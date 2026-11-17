@@ -3,7 +3,6 @@ scoreboard players add #tick cs2_const 1
 
 # 先处理上一 tick 标记的死亡播报/击杀标签过期；死亡检测在本 tick 稍后发生，
 # 这样击杀 advancement 的标签一定已经写入，避免把击杀死亡误报成环境死亡。
-function cs2:stats/tick
 
 # 实验性投掷物：烟雾弹 / 高爆手雷
 # 死亡掉落物品规则
