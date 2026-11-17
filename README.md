@@ -43,10 +43,19 @@
 - 火区伤害使用 `magic`，绕过护甲。
 - 第 7 秒最后一跳后移除火区。
 
+## 七、击杀播报与归属
+
+- `cs2grenade` 通过 `LivingDeathEvent` 直接读取 `DamageSource`，不再使用数据包的“最近击杀者”标签。
+- 同归于尽、同 tick 连杀、手雷/燃烧击杀都能正确归属；无玩家击杀者显示原版死亡信息。
+- 播报会显示击杀武器：枪械读 `DamageSource.getWeaponItem()`，高爆/燃烧分别显示 `[高爆手雷]`/`[燃烧弹]`。
+- K/D 由模组更新；数据包旧的 `kill_t`/`kill_ct` advancement 与 `stats/death_feed` 调用已停用。
+- 击杀奖金仍由数据包 `econ/kill/on_t|on_ct` 按阵营结算，同队击杀不发奖金。
+- 播报只发给 `cs2_inmatch=1` 的参赛者和 `cs2_cast` 解说。
+
 ## 涉及文件
 
-- 模组：cs2grenade-0.1.0.jar（52558 字节）
-- 数据包：cs2_bomb_datapack（422 个文件）
+- 模组：cs2grenade-0.1.0.jar（56142 字节）
+- 数据包：cs2_bomb_datapack
 - 资源包：cs2_bomb_resourcepack.zip（约 1.15 MB）
 
 ## 构建
