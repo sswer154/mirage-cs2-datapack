@@ -19,7 +19,7 @@ scoreboard players set @s cs2_was_alive 0
 clear @s
 effect clear @s
 function cs2:util/speed
-function cs2:util/jump_lock
+function cs2:util/freeze_lock
 gamemode adventure @s
 function cs2:player/tag
 execute if entity @e[type=marker,tag=cs2_spawn_ct] run tp @s @e[type=marker,tag=cs2_spawn_ct,limit=1]

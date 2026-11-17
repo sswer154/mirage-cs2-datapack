@@ -27,12 +27,8 @@ execute as @a[scores={cs2_inmatch=1}] run function cs2:util/give_shop_item
 execute as @a[scores={cs2_inmatch=1}] run function cs2:stats/round_start
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"[战术菜单]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_panel set 1"},"hoverEvent":{"action":"show_text","value":{"text":"暂停 / 重开 / 结束投票"}}}]
 
-effect give @a[team=cs2_t,scores={cs2_inmatch=1}] minecraft:slowness 30 255 true
-effect give @a[team=cs2_t,scores={cs2_inmatch=1}] minecraft:resistance 30 255 true
-effect give @a[team=cs2_ct,scores={cs2_inmatch=1}] minecraft:slowness 30 255 true
-effect give @a[team=cs2_ct,scores={cs2_inmatch=1}] minecraft:resistance 30 255 true
 execute as @a[scores={cs2_inmatch=1}] run function cs2:util/speed
-execute as @a[scores={cs2_inmatch=1}] run function cs2:util/jump_lock
+execute as @a[scores={cs2_inmatch=1}] run function cs2:util/freeze_lock
 
 gamemode adventure @a[team=cs2_t,scores={cs2_inmatch=1}]
 gamemode adventure @a[team=cs2_ct,scores={cs2_inmatch=1}]
