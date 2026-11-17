@@ -326,14 +326,24 @@
                   "AttachmentId": "huanmeng:m856a1_556_mag"
                 }
               }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:sight_uh1"
+                }
+              }
             }
           }
         }
       },
-      "name": "M16A4",
+      "name": "M16A4（全息）",
       "lore": [
         "价格 $2800",
-        "CT 专属"
+        "CT 专属",
+        "全息镜 · 方窗"
       ],
       "commands": [
         "function cs2:shop/items/m16"
