@@ -10,5 +10,5 @@ scoreboard players set @s cs2_wclass 1
 clear @s tacz:modern_kinetic_gun[minecraft:custom_data~{GunId:"tacz:glock_17"}]
 clear @s tacz:modern_kinetic_gun[minecraft:custom_data~{GunId:"tacz:m9a4"}]
 scoreboard players set @s cs2_secondary 1
-give @s tacz:modern_kinetic_gun[minecraft:custom_data={cs2_secondary_gun:1b,GunCurrentAmmoCount:0,GunFireMode:"SEMI",GunId:"bf1:obrez",HasBulletInBarrel:0b}]
+give @s tacz:modern_kinetic_gun[minecraft:custom_data={cs2_secondary_gun:1b,GunCurrentAmmoCount:4,GunFireMode:"SEMI",GunId:"bf1:obrez",HasBulletInBarrel:0b}]
 tellraw @s [{"text":"已购买 ","color":"green"},{"text":"截断莫辛纳甘","color":"yellow"},{"text":"  -$800  余额 $","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"gold"}]
