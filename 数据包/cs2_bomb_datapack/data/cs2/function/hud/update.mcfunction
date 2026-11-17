@@ -12,7 +12,6 @@ scoreboard players operation #bomb_sec cs2_counts = #bomb_timer cs2_bomb_timer
 scoreboard players operation #bomb_sec cs2_counts /= #20 cs2_const
 execute if score #bomb_sec cs2_counts matches ..-1 run scoreboard players set #bomb_sec cs2_counts 0
 
-function cs2:hud/actionbar
-
-# 播报目标：只给参赛者与解说
+# 播报目标：只给参赛者与解说（必须先打标签，动作栏才有人可发）
 function cs2:util/feed_target
+function cs2:hud/actionbar
