@@ -59,6 +59,11 @@ execute unless score #utility_ready cs2_const matches 1 run scoreboard objective
 execute unless score #utility_ready cs2_const matches 1 run scoreboard players set #utility_ready cs2_const 1
 scoreboard players set #util_pulse cs2_const 0
 
+# 训练商店条件：旧存档/合并包漏建 cs2_testshop objective 时补建
+execute unless score #testshop_ready cs2_const matches 1 run scoreboard objectives add cs2_testshop dummy
+execute unless score #testshop_ready cs2_const matches 1 run scoreboard players set #testshop cs2_testshop 0
+execute unless score #testshop_ready cs2_const matches 1 run scoreboard players set #testshop_ready cs2_const 1
+
 # 战术菜单/投票/练习退出：旧存档首次 reload 补建触发器
 execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_panel trigger
 execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_pause trigger
