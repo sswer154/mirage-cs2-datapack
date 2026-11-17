@@ -57,11 +57,8 @@ execute if score #state cs2_state matches 4 run function cs2:kit/drop_check
 # HUD
 function cs2:hud/tick
 
-# 测试商店是否可用：未开赛，或处于单人测试模式
-scoreboard players set #testshop cs2_testshop 0
-execute if score #state cs2_state matches 0 run scoreboard players set #testshop cs2_testshop 1
-execute if score #state cs2_state matches 7 run scoreboard players set #testshop cs2_testshop 1
-execute if score #solo cs2_counts matches 1..2 run scoreboard players set #testshop cs2_testshop 1
+# 测试商店按钮的条件检查始终通过；训练商店只会在单人测试局由 give_test_shop 发放
+scoreboard players set #testshop cs2_testshop 1
 
 # 兜底：比赛进行中但场上一个参赛者都没有，持续 10 秒就自动结束
 execute if score #state cs2_state matches 1..6 unless entity @a[scores={cs2_inmatch=1}] run scoreboard players add #empty cs2_empty 1
