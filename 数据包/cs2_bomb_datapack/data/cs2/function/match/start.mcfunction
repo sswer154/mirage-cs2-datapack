@@ -55,10 +55,11 @@ execute store result bossbar cs2:round value run scoreboard players get #timer c
 bossbar set cs2:bomb visible false
 
 execute as @a[scores={cs2_inmatch=1}] run function cs2:match/warmup_player
-title @a times 10 40 10
-title @a[scores={cs2_hud=1}] title {"text":"比赛开始","color":"gold","bold":true}
-title @a[scores={cs2_hud=1}] subtitle {"text":"热身阶段","color":"gray"}
-tellraw @a {"text":"比赛开始：热身结束后自动进入第 1 回合。","color":"gold"}
-execute if score #solo cs2_counts matches 1 run tellraw @a {"text":"测试模式：仅 T 队有玩家，CT 空位不会自动判负。","color":"yellow"}
-execute if score #solo cs2_counts matches 2 run tellraw @a {"text":"测试模式：仅 CT 队有玩家，T 空位不会自动判负。","color":"yellow"}
+function cs2:util/feed_target
+title @a[tag=cs2_feed_target] times 10 40 10
+title @a[tag=cs2_feed_target,scores={cs2_hud=1}] title {"text":"比赛开始","color":"gold","bold":true}
+title @a[tag=cs2_feed_target,scores={cs2_hud=1}] subtitle {"text":"热身阶段","color":"gray"}
+tellraw @a[tag=cs2_feed_target] {"text":"比赛开始：热身结束后自动进入第 1 回合。","color":"gold"}
+execute if score #solo cs2_counts matches 1 run tellraw @a[tag=cs2_feed_target] {"text":"测试模式：仅 T 队有玩家，CT 空位不会自动判负。","color":"yellow"}
+execute if score #solo cs2_counts matches 2 run tellraw @a[tag=cs2_feed_target] {"text":"测试模式：仅 CT 队有玩家，T 空位不会自动判负。","color":"yellow"}
 function cs2:match/status
