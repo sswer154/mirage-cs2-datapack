@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "pickup": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "tacz:modern_kinetic_gun",
+            "components": {
+              "minecraft:custom_data": {
+                "GunId": "bf1:m2_2"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "function": "cs2:inventory/pickup_ef46"
+  }
+}

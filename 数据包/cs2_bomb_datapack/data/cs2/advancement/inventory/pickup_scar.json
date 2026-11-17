@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "pickup": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "tacz:modern_kinetic_gun",
+            "components": {
+              "minecraft:custom_data": {
+                "GunId": "tacz:scar_l"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "function": "cs2:inventory/pickup_scar"
+  }
+}

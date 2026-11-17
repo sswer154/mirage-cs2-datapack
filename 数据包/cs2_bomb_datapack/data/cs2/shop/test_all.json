@@ -1,0 +1,1320 @@
+{
+  "title": "测试商店 · 全部物品（1/2）",
+  "rows": 6,
+  "balance_slot": -1,
+  "items": [
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:g36k",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:hp_556_mag"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "G36K突击步枪",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/g36k"
+      ],
+      "slot": 10,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:aug",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:hp_556_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "AUG突击步枪",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/aug"
+      ],
+      "slot": 11,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:ak47",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:ps_762x39_mag"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_cyclone_d2"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:oem_stock_tactical"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "满改 AKM",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/ak_full"
+      ],
+      "slot": 12,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:ak47",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:ps_762x39_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "AK-47",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/ak"
+      ],
+      "slot": 13,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:scar_l",
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_se_5"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_cthulhu"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:stock_tactical_ar"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "满改 SCAR-L",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/scar_full"
+      ],
+      "slot": 14,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:scar_l"
+          }
+        }
+      },
+      "name": "SCAR-L",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/scar"
+      ],
+      "slot": 15,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m16a4",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:m856a1_556_mag"
+                }
+              }
+            },
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_se_5"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_silencer_ursus"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:stock_carbon_bone_c5"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "满改 M16A4",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m16_full"
+      ],
+      "slot": 16,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m16a4",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:m856a1_556_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "M16A4",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m16"
+      ],
+      "slot": 19,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m4a1",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:m856a1_556_mag"
+                }
+              }
+            },
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_se_5"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_cthulhu"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:stock_carbon_bone_c5"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "满改 M4A1",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m4a1_full"
+      ],
+      "slot": 20,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m4a1",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:m856a1_556_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "M4A1",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m4a1"
+      ],
+      "slot": 21,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:qbz_191",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:dbp191_58_mag"
+                }
+              }
+            },
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_vertical_ranger"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_cthulhu"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:stock_carbon_bone_c5"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "191式突击步枪",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/qbz191"
+      ],
+      "slot": 22,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:fn_fal",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "FN FAL",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/fnfal"
+      ],
+      "slot": 23,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:handgun"
+          }
+        }
+      },
+      "name": "手枪",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/handgun"
+      ],
+      "slot": 24,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:cz75",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:n7n31_9x19_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "CZ75",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/cz75"
+      ],
+      "slot": 25,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m1911"
+          }
+        }
+      },
+      "name": "M1911",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m1911"
+      ],
+      "slot": 28,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:sw_model3"
+          }
+        }
+      },
+      "name": "3 号左轮手枪",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/sw_model3"
+      ],
+      "slot": 29,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:deagle"
+          }
+        }
+      },
+      "name": "沙漠之鹰",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/deagle"
+      ],
+      "slot": 30,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:obrez"
+          }
+        }
+      },
+      "name": "截断莫辛纳甘",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/obrez"
+      ],
+      "slot": 31,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:ump45",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:hydrashok_45_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "UMP45",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/ump45"
+      ],
+      "slot": 32,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:hk_mp5a5",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:n7n31_9x19_mag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "MP5A5",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/mp5"
+      ],
+      "slot": 33,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:p90",
+            "AttachmentLASER": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "huanmeng:ss197sr_57_laser"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "P90（空尖弹）",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/p90_hp"
+      ],
+      "slot": 34,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:vp1915"
+          }
+        }
+      },
+      "name": "维拉佩罗萨",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/vp1915"
+      ],
+      "slot": 37,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:p90"
+          }
+        }
+      },
+      "name": "P90",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/p90"
+      ],
+      "slot": 38,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:db_long"
+          }
+        }
+      },
+      "name": "DB-4",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/db4"
+      ],
+      "slot": 39,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m870"
+          }
+        }
+      },
+      "name": "M870",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m870"
+      ],
+      "slot": 40,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:aa12",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:extended_mag_1"
+                }
+              }
+            },
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_rk1_b25u"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_mastiff_sg"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:sight_exp3"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "AA12",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/aa12"
+      ],
+      "slot": 41,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m1014",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:ammo_mod_fmj"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_mastiff_sg"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:sight_coyote"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "满改 M1014",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/xm1014_full"
+      ],
+      "slot": 42,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m1014"
+          }
+        }
+      },
+      "name": "M1014",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/xm1014"
+      ],
+      "slot": 43,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 0,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 1,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 2,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 3,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 4,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 5,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 6,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 7,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 8,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 9,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 17,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 18,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 26,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 27,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 35,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 36,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 44,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 45,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 46,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 47,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 48,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 50,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 51,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 52,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 49,
+      "display": {
+        "id": "minecraft:arrow",
+        "count": 1
+      },
+      "name": "下一页",
+      "lore": [
+        "更多物品"
+      ],
+      "commands": [
+        "cs2shop switch cs2:test_all2"
+      ]
+    },
+    {
+      "slot": 53,
+      "display": {
+        "id": "minecraft:arrow",
+        "count": 1
+      },
+      "name": "返回",
+      "lore": [
+        "回主商店"
+      ],
+      "commands": [
+        "cs2shop switch cs2:main"
+      ]
+    }
+  ]
+}

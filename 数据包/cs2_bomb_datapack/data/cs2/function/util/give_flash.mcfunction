@@ -1,0 +1,1 @@
+give @s minecraft:snowball[minecraft:custom_data={cs2_util:"flash"},minecraft:custom_model_data=722003,minecraft:item_name='{"text":"闪光弹","color":"yellow"}',minecraft:lore=['{"text":"右键投掷 · 2 秒后闪光","color":"dark_gray"}'],minecraft:max_stack_size=1] 1

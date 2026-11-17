@@ -1,0 +1,70 @@
+# 主循环：每 tick 执行
+scoreboard players add #tick cs2_const 1
+
+# 先处理上一 tick 标记的死亡播报/击杀标签过期；死亡检测在本 tick 稍后发生，
+# 这样击杀 advancement 的标签一定已经写入，避免把击杀死亡误报成环境死亡。
+function cs2:stats/tick
+
+# 实验性投掷物：烟雾弹 / 高爆手雷
+# 死亡掉落物品规则
+function cs2:util/item_tick
+# 准备阶段确保每名参赛者有商店钻石；清掉被丢弃的商店钻石
+execute if score #state cs2_state matches 2 as @a[scores={cs2_inmatch=1}] run function cs2:util/give_shop_item
+execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_shop_item run kill @s
+
+# 新玩家初始化
+execute as @a unless score @s cs2_init matches 1 run function cs2:player/init
+execute as @a[scores={cs2_init=1}] run function cs2:player/tick
+
+# /trigger 入队/离队
+execute as @a[scores={cs2_join_t=1..}] run function cs2:join/t
+execute as @a[scores={cs2_join_ct=1..}] run function cs2:join/ct
+execute as @a[scores={cs2_join_cast=1..}] run function cs2:join/cast
+execute as @a[scores={cs2_leave=1..}] run function cs2:join/leave
+execute as @a[scores={cs2_hud_toggle=1..}] run function cs2:hud/trigger_toggle
+execute as @a[scores={cs2_stats=1..}] run function cs2:stats/trigger
+execute as @a[scores={cs2_panel=1..}] run function cs2:panel/trigger
+execute as @a[scores={cs2_pause=1..}] run function cs2:panel/pause_request
+execute as @a[scores={cs2_vote_restart=1..}] run function cs2:panel/vote_restart
+execute as @a[scores={cs2_vote_end=1..}] run function cs2:panel/vote_end
+execute as @a[scores={cs2_practice_leave=1..}] run function cs2:practice/leave
+execute as @a[scores={cs2_match_pause=1..}] run function cs2:panel/match_pause
+execute as @a[scores={cs2_match_resume=1..}] run function cs2:panel/match_resume
+
+# 战术暂停：停住回合计时/炸弹倒计时/胜负检查，只更新暂停倒计时
+execute if score #paused cs2_counts matches 1 run function cs2:panel/pause_tick
+execute if score #paused cs2_counts matches 1 run return 0
+
+# 状态计时
+execute if score #state cs2_state matches 1 run function cs2:round/warmup_tick
+execute if score #state cs2_state matches 2 run function cs2:round/freeze_tick
+execute if score #state cs2_state matches 3 run function cs2:round/live_tick
+execute if score #state cs2_state matches 4 run function cs2:bomb/tick
+execute if score #state cs2_state matches 5 run function cs2:round/end_tick
+execute if score #state cs2_state matches 6 run function cs2:round/break_tick
+
+# 胜负检查
+execute if score #state cs2_state matches 3 run function cs2:round/check_live
+execute if score #state cs2_state matches 3 run function cs2:round/check_time_live
+execute if score #state cs2_state matches 4 run function cs2:round/check_planted
+
+# 炸弹掉落/拾取检测
+execute if score #state cs2_state matches 3 run function cs2:bomb/drop_check
+# 拆弹器掉落/拾取检测
+execute if score #state cs2_state matches 3 run function cs2:kit/drop_check
+execute if score #state cs2_state matches 4 run function cs2:kit/drop_check
+
+# HUD
+function cs2:hud/tick
+
+# 测试商店是否可用：未开赛，或处于单人测试模式
+scoreboard players set #testshop cs2_testshop 0
+execute if score #state cs2_state matches 0 run scoreboard players set #testshop cs2_testshop 1
+execute if score #state cs2_state matches 7 run scoreboard players set #testshop cs2_testshop 1
+execute if score #solo cs2_counts matches 1..2 run scoreboard players set #testshop cs2_testshop 1
+
+# 兜底：比赛进行中但场上一个参赛者都没有，持续 10 秒就自动结束
+execute if score #state cs2_state matches 1..6 unless entity @a[scores={cs2_inmatch=1}] run scoreboard players add #empty cs2_empty 1
+execute if score #state cs2_state matches 1..6 if entity @a[scores={cs2_inmatch=1}] run scoreboard players set #empty cs2_empty 0
+execute if score #state cs2_state matches 1..6 if score #empty cs2_empty matches 200.. run function cs2:match/end
+execute unless score #state cs2_state matches 1..6 run scoreboard players set #empty cs2_empty 0

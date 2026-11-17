@@ -1,0 +1,32 @@
+scoreboard players set #state cs2_state 4
+scoreboard players set #bomb cs2_bomb_state 3
+scoreboard players set @s cs2_planter 1
+scoreboard players operation #bomb_timer cs2_bomb_timer = bomb cs2_cfg
+scoreboard players operation #bomb_timer cs2_bomb_timer *= #20 cs2_const
+scoreboard players set #drop_timer cs2_counts 0
+scoreboard players set #blink cs2_blink 0
+scoreboard players set #blink_on cs2_blink 0
+scoreboard players set @s cs2_carrier 0
+clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
+# 安放瞬间清零拆弹进度，并对齐 sneak_time 基线，避免把安放前的潜行时间算进拆弹
+scoreboard players set @a[team=cs2_ct] cs2_defuse 0
+execute as @a run scoreboard players operation @s cs2_sneak_prev = @s cs2_sneak
+
+execute at @s run summon marker ~ ~ ~ {Tags:["cs2_bomb"]}
+execute at @s run summon item_display ~ ~0.2 ~ {Tags:["cs2_c4_display"],item:{id:"minecraft:nautilus_shell",count:1,components:{"minecraft:custom_data":{cs2_bomb:1b},"minecraft:custom_model_data":721001}}}
+execute at @s run data merge entity @e[type=item_display,tag=cs2_c4_display,limit=1] {transformation:{translation:[0f,0.3f,0f],scale:[1.2f,1.2f,1.2f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}
+
+bossbar set cs2:round visible false
+bossbar set cs2:bomb visible true
+execute store result bossbar cs2:bomb max run scoreboard players get #bomb_timer cs2_bomb_timer
+execute store result bossbar cs2:bomb value run scoreboard players get #bomb_timer cs2_bomb_timer
+
+title @a times 10 40 10
+title @a[scores={cs2_hud=1}] title {"text":"炸弹已安放","color":"red","bold":true}
+execute if score #site cs2_site matches 1 run title @a[scores={cs2_hud=1}] subtitle {"text":"A 包点","color":"red"}
+execute if score #site cs2_site matches 2 run title @a[scores={cs2_hud=1}] subtitle {"text":"B 包点","color":"red"}
+execute if score #site cs2_site matches 1 run tellraw @a [{"text":"炸弹已安放在 ","color":"red"},{"text":"A","color":"red","bold":true},{"text":" 包点，","color":"gray"},{"score":{"name":"bomb","objective":"cs2_cfg"},"color":"yellow"},{"text":" 秒后爆炸。","color":"gray"}]
+execute if score #site cs2_site matches 2 run tellraw @a [{"text":"炸弹已安放在 ","color":"red"},{"text":"B","color":"red","bold":true},{"text":" 包点，","color":"gray"},{"score":{"name":"bomb","objective":"cs2_cfg"},"color":"yellow"},{"text":" 秒后爆炸。","color":"gray"}]
+playsound minecraft:block.respawn_anchor.set_spawn master @a
+particle minecraft:smoke ~ ~0.4 ~ 0.25 0.25 0.25 0.01 20 normal
+particle minecraft:flame ~ ~0.4 ~ 0.15 0.15 0.15 0.01 8 normal

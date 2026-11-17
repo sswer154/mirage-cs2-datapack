@@ -1,0 +1,29 @@
+{
+  "title": "测试商店",
+  "rows": 3,
+  "items": [
+    {
+      "slot": 11,
+      "display": { "id": "minecraft:diamond_sword", "count": 1 },
+      "name": "测试按钮 A",
+      "lore": ["点一下执行 tellraw", "不改任何数据"],
+      "commands": ["tellraw @s {\"text\":\"你点了 A\",\"color\":\"green\"}"]
+    },
+    {
+      "slot": 13,
+      "display": { "id": "minecraft:gold_ingot", "count": 1 },
+      "name": "测试按钮 B",
+      "lore": ["带一个条件", "钱 >= 100 才触发"],
+      "conditions": ["if score @s cs2_money matches 100.."],
+      "commands": ["tellraw @s {\"text\":\"你点了 B\",\"color\":\"gold\"}"]
+    },
+    {
+      "slot": 15,
+      "display": { "id": "minecraft:barrier", "count": 1 },
+      "name": "缺钱时点我",
+      "lore": ["条件不满足就什么都不发生"],
+      "conditions": ["if score @s cs2_money matches 999999.."],
+      "commands": ["tellraw @s {\"text\":\"不该出现\",\"color\":\"red\"}"]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+give @s minecraft:snowball[minecraft:custom_data={cs2_util:"fire"},minecraft:custom_model_data=722004,minecraft:item_name='{"text":"燃烧弹","color":"gold"}',minecraft:lore=['{"text":"右键投掷 · 4 秒后形成 7 秒火区","color":"dark_gray"}'],minecraft:max_stack_size=1] 1

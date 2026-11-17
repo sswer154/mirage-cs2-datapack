@@ -1,0 +1,6 @@
+tellraw @s [{"text":"═══ 护甲 / 拆弹器 ═══","color":"gold","bold":true}]
+tellraw @s [{"text":"资金：$","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"green"}]
+tellraw @s [{"text":"半甲（头盔 + 胸甲）  ","color":"white"},{"text":"$650  ","color":"gold"},{"text":""},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 134"},"hoverEvent":{"action":"show_text","value":{"text":"购买 半甲（头盔 + 胸甲）"}}}]
+tellraw @s [{"text":"全甲（全套下界合金）  ","color":"white"},{"text":"$1000  ","color":"gold"},{"text":""},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 135"},"hoverEvent":{"action":"show_text","value":{"text":"购买 全甲（全套下界合金）"}}}]
+tellraw @s [{"text":"拆弹器  ","color":"white"},{"text":"$400  ","color":"gold"},{"text":"（CT 专属）","color":"gray"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 136"},"hoverEvent":{"action":"show_text","value":{"text":"购买 拆弹器"}}}]
+tellraw @s [{"text":"[返回商店]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 1"},"hoverEvent":{"action":"show_text","value":{"text":"返回商店"}}},{"text":"  "},{"text":"[关闭]","color":"red","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 99"},"hoverEvent":{"action":"show_text","value":{"text":"关闭商店"}}}]

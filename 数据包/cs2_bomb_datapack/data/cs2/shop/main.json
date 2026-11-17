@@ -1,0 +1,489 @@
+{
+  "title": "CS2 商店",
+  "rows": 6,
+  "balance_slot": 49,
+  "items": [
+    {
+      "slot": 10,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:deagle"
+          }
+        }
+      },
+      "name": "手枪",
+      "lore": [
+        "6 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:pistols"
+      ]
+    },
+    {
+      "slot": 12,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:hk_mp5a5"
+          }
+        }
+      },
+      "name": "冲锋枪",
+      "lore": [
+        "5 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:smg"
+      ]
+    },
+    {
+      "slot": 14,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:ak47"
+          }
+        }
+      },
+      "name": "步枪",
+      "lore": [
+        "12 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:rifles"
+      ]
+    },
+    {
+      "slot": 16,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m870"
+          }
+        }
+      },
+      "name": "霰弹枪",
+      "lore": [
+        "6 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:shotguns"
+      ]
+    },
+    {
+      "slot": 19,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:sks_tactical"
+          }
+        }
+      },
+      "name": "射手步枪",
+      "lore": [
+        "2 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:dmr"
+      ]
+    },
+    {
+      "slot": 21,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m249"
+          }
+        }
+      },
+      "name": "机枪",
+      "lore": [
+        "3 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:mg"
+      ]
+    },
+    {
+      "slot": 23,
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:springfield1873",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_1873_6x"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "狙击枪",
+      "lore": [
+        "春田 1873 等 3 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:sniper"
+      ]
+    },
+    {
+      "slot": 37,
+      "display": {
+        "id": "minecraft:netherite_chestplate",
+        "count": 1
+      },
+      "name": "护甲 / 拆弹器",
+      "lore": [
+        "3 件商品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:armor"
+      ]
+    },
+    {
+      "slot": 43,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722002
+        }
+      },
+      "name": "道具",
+      "lore": [
+        "7 种投掷物 / 2 种医疗用品",
+        "点击查看"
+      ],
+      "commands": [
+        "cs2shop switch cs2:utility"
+      ]
+    },
+    {
+      "slot": 0,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 1,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 2,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 3,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 4,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 5,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 6,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 7,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 8,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 9,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 17,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 18,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 26,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 27,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 35,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 36,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 44,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 45,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 46,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 47,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 48,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 50,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 51,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 52,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 53,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    }
+  ]
+}

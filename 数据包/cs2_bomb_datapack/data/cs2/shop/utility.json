@@ -1,0 +1,462 @@
+{
+  "title": "商店 · 道具",
+  "rows": 6,
+  "balance_slot": 49,
+  "items": [
+    {
+      "slot": 10,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722002,
+          "minecraft:item_name": "{\"text\":\"高爆手雷\",\"color\":\"green\"}"
+        }
+      },
+      "name": "高爆手雷",
+      "lore": [
+        "价格 $300"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_he"
+      ]
+    },
+    {
+      "slot": 12,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722006,
+          "minecraft:item_name": "{\"text\":\"高爆手雷（短引线）\",\"color\":\"red\"}"
+        }
+      },
+      "name": "高爆手雷（短引线）",
+      "lore": [
+        "价格 $500"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_he_fast"
+      ]
+    },
+    {
+      "slot": 14,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722003,
+          "minecraft:item_name": "{\"text\":\"闪光弹\",\"color\":\"yellow\"}"
+        }
+      },
+      "name": "闪光弹",
+      "lore": [
+        "价格 $200"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_flash"
+      ]
+    },
+    {
+      "slot": 16,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722001,
+          "minecraft:item_name": "{\"text\":\"烟雾弹\",\"color\":\"gray\"}"
+        }
+      },
+      "name": "烟雾弹",
+      "lore": [
+        "价格 $300"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_smoke"
+      ]
+    },
+    {
+      "slot": 19,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722004,
+          "minecraft:item_name": "{\"text\":\"燃烧弹\",\"color\":\"dark_red\"}"
+        }
+      },
+      "name": "燃烧弹",
+      "lore": [
+        "价格 $400 / CT $500"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_fire"
+      ]
+    },
+    {
+      "slot": 21,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722007,
+          "minecraft:item_name": "{\"text\":\"碰炸手雷\",\"color\":\"gold\"}"
+        }
+      },
+      "name": "碰炸手雷",
+      "lore": [
+        "价格 $600"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_impact"
+      ]
+    },
+    {
+      "slot": 23,
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724001,
+          "minecraft:item_name": "{\"text\":\"野战手术包\",\"color\":\"aqua\"}"
+        }
+      },
+      "name": "野战手术包",
+      "lore": [
+        "价格 $700",
+        "医疗用品",
+        "回复生命: 6.0",
+        "使用时长: 8s",
+        "冷却: 6s（医疗用品共享）",
+        "使用期间无法移动",
+        "解除所有负面效果"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_surgery"
+      ]
+    },
+    {
+      "slot": 25,
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724002,
+          "minecraft:item_name": "{\"text\":\"金星万金油\",\"color\":\"gold\"}"
+        }
+      },
+      "name": "金星万金油",
+      "lore": [
+        "价格 $850",
+        "医疗用品",
+        "回复生命: 1.0",
+        "使用时长: 5.6s",
+        "冷却: 3s（医疗用品共享）",
+        "生命恢复 (00:10)",
+        "使用期间可移动但无法奔跑"
+      ],
+      "commands": [
+        "function cs2:shop/items/util_golden"
+      ]
+    },
+    {
+      "slot": 0,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 1,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 2,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 3,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 4,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 5,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 6,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 7,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 8,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 9,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 17,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 18,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 26,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 27,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 35,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 36,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 44,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 45,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 46,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 47,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 48,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 50,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 51,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 52,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 53,
+      "display": {
+        "id": "minecraft:arrow",
+        "count": 1
+      },
+      "name": "返回",
+      "commands": [
+        "cs2shop switch cs2:main"
+      ]
+    }
+  ]
+}

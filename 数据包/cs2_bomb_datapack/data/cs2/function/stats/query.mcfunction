@@ -1,0 +1,1 @@
+tellraw @s [{"text":"本局 K/D：","color":"gold"},{"score":{"name":"@s","objective":"cs2_kills"},"color":"green"},{"text":" / ","color":"gray"},{"score":{"name":"@s","objective":"cs2_deaths"},"color":"red"}]

@@ -1,0 +1,887 @@
+{
+  "title": "测试商店 · 全部物品（2/2）",
+  "rows": 6,
+  "balance_slot": -1,
+  "items": [
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:m2_2"
+          }
+        }
+      },
+      "name": "M2火焰喷射器",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/ef46"
+      ],
+      "slot": 10,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:sks_tactical",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:extended_mag_2"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_contender"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "SKS",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/sks"
+      ],
+      "slot": 11,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:spr15hb",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_contender"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "SPR-15 HB",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/spr15"
+      ],
+      "slot": 12,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:lewis",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            },
+            "AttachmentSTOCK": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:stock_hk_slim_line"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "刘易斯轻机枪",
+      "lore": [
+        "T 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/lewis"
+      ],
+      "slot": 13,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:qbz_95",
+            "AttachmentEXTENDED_MAG": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:extended_mag_3"
+                }
+              }
+            },
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_rk1_b25u"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "95式班用机枪",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/qbz95"
+      ],
+      "slot": 14,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:m249",
+            "AttachmentGRIP": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:grip_vertical_talon"
+                }
+              }
+            },
+            "AttachmentMUZZLE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:muzzle_brake_cyclone_d2"
+                }
+              }
+            },
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_hamr"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "M249",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m249"
+      ],
+      "slot": 15,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:springfield1873",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_1873_6x"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "春田 1873",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/springfield"
+      ],
+      "slot": 16,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "bf1:man_m95",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_elcan_4x"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "M1895",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/m1895"
+      ],
+      "slot": 19,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "tacz:modern_kinetic_gun",
+        "count": 1,
+        "components": {
+          "minecraft:custom_data": {
+            "GunId": "tacz:ai_awp",
+            "AttachmentSCOPE": {
+              "id": "tacz:attachment",
+              "count": 1,
+              "components": {
+                "minecraft:custom_data": {
+                  "AttachmentId": "tacz:scope_standard_8x"
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "AWM",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/awm"
+      ],
+      "slot": 20,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:shears",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 721003
+        }
+      },
+      "name": "拆弹器",
+      "lore": [
+        "CT 专属",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/kit"
+      ],
+      "slot": 21,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:diamond_chestplate",
+        "count": 1
+      },
+      "name": "半甲（头盔 + 胸甲）",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/armor_half"
+      ],
+      "slot": 22,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:netherite_chestplate",
+        "count": 1
+      },
+      "name": "全甲（全套下界合金）",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:test_items/armor_full"
+      ],
+      "slot": 23,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722002,
+          "minecraft:item_name": "{\"text\":\"高爆手雷\",\"color\":\"green\"}"
+        }
+      },
+      "name": "高爆手雷",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_he"
+      ],
+      "slot": 24,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722006,
+          "minecraft:item_name": "{\"text\":\"高爆手雷（短引线）\",\"color\":\"red\"}"
+        }
+      },
+      "name": "高爆手雷（短引线）",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_he_fast_proto"
+      ],
+      "slot": 25,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722003,
+          "minecraft:item_name": "{\"text\":\"闪光弹\",\"color\":\"yellow\"}"
+        }
+      },
+      "name": "闪光弹",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_flash"
+      ],
+      "slot": 28,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722001,
+          "minecraft:item_name": "{\"text\":\"烟雾弹\",\"color\":\"gray\"}"
+        }
+      },
+      "name": "烟雾弹",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_smoke"
+      ],
+      "slot": 29,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722004,
+          "minecraft:item_name": "{\"text\":\"燃烧弹\",\"color\":\"dark_red\"}"
+        }
+      },
+      "name": "燃烧弹",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_fire"
+      ],
+      "slot": 30,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722007,
+          "minecraft:item_name": "{\"text\":\"碰炸手雷\",\"color\":\"gold\"}"
+        }
+      },
+      "name": "碰炸手雷",
+      "lore": [
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_he_impact_proto"
+      ],
+      "slot": 31,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724001,
+          "minecraft:item_name": "{\"text\":\"野战手术包\",\"color\":\"aqua\"}"
+        }
+      },
+      "name": "野战手术包",
+      "lore": [
+        "医疗用品",
+        "回复生命: 6.0",
+        "使用时长: 8s",
+        "冷却: 6s（医疗用品共享）",
+        "使用期间无法移动",
+        "解除所有负面效果",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_surgery_kit"
+      ],
+      "slot": 32,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724002,
+          "minecraft:item_name": "{\"text\":\"金星万金油\",\"color\":\"gold\"}"
+        }
+      },
+      "name": "金星万金油",
+      "lore": [
+        "医疗用品",
+        "回复生命: 1.0",
+        "使用时长: 5.6s",
+        "冷却: 3s（医疗用品共享）",
+        "生命恢复 (00:10)",
+        "使用期间可移动但无法奔跑",
+        "测试 · 免费"
+      ],
+      "commands": [
+        "function cs2:util/give_golden_star"
+      ],
+      "slot": 33,
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 0,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 1,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 2,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 3,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 4,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 5,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 6,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 7,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 8,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 9,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 17,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 18,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 26,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 27,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 35,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 36,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 44,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 45,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 46,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 47,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 48,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 50,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 51,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 52,
+      "display": {
+        "id": "minecraft:black_stained_glass_pane",
+        "count": 1,
+        "components": {
+          "minecraft:hide_tooltip": {}
+        }
+      },
+      "name": "",
+      "commands": []
+    },
+    {
+      "slot": 45,
+      "display": {
+        "id": "minecraft:arrow",
+        "count": 1
+      },
+      "name": "上一页",
+      "lore": [
+        "翻回上一页"
+      ],
+      "commands": [
+        "cs2shop switch cs2:test_all"
+      ]
+    },
+    {
+      "slot": 53,
+      "display": {
+        "id": "minecraft:arrow",
+        "count": 1
+      },
+      "name": "返回",
+      "lore": [
+        "回主商店"
+      ],
+      "commands": [
+        "cs2shop switch cs2:main"
+      ]
+    }
+  ]
+}

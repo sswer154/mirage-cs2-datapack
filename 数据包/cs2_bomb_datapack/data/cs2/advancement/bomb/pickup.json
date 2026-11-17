@@ -1,0 +1,22 @@
+{
+  "criteria": {
+    "pickup": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:nautilus_shell",
+            "components": {
+              "minecraft:custom_data": {
+                "cs2_bomb": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "function": "cs2:bomb/on_pickup"
+  }
+}

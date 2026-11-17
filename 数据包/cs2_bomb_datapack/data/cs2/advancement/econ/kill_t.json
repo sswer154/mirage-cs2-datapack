@@ -1,0 +1,16 @@
+{
+  "criteria": {
+    "killed": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:player",
+          "nbt": "{Tags:[\"cs2_tag_t\"]}"
+        }
+      }
+    }
+  },
+  "rewards": {
+    "function": "cs2:econ/kill/on_t"
+  }
+}

@@ -1,0 +1,7 @@
+tellraw @s [{"text":"═══ 投掷物 ═══","color":"gold","bold":true}]
+tellraw @s [{"text":"资金：$","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"green"}]
+tellraw @s [{"text":"催泪弹  ","color":"white"},{"text":"$300  ","color":"gold"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 201"},"hoverEvent":{"action":"show_text","value":{"text":"购买 催泪弹"}}}]
+tellraw @s [{"text":"高爆手雷  ","color":"white"},{"text":"$300  ","color":"gold"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 202"},"hoverEvent":{"action":"show_text","value":{"text":"购买 高爆手雷"}}}]
+tellraw @s [{"text":"闪光弹  ","color":"white"},{"text":"$200  ","color":"gold"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 203"},"hoverEvent":{"action":"show_text","value":{"text":"购买 闪光弹"}}}]
+tellraw @s [{"text":"燃烧弹  ","color":"white"},{"text":"$400 / CT $500  ","color":"gold"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 204"},"hoverEvent":{"action":"show_text","value":{"text":"购买 燃烧弹"}}}]
+tellraw @s [{"text":"[返回商店]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 1"},"hoverEvent":{"action":"show_text","value":{"text":"返回商店"}}},{"text":"  "},{"text":"[关闭]","color":"red","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 99"},"hoverEvent":{"action":"show_text","value":{"text":"关闭商店"}}}]

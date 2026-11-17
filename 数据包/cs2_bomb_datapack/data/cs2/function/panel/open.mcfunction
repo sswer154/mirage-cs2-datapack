@@ -1,0 +1,20 @@
+tellraw @s [{"text":"═══ 战术菜单 ═══","color":"aqua","bold":true}]
+execute store result score #vote_restart_total cs2_counts if entity @a[scores={cs2_inmatch=1}]
+execute store result score #vote_end_total cs2_counts if entity @a[scores={cs2_inmatch=1}]
+
+# 准备阶段：战术暂停 / 比赛暂停 / 结束投票
+execute if score #state cs2_state matches 2 unless score #paused cs2_counts matches 1 run tellraw @s [{"text":"战术暂停  T ","color":"gray"},{"score":{"name":"#pause_t","objective":"cs2_counts"},"color":"red"},{"text":"/3   CT ","color":"gray"},{"score":{"name":"#pause_c","objective":"cs2_counts"},"color":"blue"},{"text":"/3","color":"gray"}]
+execute if score #state cs2_state matches 2 unless score #paused cs2_counts matches 1 run tellraw @s [{"text":"[请求战术暂停]","color":"yellow","clickEvent":{"action":"run_command","value":"/trigger cs2_pause"},"hoverEvent":{"action":"show_text","value":{"text":"30 秒；每方最多 3 次；仅准备阶段可用"}}}]
+execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 0 unless score #paused cs2_counts matches 1 run tellraw @s [{"text":"比赛暂停  T ","color":"gray"},{"score":{"name":"#mpause_t","objective":"cs2_counts"},"color":"red"},{"text":"/1   CT ","color":"gray"},{"score":{"name":"#mpause_c","objective":"cs2_counts"},"color":"blue"},{"text":"/1","color":"gray"},{"text":"  ","color":"gray"},{"text":"[发起比赛暂停]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_match_pause"},"hoverEvent":{"action":"show_text","value":{"text":"双方各一人同意后生效；无时间限制；任意参赛者可解除"}}}]
+execute if score #state cs2_state matches 2 if score #paused cs2_counts matches 1 if score #pause_kind cs2_counts matches 2 run tellraw @s [{"text":"比赛暂停中 · ","color":"aqua"},{"text":"[解除比赛暂停]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_match_resume"},"hoverEvent":{"action":"show_text","value":{"text":"任意参赛者均可解除"}}}]
+execute if score #state cs2_state matches 2 if score #paused cs2_counts matches 1 unless score #pause_kind cs2_counts matches 2 run tellraw @s {"text":"战术暂停进行中，等待倒计时结束。","color":"yellow"}
+execute if score #state cs2_state matches 2 unless score #paused cs2_counts matches 1 if score #solo cs2_counts matches 0 run tellraw @s [{"text":"[同意结束战局]","color":"gold","clickEvent":{"action":"run_command","value":"/trigger cs2_vote_end"}},{"text":" 已同意 ","color":"gray"},{"score":{"name":"#vote_end_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_end_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
+
+# 回合进行中：重开/结束投票
+execute if score #state cs2_state matches 3..4 unless score #paused cs2_counts matches 1 run tellraw @s [{"text":"[同意重开本小局]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_vote_restart"}},{"text":" 已同意 ","color":"gray"},{"score":{"name":"#vote_restart_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_restart_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
+execute if score #state cs2_state matches 3..4 unless score #paused cs2_counts matches 1 run tellraw @s [{"text":"[同意结束战局]","color":"gold","clickEvent":{"action":"run_command","value":"/trigger cs2_vote_end"}},{"text":" 已同意 ","color":"gray"},{"score":{"name":"#vote_end_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_end_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
+
+execute if score #state cs2_state matches 2..4 if score #solo cs2_counts matches 1..2 run tellraw @s [{"text":"[退出训练]","color":"red","clickEvent":{"action":"run_command","value":"/trigger cs2_practice_leave"},"hoverEvent":{"action":"show_text","value":{"text":"结束当前练习战局并离队"}}}]
+execute if score #state cs2_state matches 2..4 run tellraw @s [{"text":"重开/结束需要所有参赛者同意；比赛暂停需要双方各一人同意；练习模式可退出训练，不能重开或结束。","color":"dark_gray"}]
+execute unless score #state cs2_state matches 2..4 run tellraw @s [{"text":"准备阶段/回合进行中才能使用战术菜单。","color":"red"}]
+tellraw @s [{"text":"[关闭]","color":"red","clickEvent":{"action":"run_command","value":"/trigger cs2_panel set 99"}}]

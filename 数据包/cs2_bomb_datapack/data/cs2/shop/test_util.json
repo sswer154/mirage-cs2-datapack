@@ -1,0 +1,265 @@
+{
+  "title": "测试商店 · 投掷物",
+  "rows": 4,
+  "balance_slot": -1,
+  "items": [
+    {
+      "slot": 10,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722002,
+          "minecraft:custom_data": {
+            "cs2_util": "he"
+          },
+          "minecraft:item_name": "{\"text\":\"高爆手雷\",\"color\":\"green\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "高爆手雷",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_he_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 12,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722003,
+          "minecraft:custom_data": {
+            "cs2_util": "flash"
+          },
+          "minecraft:item_name": "{\"text\":\"闪光弹\",\"color\":\"yellow\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "闪光弹",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_flash_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 14,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722001,
+          "minecraft:custom_data": {
+            "cs2_util": "smoke"
+          },
+          "minecraft:item_name": "{\"text\":\"烟雾弹\",\"color\":\"gray\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "烟雾弹",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_smoke_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 16,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722004,
+          "minecraft:custom_data": {
+            "cs2_util": "fire"
+          },
+          "minecraft:item_name": "{\"text\":\"燃烧弹\",\"color\":\"red\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "燃烧弹",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_fire_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 18,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722006,
+          "minecraft:custom_data": {
+            "cs2_util": "he_fast"
+          },
+          "minecraft:item_name": "{\"text\":\"高爆手雷（短引线）\",\"color\":\"red\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "高爆手雷（短引线）",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_he_fast_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 20,
+      "display": {
+        "id": "minecraft:snowball",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 722007,
+          "minecraft:custom_data": {
+            "cs2_util": "he_impact"
+          },
+          "minecraft:item_name": "{\"text\":\"碰炸手雷\",\"color\":\"gold\"}",
+          "minecraft:lore": [
+            "{\"text\":\"点击获得 1 颗\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "碰炸手雷",
+      "lore": [
+        "点击获得 1 颗"
+      ],
+      "commands": [
+        "function cs2:util/give_he_impact_proto"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 22,
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724001,
+          "minecraft:custom_data": {
+            "cs2_util": "surgery_kit",
+            "cs2_type": "medical",
+            "cs2_uses": 15
+          },
+          "minecraft:item_name": "{\"text\":\"野战手术包\",\"color\":\"aqua\"}",
+          "minecraft:lore": [
+            "{\"text\":\"医疗用品\",\"color\":\"dark_aqua\"}",
+            "{\"text\":\"回复生命: 6.0\",\"color\":\"green\"}",
+            "{\"text\":\"可用次数: 15\",\"color\":\"green\"}",
+            "{\"text\":\"使用时长: 8s\",\"color\":\"green\"}",
+            "{\"text\":\"冷却: 6s（医疗用品共享）\",\"color\":\"green\"}",
+            "{\"text\":\"使用期间无法移动\",\"color\":\"gray\"}",
+            "{\"text\":\"解除所有负面效果\",\"color\":\"blue\"}"
+          ],
+          "minecraft:max_stack_size": 1,
+          "minecraft:max_damage": 15,
+          "minecraft:damage": 0
+        }
+      },
+      "name": "野战手术包",
+      "lore": [
+        "点击获得 1 个"
+      ],
+      "commands": [
+        "function cs2:util/give_surgery_kit"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 24,
+      "display": {
+        "id": "minecraft:paper",
+        "count": 1,
+        "components": {
+          "minecraft:custom_model_data": 724002,
+          "minecraft:custom_data": {
+            "cs2_util": "golden_star",
+            "cs2_type": "medical",
+            "cs2_uses": 8
+          },
+          "minecraft:max_damage": 8,
+          "minecraft:damage": 0,
+          "minecraft:item_name": "{\"text\":\"金星万金油\",\"color\":\"gold\"}",
+          "minecraft:lore": [
+            "{\"text\":\"医疗用品\",\"color\":\"dark_aqua\"}",
+            "{\"text\":\"回复生命: 1.0\",\"color\":\"green\"}",
+            "{\"text\":\"可用次数: 8\",\"color\":\"green\"}",
+            "{\"text\":\"使用时长: 5.6s\",\"color\":\"green\"}",
+            "{\"text\":\"冷却: 3s（医疗用品共享）\",\"color\":\"green\"}",
+            "{\"text\":\"生命恢复 (00:10)\",\"color\":\"blue\"}",
+            "{\"text\":\"使用期间可移动但无法奔跑\",\"color\":\"gray\"}"
+          ],
+          "minecraft:max_stack_size": 1
+        }
+      },
+      "name": "金星万金油",
+      "lore": [
+        "点击获得 1 个"
+      ],
+      "commands": [
+        "function cs2:util/give_golden_star"
+      ],
+      "conditions": [
+        "if score #testshop cs2_testshop matches 1"
+      ]
+    },
+    {
+      "slot": 26,
+      "display": {
+        "id": "minecraft:barrier",
+        "count": 1
+      },
+      "name": "关闭",
+      "lore": [
+        "点一下关掉界面"
+      ],
+      "commands": [
+        "cs2shop close"
+      ]
+    }
+  ]
+}

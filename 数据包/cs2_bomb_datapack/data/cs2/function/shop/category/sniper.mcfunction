@@ -1,0 +1,6 @@
+tellraw @s [{"text":"═══ 狙击枪 ═══","color":"gold","bold":true}]
+tellraw @s [{"text":"资金：$","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"green"}]
+tellraw @s [{"text":"M1895  ","color":"white"},{"text":"$2550  ","color":"gold"},{"text":"","color":"gray"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 131"},"hoverEvent":{"action":"show_text","value":{"text":"购买 M1895"}}}]
+tellraw @s [{"text":"春田 1873  ","color":"white"},{"text":"$2050  ","color":"gold"},{"text":"","color":"gray"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 132"},"hoverEvent":{"action":"show_text","value":{"text":"购买 春田 1873"}}}]
+tellraw @s [{"text":"AWM  ","color":"white"},{"text":"$4750  ","color":"gold"},{"text":"","color":"gray"},{"text":"[购买]","color":"green","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 133"},"hoverEvent":{"action":"show_text","value":{"text":"购买 AWM"}}}]
+tellraw @s [{"text":"[返回商店]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 1"},"hoverEvent":{"action":"show_text","value":{"text":"返回商店"}}},{"text":"  "},{"text":"[关闭]","color":"red","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 99"},"hoverEvent":{"action":"show_text","value":{"text":"关闭商店"}}}]

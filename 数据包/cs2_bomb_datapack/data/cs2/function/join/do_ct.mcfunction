@@ -1,0 +1,42 @@
+# 如果身上有炸弹，先按掉落处理
+execute if score @s cs2_carrier matches 1 run function cs2:bomb/carrier_lost
+clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
+team join cs2_ct @s
+scoreboard players set @s cs2_team 2
+scoreboard players set @s cs2_alive 0
+scoreboard players set @s cs2_carrier 0
+scoreboard players set @s cs2_kit 0
+scoreboard players set @s cs2_money 800
+scoreboard players set @s cs2_primary 0
+scoreboard players set @s cs2_secondary 0
+scoreboard players set @s cs2_armor 0
+scoreboard players set @s cs2_planter 0
+scoreboard players set @s cs2_util_smoke 0
+scoreboard players set @s cs2_util_he 0
+scoreboard players set @s cs2_util_flash 0
+scoreboard players set @s cs2_util_fire 0
+scoreboard players set @s cs2_wclass 1
+scoreboard players set @s cs2_kills 0
+scoreboard players reset @s cs2_deaths
+scoreboard players set @s cs2_prev_deaths 0
+scoreboard players set @s cs2_death_pending 0
+scoreboard players set @s cs2_killer_timer 0
+scoreboard players set @s cs2_needs_default 1
+scoreboard players set @s cs2_was_alive 0
+execute if score #state cs2_state matches 1..6 run scoreboard players set @s cs2_inmatch 1
+execute if score #state cs2_state matches 0 run scoreboard players set @s cs2_inmatch 0
+clear @s
+effect clear @s
+execute if score @s cs2_inmatch matches 1 run function cs2:util/speed
+function cs2:util/jump_unlock
+function cs2:player/tag
+gamemode adventure @s
+execute if entity @e[type=marker,tag=cs2_lobby] run tp @s @e[type=marker,tag=cs2_lobby,limit=1]
+tellraw @s {"text":"已加入 CT。","color":"blue"}
+
+# 中途加入/重连：重置本回合购买计数，并按当前背包快照计入上限
+scoreboard players set @s cs2_item_count 0
+function cs2:shop/snapshot_carry
+
+# 单人测试局：额外发一个测试商店
+execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 1..2 run function cs2:util/give_test_shop
