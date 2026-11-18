@@ -1,3 +1,5 @@
+# 购买前先核对副武器分数：枪已经丢了就不该拦购买
+function cs2:shop/reconcile_secondary
 # CZ75  $300
 scoreboard players set @s cs2_wclass 1
 clear @s tacz:modern_kinetic_gun[minecraft:custom_data~{GunId:"tacz:glock_17"}]
