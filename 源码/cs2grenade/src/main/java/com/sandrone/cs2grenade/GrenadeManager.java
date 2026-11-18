@@ -70,11 +70,13 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -84,6 +86,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -110,6 +113,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 
 public final class GrenadeManager {
+    private static final ResourceKey<DamageType> FIRE_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("cs2", "fire"));
     private static final List<Grenade> ACTIVE = new ArrayList<Grenade>();
     private static final String GRENADE_TAG = "cs2_grenade_visual";
     private static MinecraftServer serverRef;
@@ -997,11 +1001,7 @@ public final class GrenadeManager {
             if (e2 == null || e2.isRemoved() || e2.isDeadOrDying()) continue;
             e2.invulnerableTime = 0;
             Player thrower = fireSources.get(entry.getKey());
-            if (thrower != null) {
-                e2.hurt(e2.level().damageSources().indirectMagic(thrower, thrower), ((Float)entry.getValue()).floatValue());
-            } else {
-                e2.hurt(e2.level().damageSources().magic(), ((Float)entry.getValue()).floatValue());
-            }
+            e2.hurt(e2.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), ((Float)entry.getValue()).floatValue());
         }
         FIRE_ZONES.removeAll(dead);
     }
