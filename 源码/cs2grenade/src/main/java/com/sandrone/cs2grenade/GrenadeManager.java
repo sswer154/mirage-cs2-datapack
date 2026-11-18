@@ -52,6 +52,7 @@ package com.sandrone.cs2grenade;
 import com.sandrone.cs2grenade.Cs2Grenade;
 import com.sandrone.cs2grenade.GrenadeLoader;
 import com.sandrone.cs2grenade.GrenadeType;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -793,31 +794,126 @@ public final class GrenadeManager {
         }
     }
 
+    private static final int FIRE_MAX_STEP = 2;
+    private static final int FIRE_MAX_RISE = 6;
+    private static final int FIRE_MAX_DROP = 4;
+
     private static void placeFire(FireZone zone, double radius) {
-        int r = (int)Math.ceil(radius);
         int cx = (int)Math.floor(zone.center.x);
         int cz = (int)Math.floor(zone.center.z);
         int baseY = (int)Math.floor(zone.center.y);
-        for (int dx = -r; dx <= r; ++dx) {
-            for (int dz = -r; dz <= r; ++dz) {
-                if ((double)(dx * dx + dz * dz) > radius * radius) continue;
-                int bx = cx + dx;
-                int bz = cz + dz;
-                BlockPos ground = null;
-                for (int y = baseY + 2; y >= baseY - 4; --y) {
-                    BlockPos below = new BlockPos(bx, y - 1, bz);
-                    BlockPos at = new BlockPos(bx, y, bz);
-                    if (!zone.level.getBlockState(below).isSolidRender((BlockGetter)zone.level, below) || !zone.level.getBlockState(at).isAir()) continue;
-                    ground = at;
-                    break;
+        BlockPos centerGround = null;
+        for (int y = baseY + 2; y >= baseY - 4; --y) {
+            BlockPos at = new BlockPos(cx, y, cz);
+            BlockPos below = at.below();
+            if (!zone.level.getBlockState(below).isSolidRender((BlockGetter)zone.level, below)) continue;
+            if (!zone.level.getBlockState(at).isAir()) continue;
+            centerGround = at;
+            break;
+        }
+        if (centerGround == null) {
+            return;
+        }
+        int centerY = centerGround.getY();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
+        HashSet<BlockPos> visited = new HashSet<BlockPos>();
+        for (BlockPos placed : zone.placed) {
+            if (visited.add(placed)) {
+                queue.add(placed);
+            }
+        }
+        if (visited.add(centerGround)) {
+            queue.add(centerGround);
+        }
+        while (!queue.isEmpty()) {
+            BlockPos cur = queue.poll();
+            BlockState curState = zone.level.getBlockState(cur);
+            if (zone.placed.contains(cur)) {
+                if (curState.is(Blocks.FIRE)) {
+                    FireBlockTracker.get(zone.level).add(cur);
+                } else if (curState.isAir()) {
+                    if (!placeFireCell(zone, cur)) {
+                        zone.placed.remove(cur);
+                        continue;
+                    }
+                } else {
+                    zone.placed.remove(cur);
+                    continue;
                 }
-                if (ground == null) continue;
-                if (zone.level.setBlockAndUpdate(ground, Blocks.FIRE.defaultBlockState())) {
-                    zone.placed.add(ground);
-                    FireBlockTracker.get(zone.level).add(ground);
+            } else if (!placeFireCell(zone, cur)) {
+                continue;
+            }
+            BlockPos[] neighbors = new BlockPos[]{
+                cur.offset(1, 0, 0), cur.offset(-1, 0, 0),
+                cur.offset(0, 0, 1), cur.offset(0, 0, -1)
+            };
+            for (BlockPos n : neighbors) {
+                int dx = n.getX() - cx;
+                int dz = n.getZ() - cz;
+                if (dx * dx + dz * dz > radius * radius) continue;
+                BlockPos next = findFireGround(zone.level, n.getX(), n.getZ(), cur.getY(), FIRE_MAX_STEP);
+                if (next == null) continue;
+                int rise = next.getY() - centerY;
+                if (rise > FIRE_MAX_RISE || rise < -FIRE_MAX_DROP) continue;
+                if (!fireHasHeadroom(zone.level, next)) continue;
+                if (visited.add(next)) {
+                    queue.add(next);
                 }
             }
         }
+    }
+
+    private static boolean placeFireCell(FireZone zone, BlockPos pos) {
+        BlockState state = zone.level.getBlockState(pos);
+        if (state.is(Blocks.FIRE)) {
+            zone.placed.add(pos);
+            FireBlockTracker.get(zone.level).add(pos);
+            return true;
+        }
+        if (!state.isAir()) {
+            return false;
+        }
+        if (!zone.level.setBlockAndUpdate(pos, Blocks.FIRE.defaultBlockState())) {
+            return false;
+        }
+        zone.placed.add(pos);
+        FireBlockTracker.get(zone.level).add(pos);
+        return true;
+    }
+
+    private static BlockPos findFireGround(ServerLevel level, int x, int z, int fromY, int maxStep) {
+        int maxY = fromY + maxStep;
+        int minY = fromY - maxStep;
+        for (int y = maxY; y >= minY; --y) {
+            BlockPos at = new BlockPos(x, y, z);
+            BlockPos below = at.below();
+            if (!level.getBlockState(below).isSolidRender((BlockGetter)level, below)) continue;
+            if (!level.getBlockState(at).isAir()) continue;
+            return at;
+        }
+        return null;
+    }
+
+    private static boolean fireHasHeadroom(ServerLevel level, BlockPos to) {
+        for (int y = to.getY(); y <= to.getY() + 1; ++y) {
+            BlockPos p = new BlockPos(to.getX(), y, to.getZ());
+            if (!level.getBlockState(p).isAir()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean inPlacedFire(FireZone zone, LivingEntity e) {
+        int fx = (int)Math.floor(e.getX());
+        int fy = (int)Math.floor(e.getY());
+        int fz = (int)Math.floor(e.getZ());
+        for (BlockPos p : zone.placed) {
+            if (p.getX() == fx && p.getZ() == fz && Math.abs(p.getY() - fy) <= 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void extinguish(FireZone z) {
@@ -861,6 +957,10 @@ public final class GrenadeManager {
                 dead.add(fireZone);
                 continue;
             }
+            if (now - fireZone.lastPlaceTick >= 20) {
+                GrenadeManager.placeFire(fireZone, radius);
+                fireZone.lastPlaceTick = now;
+            }
             if (elapsed % 2 == 0) {
                 int flameCount = (int)Math.round(14.0 + radius * 8.0);
                 fireZone.level.sendParticles((ParticleOptions)ParticleTypes.FLAME, fireZone.center.x, fireZone.center.y + 0.12, fireZone.center.z, flameCount, radius * 0.32, 0.06, radius * 0.32, 0.0);
@@ -872,11 +972,17 @@ public final class GrenadeManager {
             }
             if (elapsed > 0 && elapsed % 10 == 0) {
                 float dmg = Math.min(4.0f, (float)stage);
-                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 3.0, radius + 1.0))) {
+                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 8.0, radius + 1.0))) {
                     double dz;
                     double dx;
                     Player p;
-                    if (e instanceof Player && (p = (Player)e).isSpectator() || (dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius || Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
+                    if (e instanceof Player && (p = (Player)e).isSpectator()) continue;
+                    if ((dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius) continue;
+                    if (fireZone.placed.isEmpty()) {
+                        if (Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
+                    } else if (!inPlacedFire(fireZone, e)) {
+                        continue;
+                    }
                     Float prev = (Float)pending.get(e.getUUID());
                     if (prev != null && !(dmg > prev.floatValue())) continue;
                     pending.put(e.getUUID(), Float.valueOf(dmg));
@@ -1312,6 +1418,7 @@ public final class GrenadeManager {
             this.startTick = startTick;
             this.lifeTicks = lifeTicks;
             this.thrower = thrower;
+            this.lastPlaceTick = startTick - 20;
         }
     }
 }
