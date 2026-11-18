@@ -1,0 +1,1 @@
+tellraw @a[scores={cs2_inmatch=1}] [{"text":"MVP：","color":"gold"},{"selector":"@a[tag=cs2_round_top]","color":"yellow"},{"text":"，共击杀了 ","color":"gray"},{"score":{"name":"#round_top_kills","objective":"cs2_counts"},"color":"red"},{"text":" 名敌人。","color":"gray"}]

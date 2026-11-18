@@ -1,0 +1,1 @@
+tellraw @a[scores={cs2_inmatch=1}] [{"selector":"@a[tag=cs2_top_fire]","color":"yellow"},{"text":" 本回合用燃烧弹造成了 ","color":"gray"},{"score":{"name":"#top_fire","objective":"cs2_counts"},"color":"red"},{"text":" 点伤害。","color":"gray"}]
