@@ -909,7 +909,8 @@ public final class GrenadeManager {
         int fy = (int)Math.floor(e.getY());
         int fz = (int)Math.floor(e.getZ());
         for (BlockPos p : zone.placed) {
-            if (p.getX() == fx && p.getZ() == fz && Math.abs(p.getY() - fy) <= 1) {
+            if (p.getX() == fx && p.getZ() == fz && Math.abs(p.getY() - fy) <= 1
+                && zone.level.getBlockState(p).is(Blocks.FIRE)) {
                 return true;
             }
         }
@@ -991,7 +992,7 @@ public final class GrenadeManager {
                 dead.add(fireZone);
                 continue;
             }
-            if (now - fireZone.lastPlaceTick >= 20) {
+            if (fireZone.placed.isEmpty() || now - fireZone.lastPlaceTick >= 20) {
                 GrenadeManager.placeFire(fireZone, radius);
                 fireZone.lastPlaceTick = now;
             }
@@ -1006,11 +1007,7 @@ public final class GrenadeManager {
                     Player p;
                     if (e instanceof Player && (p = (Player)e).isSpectator()) continue;
                     if ((dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius) continue;
-                    if (fireZone.placed.isEmpty()) {
-                        if (Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
-                    } else if (!inPlacedFire(fireZone, e)) {
-                        continue;
-                    }
+                    if (!inPlacedFire(fireZone, e)) continue;
                     Float prev = (Float)pending.get(e.getUUID());
                     if (prev != null && !(dmg > prev.floatValue())) continue;
                     pending.put(e.getUUID(), Float.valueOf(dmg));
