@@ -52,6 +52,7 @@ package com.sandrone.cs2grenade;
 import com.sandrone.cs2grenade.Cs2Grenade;
 import com.sandrone.cs2grenade.GrenadeLoader;
 import com.sandrone.cs2grenade.GrenadeType;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,15 +65,18 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -82,6 +86,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -103,10 +108,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 
 public final class GrenadeManager {
+    private static final ResourceKey<DamageType> FIRE_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("cs2", "fire"));
     private static final List<Grenade> ACTIVE = new ArrayList<Grenade>();
     private static final String GRENADE_TAG = "cs2_grenade_visual";
     private static MinecraftServer serverRef;
@@ -544,7 +551,7 @@ public final class GrenadeManager {
         GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.0f, 1.0f);
     }
 
-    /** 数据包通过计分板信号触发的 C4 音效：走自定义声音包，不依赖服务端注册表。 */
+    /** 数据包通过计分板信号触发的 C4 音效。 */
     static void playC4Sfx(ServerPlayer player, Vec3 pos, String id, float volume) {
         ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
         SoundEvent sound = SoundEvent.createVariableRangeEvent(loc);
@@ -552,7 +559,7 @@ public final class GrenadeManager {
                 player.getServer().overworld().getRandom().nextLong());
     }
 
-    /** 中断时掐掉安放开始音，避免读条断了声音还在放。 */
+    /** 中断时掐掉安放开始音。 */
     static void stopPlantSound(ServerLevel level, Vec3 pos) {
         GrenadeManager.stopSound(level, pos, "c4.plant_start");
     }
@@ -560,6 +567,17 @@ public final class GrenadeManager {
     /** 拆除/爆炸时掐掉还在播的倒计时。 */
     static void stopC4Countdown(ServerLevel level, Vec3 pos) {
         GrenadeManager.stopSound(level, pos, "c4.countdown");
+    }
+
+    /** 全服掐掉倒计时：拆除函数会先杀掉炸弹标记，不能靠坐标找。 */
+    static void stopC4CountdownAll() {
+        if (serverRef == null) {
+            return;
+        }
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", "c4.countdown");
+        for (ServerPlayer p : serverRef.getPlayerList().getPlayers()) {
+            p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
+        }
     }
 
     private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
@@ -570,17 +588,6 @@ public final class GrenadeManager {
         for (ServerPlayer p : level.players()) {
             if (p.distanceToSqr(pos) > range * range) continue;
             GrenadeManager.sendSoundPacket(p, sound, pos, volume, pitch, level.getRandom().nextLong());
-        }
-    }
-
-    /** 全服掐掉倒计时：拆除函数会先杀掉炸弹标记，所以不能靠坐标找。 */
-    static void stopC4CountdownAll() {
-        if (serverRef == null) {
-            return;
-        }
-        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", "c4.countdown");
-        for (ServerPlayer p : serverRef.getPlayerList().getPlayers()) {
-            p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
         }
     }
 
@@ -650,8 +657,16 @@ public final class GrenadeManager {
 
     private static void step(Grenade g) {
         Vec3 from = g.lastPos;
+        if (!g.level.isLoaded(BlockPos.containing(from))) {
+            return;
+        }
+        Vec3 previousVel = g.vel;
         g.vel = g.vel.add(0.0, -g.type.gravity(), 0.0).scale(g.type.drag());
         Vec3 to = from.add(g.vel);
+        if (!g.level.isLoaded(BlockPos.containing(to))) {
+            g.vel = previousVel;
+            return;
+        }
         BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)g.thrower));
         if (hit.getType() == HitResult.Type.BLOCK) {
             int nowTick;
@@ -731,7 +746,9 @@ public final class GrenadeManager {
             boolean burning = g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.FIRE)
                     || g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.LAVA)
                     || inFireZone(g.level, at);
-            if (g.smokeRest >= 3 || burning) {
+            // 烟雾弹也要递减兜底引信，避免卡在未加载区块或水面时永不起烟
+            --g.fuse;
+            if (g.smokeRest >= 3 || burning || g.fuse <= 0) {
                 g.fuse = 0;
             }
         } else if (--g.fuse == 20) {
@@ -771,6 +788,8 @@ public final class GrenadeManager {
         RandomSource random = level.random;
         CommandSourceStack src = level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
         Vec3 center = pos.add(0.0, 0.6, 0.0);
+        // 确保烟片生成的区块已加载；远距离投掷时落点区块可能还没到手
+        level.getChunkAt(BlockPos.containing(center));
         int[] ringCounts = new int[]{1, 10, 24, 42, 60};
         double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
         float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};
@@ -812,10 +831,13 @@ public final class GrenadeManager {
             if (z.level != level) {
                 continue;
             }
-            if (z.placed.contains(pos)) {
-                return true;
+            Vec3 at = Vec3.atCenterOf(pos);
+            for (FireNode node : z.nodes) {
+                if (node.pos.distanceTo(at) <= 2.0) {
+                    return true;
+                }
             }
-            if (z.center.distanceTo(Vec3.atCenterOf(pos)) <= 2.0) {
+            if (z.center.distanceTo(at) <= 2.0) {
                 return true;
             }
         }
@@ -832,46 +854,116 @@ public final class GrenadeManager {
         }
     }
 
+    private static final double FIRE_NODE_RADIUS = 0.8;
+    private static final double FIRE_VERTICAL_TOLERANCE = 0.65;
+
     private static void placeFire(FireZone zone, double radius) {
-        int r = (int)Math.ceil(radius);
+        zone.nodes.clear();
         int cx = (int)Math.floor(zone.center.x);
         int cz = (int)Math.floor(zone.center.z);
         int baseY = (int)Math.floor(zone.center.y);
-        for (int dx = -r; dx <= r; ++dx) {
-            for (int dz = -r; dz <= r; ++dz) {
-                if ((double)(dx * dx + dz * dz) > radius * radius) continue;
-                int bx = cx + dx;
-                int bz = cz + dz;
-                BlockPos ground = null;
-                for (int y = baseY + 2; y >= baseY - 4; --y) {
-                    BlockPos below = new BlockPos(bx, y - 1, bz);
-                    BlockPos at = new BlockPos(bx, y, bz);
-                    if (!zone.level.getBlockState(below).isSolidRender((BlockGetter)zone.level, below) || !zone.level.getBlockState(at).isAir()) continue;
-                    ground = at;
-                    break;
-                }
-                if (ground == null) continue;
-                if (zone.level.setBlockAndUpdate(ground, Blocks.FIRE.defaultBlockState())) {
-                    zone.placed.add(ground);
-                    FireBlockTracker.get(zone.level).add(ground);
+        BlockPos centerGround = findFireCenter(zone.level, cx, cz, baseY);
+        if (centerGround == null) {
+            return;
+        }
+        int centerY = centerGround.getY();
+        ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
+        HashSet<BlockPos> visited = new HashSet<BlockPos>();
+        visited.add(centerGround);
+        queue.add(centerGround);
+        while (!queue.isEmpty()) {
+            BlockPos cur = queue.poll();
+            addFireNode(zone, cur);
+            BlockPos[] neighbors = new BlockPos[]{
+                cur.offset(1, 0, 0), cur.offset(-1, 0, 0),
+                cur.offset(0, 0, 1), cur.offset(0, 0, -1)
+            };
+            for (BlockPos n : neighbors) {
+                int dx = n.getX() - cx;
+                int dz = n.getZ() - cz;
+                if (dx * dx + dz * dz > radius * radius) continue;
+                BlockPos next = findFireGround(zone.level, n.getX(), n.getZ(), cur.getY());
+                if (next == null) continue;
+                int dy = next.getY() - cur.getY();
+                if (dy < -1 || dy > 1) continue;
+                if (next.getY() > centerY + 1) continue;
+                if (!fireHasHeadroom(zone.level, next)) continue;
+                if (visited.add(next)) {
+                    queue.add(next);
                 }
             }
         }
+    }
+
+    private static BlockPos findFireCenter(ServerLevel level, int cx, int cz, int baseY) {
+        for (int y = baseY + 2; y >= baseY - 4; --y) {
+            BlockPos at = new BlockPos(cx, y, cz);
+            if (isFireCell(level, at)) {
+                return at;
+            }
+        }
+        return null;
+    }
+
+    private static BlockPos findFireGround(ServerLevel level, int x, int z, int fromY) {
+        for (int y = fromY + 1; y >= fromY - 1; --y) {
+            BlockPos at = new BlockPos(x, y, z);
+            if (isFireCell(level, at)) {
+                return at;
+            }
+        }
+        return null;
+    }
+
+    private static boolean isFireCell(ServerLevel level, BlockPos pos) {
+        if (!level.getBlockState(pos).isAir()) {
+            return false;
+        }
+        BlockPos below = pos.below();
+        VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
+        return !support.isEmpty() && support.max(Direction.Axis.Y) >= 0.45;
+    }
+
+    private static void addFireNode(FireZone zone, BlockPos cell) {
+        BlockPos below = cell.below();
+        VoxelShape support = zone.level.getBlockState(below).getCollisionShape(zone.level, below);
+        double surfaceY = (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
+        zone.nodes.add(new FireNode(
+            new Vec3((double)cell.getX() + 0.5, surfaceY + 0.05, (double)cell.getZ() + 0.5),
+            (float)FIRE_NODE_RADIUS
+        ));
+    }
+
+    private static boolean fireHasHeadroom(ServerLevel level, BlockPos to) {
+        for (int y = to.getY(); y <= to.getY() + 1; ++y) {
+            BlockPos p = new BlockPos(to.getX(), y, to.getZ());
+            if (!level.getBlockState(p).isAir()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean inFire(FireZone zone, LivingEntity e) {
+        double ex = e.getX();
+        double ey = e.getY();
+        double ez = e.getZ();
+        for (FireNode node : zone.nodes) {
+            double dx = ex - node.pos.x;
+            double dz = ez - node.pos.z;
+            if (dx * dx + dz * dz > (double)node.radius * (double)node.radius) continue;
+            if (Math.abs(ey - node.pos.y) > FIRE_VERTICAL_TOLERANCE) continue;
+            return true;
+        }
+        return false;
     }
 
     private static void extinguish(FireZone z) {
-        FireBlockTracker tracker = FireBlockTracker.get(z.level);
-        for (BlockPos p : z.placed) {
-            if (z.level.getBlockState(p).is(Blocks.FIRE)) {
-                z.level.removeBlock(p, false);
-            }
-            tracker.remove(p);
-        }
-        z.placed.clear();
+        z.nodes.clear();
     }
 
     private static void emitFireParticles(FireZone zone, double radius, int elapsed) {
-        if (zone.placed.isEmpty()) {
+        if (zone.nodes.isEmpty()) {
             return;
         }
         int remaining = Math.max(0, zone.lifeTicks - elapsed);
@@ -879,29 +971,22 @@ public final class GrenadeManager {
         if (remaining < 60) {
             maxSamples = Math.max(4, maxSamples * remaining / 60);
         }
-        ArrayList<BlockPos> cells = new ArrayList<BlockPos>(zone.placed);
-        if (cells.isEmpty()) {
-            return;
-        }
         RandomSource random = zone.level.random;
-        int samples = Math.min(maxSamples, cells.size());
+        int samples = Math.min(maxSamples, zone.nodes.size());
         for (int i = 0; i < samples; ++i) {
-            BlockPos p = cells.get(random.nextInt(cells.size()));
-            if (!zone.level.getBlockState(p).is(Blocks.FIRE)) {
-                continue;
-            }
-            double x = (double)p.getX() + 0.5;
-            double y = (double)p.getY() + 0.15;
-            double z = (double)p.getZ() + 0.5;
-            zone.level.sendParticles(ParticleTypes.FLAME, x, y, z, 1, 0.05, 0.02, 0.05, 0.0);
+            FireNode node = zone.nodes.get(random.nextInt(zone.nodes.size()));
+            double x = node.pos.x + (random.nextDouble() - 0.5) * 0.45;
+            double y = node.pos.y;
+            double z = node.pos.z + (random.nextDouble() - 0.5) * 0.45;
+            zone.level.sendParticles(ParticleTypes.LAVA, x, y + 0.02, z, 1, 0.02, 0.02, 0.02, 0.0);
+            zone.level.sendParticles(ParticleTypes.FLAME, x, y + 0.08, z, 1, 0.04, 0.02, 0.04, 0.0);
             if ((i & 1) == 0) {
-                zone.level.sendParticles(ParticleTypes.SMALL_FLAME, x, y + 0.12, z, 1, 0.04, 0.03, 0.04, 0.0);
+                zone.level.sendParticles(ParticleTypes.SMALL_FLAME, x, y + 0.18, z, 1, 0.04, 0.03, 0.04, 0.0);
             }
             if (i % 4 == 0) {
-                zone.level.sendParticles(ParticleTypes.SMOKE, x, y + 0.45, z, 1, 0.02, 0.08, 0.02, 0.0);
+                zone.level.sendParticles(ParticleTypes.SMOKE, x, y + 0.5, z, 1, 0.02, 0.08, 0.02, 0.0);
             }
         }
-        zone.level.sendParticles(ParticleTypes.FLAME, zone.center.x, zone.center.y + 0.2, zone.center.z, 2, 0.04, 0.06, 0.04, 0.0);
     }
 
     private static void tickFires() {
@@ -934,16 +1019,22 @@ public final class GrenadeManager {
                 dead.add(fireZone);
                 continue;
             }
+            if (fireZone.nodes.isEmpty() || now - fireZone.lastPlaceTick >= 20) {
+                GrenadeManager.placeFire(fireZone, radius);
+                fireZone.lastPlaceTick = now;
+            }
             if (elapsed % 2 == 0) {
                 emitFireParticles(fireZone, radius, elapsed);
             }
             if (elapsed > 0 && elapsed % 10 == 0) {
                 float dmg = Math.min(4.0f, (float)stage);
-                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 3.0, radius + 1.0))) {
+                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 8.0, radius + 1.0))) {
                     double dz;
                     double dx;
                     Player p;
-                    if (e instanceof Player && (p = (Player)e).isSpectator() || (dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius || Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
+                    if (e instanceof Player && (p = (Player)e).isSpectator()) continue;
+                    if ((dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius) continue;
+                    if (!inFire(fireZone, e)) continue;
                     Float prev = (Float)pending.get(e.getUUID());
                     if (prev != null && !(dmg > prev.floatValue())) continue;
                     pending.put(e.getUUID(), Float.valueOf(dmg));
@@ -961,11 +1052,7 @@ public final class GrenadeManager {
             if (e2 == null || e2.isRemoved() || e2.isDeadOrDying()) continue;
             e2.invulnerableTime = 0;
             Player thrower = fireSources.get(entry.getKey());
-            if (thrower != null) {
-                e2.hurt(e2.level().damageSources().indirectMagic(thrower, thrower), ((Float)entry.getValue()).floatValue());
-            } else {
-                e2.hurt(e2.level().damageSources().magic(), ((Float)entry.getValue()).floatValue());
-            }
+            e2.hurt(e2.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), ((Float)entry.getValue()).floatValue());
         }
         FIRE_ZONES.removeAll(dead);
     }
@@ -1106,8 +1193,7 @@ public final class GrenadeManager {
             if (d > 40.0) {
                 continue;
             }
-            // 被闪到的玩家也听得到这一发爆响，但按闪光强度衰减；耳鸣仍然盖在上面，
-            // 这样中闪时有听觉反馈，也不至于把爆响和耳鸣叠得过吵
+            // 被闪到的玩家也听得到这一发爆响，但按闪光强度衰减；耳鸣仍然盖在上面
             double ownPower = flashPower.getOrDefault(p.getUUID(), 0.0);
             String layer;
             float loud;
@@ -1126,7 +1212,7 @@ public final class GrenadeManager {
                 pitch = 1.0f;
             }
             if (ownPower >= 0.01) {
-                // 中闪越重，自己听到的爆响越轻，最低保留 0.6 的底噪
+                // 中闪越重，自己听到的爆响越轻，最低保留 0.6
                 loud = Math.max(0.6f, (float) (loud * (1.0 - 0.7 * Math.min(1.0, ownPower))));
             }
             GrenadeManager.sendSoundPacket(p, SoundEvent.createVariableRangeEvent(
@@ -1365,6 +1451,9 @@ public final class GrenadeManager {
         }
     }
 
+    private record FireNode(Vec3 pos, float radius) {
+    }
+
     private static final class FireZone {
         final ServerLevel level;
         final Vec3 center;
@@ -1373,7 +1462,7 @@ public final class GrenadeManager {
         final Player thrower;
         int lastDamageTick;
         int lastPlaceTick;
-        final Set<BlockPos> placed = new HashSet<BlockPos>();
+        final List<FireNode> nodes = new ArrayList<FireNode>();
         final Map<UUID, Integer> burnSteps = new HashMap<UUID, Integer>();
 
         FireZone(ServerLevel level, Vec3 center, int startTick, int lifeTicks, Player thrower) {
@@ -1382,6 +1471,7 @@ public final class GrenadeManager {
             this.startTick = startTick;
             this.lifeTicks = lifeTicks;
             this.thrower = thrower;
+            this.lastPlaceTick = startTick - 20;
         }
     }
 }
