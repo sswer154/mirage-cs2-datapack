@@ -927,6 +927,40 @@ public final class GrenadeManager {
         z.placed.clear();
     }
 
+    private static void emitFireParticles(FireZone zone, double radius, int elapsed) {
+        if (zone.placed.isEmpty()) {
+            return;
+        }
+        int remaining = Math.max(0, zone.lifeTicks - elapsed);
+        int maxSamples = Math.min(24, Math.max(12, (int)Math.round(10.0 + radius * 1.5)));
+        if (remaining < 60) {
+            maxSamples = Math.max(4, maxSamples * remaining / 60);
+        }
+        ArrayList<BlockPos> cells = new ArrayList<BlockPos>(zone.placed);
+        if (cells.isEmpty()) {
+            return;
+        }
+        RandomSource random = zone.level.random;
+        int samples = Math.min(maxSamples, cells.size());
+        for (int i = 0; i < samples; ++i) {
+            BlockPos p = cells.get(random.nextInt(cells.size()));
+            if (!zone.level.getBlockState(p).is(Blocks.FIRE)) {
+                continue;
+            }
+            double x = (double)p.getX() + 0.5;
+            double y = (double)p.getY() + 0.15;
+            double z = (double)p.getZ() + 0.5;
+            zone.level.sendParticles(ParticleTypes.FLAME, x, y, z, 1, 0.05, 0.02, 0.05, 0.0);
+            if ((i & 1) == 0) {
+                zone.level.sendParticles(ParticleTypes.SMALL_FLAME, x, y + 0.12, z, 1, 0.04, 0.03, 0.04, 0.0);
+            }
+            if (i % 4 == 0) {
+                zone.level.sendParticles(ParticleTypes.SMOKE, x, y + 0.45, z, 1, 0.02, 0.08, 0.02, 0.0);
+            }
+        }
+        zone.level.sendParticles(ParticleTypes.FLAME, zone.center.x, zone.center.y + 0.2, zone.center.z, 2, 0.04, 0.06, 0.04, 0.0);
+    }
+
     private static void tickFires() {
         if (FIRE_ZONES.isEmpty() || serverRef == null) {
             return;
@@ -962,13 +996,7 @@ public final class GrenadeManager {
                 fireZone.lastPlaceTick = now;
             }
             if (elapsed % 2 == 0) {
-                int flameCount = (int)Math.round(14.0 + radius * 8.0);
-                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.FLAME, fireZone.center.x, fireZone.center.y + 0.12, fireZone.center.z, flameCount, radius * 0.32, 0.06, radius * 0.32, 0.0);
-                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.SMALL_FLAME, fireZone.center.x, fireZone.center.y + 0.25, fireZone.center.z, flameCount / 2, radius * 0.28, 0.1, radius * 0.28, 0.0);
-                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.SMOKE, fireZone.center.x, fireZone.center.y + 0.4, fireZone.center.z, 3, radius * 0.22, 0.15, radius * 0.22, 0.0);
-                if (elapsed % 10 == 0) {
-                    fireZone.level.sendParticles((ParticleOptions)ParticleTypes.LAVA, fireZone.center.x, fireZone.center.y + 0.12, fireZone.center.z, 2, radius * 0.25, 0.05, radius * 0.25, 0.0);
-                }
+                emitFireParticles(fireZone, radius, elapsed);
             }
             if (elapsed > 0 && elapsed % 10 == 0) {
                 float dmg = Math.min(4.0f, (float)stage);
