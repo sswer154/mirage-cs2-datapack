@@ -1,0 +1,24 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "ARR"
+
+[[mods]]
+modId = "cs2grenade"
+version = "0.1.0"
+displayName = "CS2 Grenade"
+description = '''服务端专用投掷物：物理在服务端计算，客户端只需资源包。'''
+displayTest = "IGNORE_SERVER_VERSION"
+
+[[dependencies.cs2grenade]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.cs2grenade]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+ordering = "NONE"
+side = "SERVER"

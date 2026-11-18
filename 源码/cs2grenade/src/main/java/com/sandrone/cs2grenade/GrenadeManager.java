@@ -1,0 +1,1236 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  net.minecraft.commands.CommandSourceStack
+ *  net.minecraft.core.BlockPos
+ *  net.minecraft.core.Holder
+ *  net.minecraft.core.Position
+ *  net.minecraft.core.Vec3i
+ *  net.minecraft.core.component.DataComponents
+ *  net.minecraft.core.particles.ParticleOptions
+ *  net.minecraft.core.particles.ParticleTypes
+ *  net.minecraft.network.protocol.Packet
+ *  net.minecraft.network.protocol.game.ClientboundSoundPacket
+ *  net.minecraft.network.protocol.game.ClientboundStopSoundPacket
+ *  net.minecraft.resources.ResourceLocation
+ *  net.minecraft.server.MinecraftServer
+ *  net.minecraft.server.ServerScoreboard
+ *  net.minecraft.server.level.ServerLevel
+ *  net.minecraft.server.level.ServerPlayer
+ *  net.minecraft.sounds.SoundEvent
+ *  net.minecraft.sounds.SoundEvents
+ *  net.minecraft.sounds.SoundSource
+ *  net.minecraft.util.RandomSource
+ *  net.minecraft.world.entity.Display$ItemDisplay
+ *  net.minecraft.world.entity.Entity
+ *  net.minecraft.world.entity.EntityType
+ *  net.minecraft.world.entity.LivingEntity
+ *  net.minecraft.world.entity.player.Player
+ *  net.minecraft.world.item.ItemStack
+ *  net.minecraft.world.item.Items
+ *  net.minecraft.world.item.component.CustomData
+ *  net.minecraft.world.item.component.CustomModelData
+ *  net.minecraft.world.level.BlockGetter
+ *  net.minecraft.world.level.ClipContext
+ *  net.minecraft.world.level.ClipContext$Block
+ *  net.minecraft.world.level.ClipContext$Fluid
+ *  net.minecraft.world.level.ItemLike
+ *  net.minecraft.world.level.Level
+ *  net.minecraft.world.level.block.Blocks
+ *  net.minecraft.world.level.block.state.BlockState
+ *  net.minecraft.world.phys.AABB
+ *  net.minecraft.world.phys.BlockHitResult
+ *  net.minecraft.world.phys.HitResult$Type
+ *  net.minecraft.world.phys.Vec3
+ *  net.minecraft.world.phys.shapes.CollisionContext
+ *  net.minecraft.world.scores.Objective
+ *  net.minecraft.world.scores.ScoreHolder
+ */
+package com.sandrone.cs2grenade;
+
+import com.sandrone.cs2grenade.Cs2Grenade;
+import com.sandrone.cs2grenade.GrenadeLoader;
+import com.sandrone.cs2grenade.GrenadeType;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Position;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.ScoreHolder;
+
+public final class GrenadeManager {
+    private static final List<Grenade> ACTIVE = new ArrayList<Grenade>();
+    private static final String GRENADE_TAG = "cs2_grenade_visual";
+    private static MinecraftServer serverRef;
+    private static final Map<String, PendingMask> PENDING_MASKS;
+    private static int sweepTimer;
+    private static boolean purgedAfterStart;
+    private static final Map<UUID, Integer> DRAW_READY;
+    private static final Map<UUID, PendingThrow> PENDING_THROW;
+    private static final Map<UUID, String> LAST_HELD;
+    private static final Set<UUID> PERSIST_DISPLAYS;
+    private static final List<SmokeZone> SMOKE_ZONES;
+    private static int smokeVolumeId;
+    private static final List<SmokeCard> SMOKE_CARDS;
+    private static final List<FireZone> FIRE_ZONES;
+    private static final Map<UUID, Integer> BURN_STEPS;
+
+    private GrenadeManager() {
+    }
+
+    private static boolean isGrenadeVisual(Entity e) {
+        if (!(e instanceof Display.ItemDisplay)) {
+            return false;
+        }
+        Display.ItemDisplay d = (Display.ItemDisplay)e;
+        ItemStack stack = d.getSlot(0).get();
+        if (stack.isEmpty()) {
+            return false;
+        }
+        CustomModelData cmd = (CustomModelData)stack.get(DataComponents.CUSTOM_MODEL_DATA);
+        return cmd != null && (cmd.value() == 722001 || cmd.value() == 722002 || cmd.value() == 722003 || cmd.value() == 722004);
+    }
+
+    public static void cleanupOrphans(MinecraftServer server) {
+        serverRef = server;
+        for (ServerLevel level : server.getAllLevels()) {
+            ArrayList<Entity> doomed = new ArrayList<Entity>();
+            for (Entity e : level.getAllEntities()) {
+                if (!e.getTags().contains(GRENADE_TAG) && !GrenadeManager.isGrenadeVisual(e)) continue;
+                doomed.add(e);
+            }
+            for (Entity e : doomed) {
+                e.discard();
+            }
+            if (doomed.isEmpty()) continue;
+            Cs2Grenade.LOGGER.info("\u6e05\u7406\u6b8b\u7559\u624b\u96f7 {} \u4e2a", (Object)doomed.size());
+        }
+    }
+
+    public static boolean throwGrenade(Player player, ItemStack stack, int heldTicks) {
+        Level level = player.level();
+        if (!(level instanceof ServerLevel)) {
+            return false;
+        }
+        ServerLevel level2 = (ServerLevel)level;
+        CustomData data = (CustomData)stack.get(DataComponents.CUSTOM_DATA);
+        if (data == null || !data.contains("cs2_util")) {
+            return false;
+        }
+        String kind = data.copyTag().getString("cs2_util");
+        ResourceLocation typeId = kind.contains(":") ? ResourceLocation.parse((String)kind) : ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)kind);
+        GrenadeLoader.ensureLoaded(player.getServer());
+        GrenadeType type = GrenadeLoader.get(typeId);
+        if (type == null) {
+            Cs2Grenade.LOGGER.warn("\u6ca1\u6709\u627e\u5230\u6295\u63b7\u7269\u914d\u7f6e {}\uff0c\u6309\u9ed8\u8ba4\u53c2\u6570\u6295\u51fa", (Object)typeId);
+            type = GrenadeType.fallback(typeId);
+        }
+        if (!player.isCreative()) {
+            stack.shrink(1);
+        }
+        Vec3 look = player.getLookAngle();
+        double speed = type.speed();
+        if (player.isShiftKeyDown()) {
+            speed = type.speed() * 0.45;
+        }
+        Vec3 pos = player.getEyePosition().add(look.scale(0.4));
+        ItemStack model = new ItemStack((ItemLike)Items.SNOWBALL);
+        model.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(type.displayCmd() > 0 ? type.displayCmd() : type.modelCmd()));
+        Display.ItemDisplay display = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, (Level)level2);
+        display.setPos(pos.x, pos.y + type.renderOffsetY(), pos.z);
+        display.getSlot(0).set(model);
+        display.addTag(GRENADE_TAG);
+        level2.addFreshEntity((Entity)display);
+        Vec3 throwVel = look.scale(speed).add(player.getDeltaMovement().scale(type.inheritVelocity()));
+        int fuse = Math.max(20, type.fuse() - heldTicks);
+        ACTIVE.add(new Grenade(display, level2, player, throwVel, fuse, type));
+        level2.sendParticles((ParticleOptions)ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 2, 0.05, 0.05, 0.05, 0.01);
+        return true;
+    }
+
+    /** 耳鸣：每个玩家一条，时长跟着黑屏走。 */
+    private record Ring(int holdEnd, int fadeTicks, int nextTick, float volume, int fadeSec) {
+    }
+
+    private static final java.util.Map<java.util.UUID, Ring> RING_STATE = new java.util.HashMap<>();
+
+    private static void tickRings() {
+        if (RING_STATE.isEmpty() || serverRef == null) {
+            return;
+        }
+        int now = serverRef.getTickCount();
+        var it = RING_STATE.entrySet().iterator();
+        while (it.hasNext()) {
+            var e = it.next();
+            Ring r = e.getValue();
+            int end = r.holdEnd() + r.fadeTicks();
+            if (now >= end) {
+                Cs2Grenade.LOGGER.info("耳鸣结束，停止播放 fadeSec={}", r.fadeSec());
+                // 淡出素材可能比黑屏长，结束时要主动停掉，否则会一直响
+                player4Stop(serverRef, e.getKey(), "flash.ring_long");
+                if (r.fadeSec() > 0) {
+                    player4Stop(serverRef, e.getKey(), "flash.ring_fade_" + r.fadeSec());
+                }
+                it.remove();
+                continue;
+            }
+            if (now < r.nextTick()) {
+                continue;
+            }
+            var player = serverRef.getPlayerList().getPlayer(e.getKey());
+            if (player == null) {
+                it.remove();
+                continue;
+            }
+            boolean fading = now >= r.holdEnd();
+            float fade = 1.0f;
+            if (fading && r.fadeTicks() > 0) {
+                fade = Math.max(0.0f, 1.0f - (now - r.holdEnd()) / (float) r.fadeTicks());
+            }
+            if (!fading) {
+                if (r.nextTick() == 0) {
+                    // 保持段：一整段 10 秒素材，不循环，没有接缝
+                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundEntityPacket(
+                            net.minecraft.core.Holder.direct(SoundEvent.createVariableRangeEvent(
+                                    ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_long"))),
+                            SoundSource.PLAYERS, player,
+                            r.volume() * 0.5f, 1.0f, net.minecraft.util.RandomSource.create().nextLong()));
+                    // 下一次唤醒点设在保持段结束，那一步才切进淡出
+                    e.setValue(new Ring(r.holdEnd(), r.fadeTicks(), r.holdEnd(), r.volume(), 0));
+                }
+            } else {
+                if (r.nextTick() != -2) {
+                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
+                            ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_long"), SoundSource.PLAYERS));
+                    int sec = Math.max(1, Math.min(5, Math.round(r.fadeTicks() / 20.0f)));
+                    Cs2Grenade.LOGGER.info("耳鸣进入淡出: fadeTicks={} 使用{}秒档", r.fadeTicks(), sec);
+                    player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundEntityPacket(
+                            net.minecraft.core.Holder.direct(SoundEvent.createVariableRangeEvent(
+                                    ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_fade_" + sec))),
+                            SoundSource.PLAYERS, player,
+                            r.volume() * 0.5f, 1.0f, net.minecraft.util.RandomSource.create().nextLong()));
+                    e.setValue(new Ring(r.holdEnd(), r.fadeTicks(), -2, r.volume(), sec));
+                }
+            }
+        }
+    }
+
+    private static void player4Stop(MinecraftServer server, java.util.UUID uuid, String id) {
+        var pl = server.getPlayerList().getPlayer(uuid);
+        if (pl == null || pl.connection == null) {
+            return;
+        }
+        pl.connection.send(new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
+                ResourceLocation.fromNamespaceAndPath("cs2", id), SoundSource.PLAYERS));
+    }
+
+    private static void processMasks() {
+        if (PENDING_MASKS.isEmpty() || serverRef == null) {
+            return;
+        }
+        int now = serverRef.getTickCount();
+        CommandSourceStack src = serverRef.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+        ArrayList<String> done = new ArrayList<String>();
+        for (PendingMask m : List.copyOf(PENDING_MASKS.values())) {
+            if (now < m.expireTick()) continue;
+            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + m.fadeTicks() + " @s");
+            done.add(m.player());
+        }
+        done.forEach(PENDING_MASKS::remove);
+    }
+
+    public static void tick() {
+        tickRings();
+        GrenadeManager.processMasks();
+        GrenadeManager.tickSmoke();
+        GrenadeManager.tickSmokeCards();
+        GrenadeManager.tickFires();
+        if (++sweepTimer >= 20) {
+            sweepTimer = 0;
+            GrenadeManager.sweepOrphans();
+        }
+        if (ACTIVE.isEmpty()) {
+            return;
+        }
+        ACTIVE.removeIf(g -> {
+            GrenadeManager.step(g);
+            return g.fuse <= 0;
+        });
+    }
+
+    private static String utilOf(ItemStack stack) {
+        CustomData data = (CustomData)stack.get(DataComponents.CUSTOM_DATA);
+        if (data == null) {
+            return null;
+        }
+        String util = data.copyTag().getString("cs2_util");
+        return util.isEmpty() ? null : util;
+    }
+
+    public static void playerTick(ServerPlayer player, int now) {
+        String held = GrenadeManager.utilOf(player.getMainHandItem());
+        String last = LAST_HELD.get(player.getUUID());
+        boolean isGrenade = false;
+        if (held != null) {
+            ResourceLocation loc = held.contains(":")
+                    ? ResourceLocation.parse(held)
+                    : ResourceLocation.fromNamespaceAndPath("cs2", held);
+            isGrenade = GrenadeLoader.get(loc) != null;
+        }
+        if (isGrenade && !held.equals(last)) {
+            DRAW_READY.put(player.getUUID(), now + 10);
+            player.getCooldowns().addCooldown(player.getMainHandItem().getItem(), 10);
+            GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.draw", 0.6f, 1.0f);
+        }
+        if (!isGrenade) {
+            PENDING_THROW.remove(player.getUUID());
+        }
+        LAST_HELD.put(player.getUUID(), held == null ? "" : held);
+        PendingThrow pt = PENDING_THROW.get(player.getUUID());
+        if (pt == null || now < pt.endTick()) {
+            return;
+        }
+        PENDING_THROW.remove(player.getUUID());
+        if (player.getInventory().selected != pt.slot() || !pt.util().equals(GrenadeManager.utilOf(player.getMainHandItem()))) {
+            return;
+        }
+        if (GrenadeManager.throwGrenade((Player)player, player.getMainHandItem(), 0)) {
+            int pick = 1 + ThreadLocalRandom.current().nextInt(3);
+            GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.fuze_" + pick, 0.55f, 1.0f);
+        }
+    }
+
+    public static boolean requestThrow(ServerPlayer player) {
+        int now = serverRef == null ? 0 : serverRef.getTickCount();
+        Integer ready = DRAW_READY.get(player.getUUID());
+        if (ready != null && now < ready) {
+            return true;
+        }
+        if (PENDING_THROW.containsKey(player.getUUID())) {
+            return true;
+        }
+        String util = GrenadeManager.utilOf(player.getMainHandItem());
+        if (util == null) {
+            return false;
+        }
+        PENDING_THROW.put(player.getUUID(), new PendingThrow(now + 6, player.getInventory().selected, util));
+        GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.pin", 0.7f, 1.0f);
+        return true;
+    }
+
+    public static void purgeTransientVisuals(MinecraftServer server) {
+        if (server == null) {
+            return;
+        }
+        for (ServerLevel level : server.getAllLevels()) {
+            int before = 0;
+            ArrayList<Entity> doomed = new ArrayList<Entity>();
+            for (Entity e : level.getAllEntities()) {
+                if (!e.getTags().contains("cs2_smoke_card")) continue;
+                doomed.add(e);
+            }
+            for (Entity e : doomed) {
+                e.discard();
+                ++before;
+            }
+            if (before <= 0) continue;
+            Cs2Grenade.LOGGER.info("\u6e05\u7406\u6b8b\u7559\u70df\u7247 {} \u4e2a", (Object)before);
+        }
+        SMOKE_ZONES.clear();
+        SMOKE_CARDS.clear();
+    }
+
+    private static void sweepOrphanSmokeCards(ServerLevel level) {
+        HashSet<String> active = new HashSet<String>();
+        HashSet<UUID> activeCanisters = new HashSet<UUID>();
+        for (SmokeZone z : SMOKE_ZONES) {
+            active.add("cs2_smoke_" + z.volumeId);
+            if (z.display == null || z.display.isRemoved()) continue;
+            activeCanisters.add(z.display.getUUID());
+        }
+        ArrayList<Entity> doomed = new ArrayList<Entity>();
+        for (Entity e : level.getAllEntities()) {
+            if (e.getTags().contains("cs2_smoke_canister")) {
+                if (activeCanisters.contains(e.getUUID())) continue;
+                doomed.add(e);
+                continue;
+            }
+            if (!e.getTags().contains("cs2_smoke_card")) continue;
+            String owner = null;
+            for (String tag : e.getTags()) {
+                if (!tag.startsWith("cs2_smoke_")) continue;
+                owner = tag;
+                break;
+            }
+            if (owner != null && active.contains(owner)) continue;
+            doomed.add(e);
+        }
+        for (Entity e : doomed) {
+            e.discard();
+        }
+        if (!doomed.isEmpty()) {
+            Cs2Grenade.LOGGER.info("\u6e05\u7406\u65e0\u4e3b\u70df\u7247/\u7f50\u4f53 {} \u4e2a", (Object)doomed.size());
+        }
+    }
+
+    private static void sweepOrphans() {
+        HashSet<UUID> alive = new HashSet<UUID>();
+        for (Grenade g : ACTIVE) {
+            if (g.display == null) continue;
+            alive.add(g.display.getUUID());
+        }
+        alive.addAll(PERSIST_DISPLAYS);
+        for (ServerLevel level : serverRef.getAllLevels()) {
+            ArrayList<Entity> doomed = new ArrayList<Entity>();
+            for (Entity e : level.getAllEntities()) {
+                if (e.isRemoved() || alive.contains(e.getUUID()) || !GrenadeManager.isGrenadeVisual(e)) continue;
+                doomed.add(e);
+            }
+            GrenadeManager.sweepOrphanSmokeCards(level);
+            for (Entity e : doomed) {
+                e.discard();
+            }
+        }
+    }
+
+    private static boolean inMatch(ServerPlayer player) {
+        if (serverRef == null) {
+            return false;
+        }
+        ServerScoreboard board = serverRef.getScoreboard();
+        Objective obj = board.getObjective("cs2_inmatch");
+        if (obj == null) {
+            return false;
+        }
+        return board.getOrCreatePlayerScore((ScoreHolder)player, obj).get() == 1;
+    }
+
+    private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)id);
+        SoundEvent sound = SoundEvent.createVariableRangeEvent((ResourceLocation)loc);
+        Cs2Grenade.LOGGER.info("\u64ad\u653e\u6295\u63b7\u97f3\u6548 {} vol={} pitch={} at {} {} {}", new Object[]{id, Float.valueOf(volume), Float.valueOf(pitch), (int)pos.x, (int)pos.y, (int)pos.z});
+        double range = 16.0 * (double)volume;
+        for (ServerPlayer p : level.players()) {
+            if (p.distanceToSqr(pos) > range * range) continue;
+            GrenadeManager.sendSoundPacket(p, sound, pos, volume, pitch, level.getRandom().nextLong());
+        }
+    }
+
+    private static void stopSound(ServerLevel level, Vec3 pos, String id) {
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)id);
+        for (ServerPlayer p : level.players()) {
+            if (p.distanceToSqr(pos) > 4096.0) continue;
+            p.connection.send((Packet)new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
+        }
+    }
+
+    private static void sendSoundPacket(ServerPlayer p, SoundEvent sound, Vec3 pos, float volume, float pitch, long seed) {
+        if (p.connection == null) {
+            return;
+        }
+        p.connection.send(new ClientboundSoundPacket(Holder.direct(sound), SoundSource.PLAYERS, pos.x, pos.y, pos.z, volume, pitch, seed));
+    }
+
+    private static void playHit(Grenade g, Vec3 pos, String id, float volume, float pitch) {
+        int now = serverRef == null ? 0 : serverRef.getTickCount();
+        Cs2Grenade.LOGGER.info("\u78b0\u649e\u89e6\u53d1 type={} effect={} speed={} \u8ddd\u4e0a\u6b21={}", new Object[]{g.type.id(), g.type.effect(), g.vel.length(), now - g.lastSoundTick});
+        volume = Math.max(0.8f, volume * 2.6f);
+        if (now - g.lastSoundTick < 3) {
+            return;
+        }
+        g.lastSoundTick = now;
+        String effect = g.type.effect();
+        String group = "collide_he";
+        int variants = 3;
+        if ("flash".equals(effect)) {
+            group = "impact_flash";
+            variants = 3;
+        } else if ("smoke".equals(effect) || "fire".equals(effect)) {
+            // 燃烧弹也是玻璃瓶，和烟雾弹同属轻质罐体，用同一组轻碰音
+            group = "impact_smoke";
+            variants = 3;
+        }
+        int pick = 1 + ThreadLocalRandom.current().nextInt(variants);
+        double speed = g.vel.length();
+        if ("collide_he".equals(group) && speed < 0.22) {
+            pick = 1 + ThreadLocalRandom.current().nextInt(3);
+            id = "cs2:grenade.collide_short_" + pick;
+        } else {
+            id = "cs2:grenade." + group + "_" + pick;
+        }
+        BlockState state = g.level.getBlockState(BlockPos.containing((Position)pos));
+        String mat = state.getSoundType().toString().toLowerCase(Locale.ROOT);
+        float matPitch = pitch;
+        if (mat.contains("metal")) {
+            matPitch *= 1.15f;
+        } else if (mat.contains("wood")) {
+            matPitch *= 1.3f;
+        } else if (mat.contains("gravel")) {
+            matPitch *= 0.9f;
+        } else if (mat.contains("grass")) {
+            matPitch *= 0.8f;
+        }
+        pitch = matPitch;
+        ResourceLocation loc = ResourceLocation.parse((String)id);
+        SoundEvent sound = SoundEvent.createVariableRangeEvent((ResourceLocation)loc);
+        double range = 16.0 * (double)volume;
+        for (ServerPlayer p : g.level.players()) {
+            if (p.distanceToSqr(pos) > range * range) continue;
+            GrenadeManager.sendSoundPacket(p, sound, pos, volume, pitch, g.level.getRandom().nextLong());
+        }
+    }
+
+    private static void step(Grenade g) {
+        Vec3 from = g.lastPos;
+        g.vel = g.vel.add(0.0, -g.type.gravity(), 0.0).scale(g.type.drag());
+        Vec3 to = from.add(g.vel);
+        BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)g.thrower));
+        if (hit.getType() == HitResult.Type.BLOCK) {
+            int nowTick;
+            Vec3 normal = Vec3.atLowerCornerOf((Vec3i)hit.getDirection().getNormal());
+            double impactSpeed = g.vel.length();
+            g.vel = g.vel.subtract(normal.scale(2.0 * g.vel.dot(normal))).scale(g.type.bounce());
+            to = hit.getLocation().add(normal.scale(0.02));
+            ++g.bounces;
+            if ("fire".equals(g.type.effect()) && normal.y > 0.7) {
+                g.fuse = 0;
+                GrenadeManager.explode(g, hit.getLocation());
+                return;
+            }
+            if ("impact".equals(g.type.effect()) && g.travel >= 4.0) {
+                g.fuse = 0;
+                GrenadeManager.explode(g, hit.getLocation());
+                return;
+            }
+            int n = nowTick = serverRef == null ? 0 : serverRef.getTickCount();
+            if (!g.soundTailPlayed && impactSpeed > 0.08 && nowTick >= g.wallSoundEndTick) {
+                GrenadeManager.playHit(g, hit.getLocation(), g.type.hitSoundWall(), g.type.hitVolumeWall(), g.type.hitPitchWall());
+                g.soundStarted = true;
+                g.soundPos = hit.getLocation();
+                g.wallSoundEndTick = nowTick + 5;
+            }
+        }
+        if (g.soundStarted && !g.soundTailPlayed && g.tailPendingAt == 0) {
+            if (g.vel.length() < 0.12) {
+                ++g.restTicks;
+                if (g.restTicks >= 3) {
+                    int nowTick;
+                    int n = nowTick = serverRef == null ? 0 : serverRef.getTickCount();
+                    if (g.wallSoundEndTick > nowTick) {
+                        g.tailPendingAt = g.wallSoundEndTick;
+                    } else {
+                        GrenadeManager.playHit(g, g.lastPos, g.type.hitSoundTail(), g.type.hitVolume() * 0.7f, g.type.hitPitch());
+                        g.soundTailPlayed = true;
+                    }
+                }
+            } else {
+                g.restTicks = 0;
+            }
+        }
+        if (g.tailPendingAt > 0 && serverRef != null && serverRef.getTickCount() >= g.tailPendingAt) {
+            GrenadeManager.playHit(g, g.lastPos, g.type.hitSoundTail(), g.type.hitVolume() * 0.7f, g.type.hitPitch());
+            g.soundTailPlayed = true;
+            g.tailPendingAt = 0;
+        }
+        g.travel += from.distanceTo(to);
+        Vec3 after = to;
+        if (g.display.horizontalCollision || g.display.verticalCollision) {
+            Vec3 v = g.vel;
+            if (g.display.verticalCollision) {
+                v = new Vec3(v.x, -v.y * 0.35, v.z);
+            }
+            if (g.display.horizontalCollision) {
+                v = new Vec3(-v.x * 0.35, v.y, v.z);
+            }
+            g.vel = v.scale(0.9);
+            to = after;
+        }
+        g.lastPos = to;
+        if (g.display != null && g.display.isAlive()) {
+            g.display.setPos(to.x, to.y + g.type.renderOffsetY(), to.z);
+        }
+        if (g.fuse % 2 == 0) {
+            g.level.sendParticles((ParticleOptions)ParticleTypes.SMOKE, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
+        }
+        if ("smoke".equals(g.type.effect())) {
+            // 烟雾弹没有引信：停稳或接触火才起烟
+            if (g.vel.length() < 0.12) {
+                ++g.smokeRest;
+            } else {
+                g.smokeRest = 0;
+            }
+            net.minecraft.core.BlockPos at = net.minecraft.core.BlockPos.containing(to);
+            boolean burning = g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.FIRE)
+                    || g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.LAVA)
+                    || inFireZone(g.level, at);
+            if (g.smokeRest >= 3 || burning) {
+                g.fuse = 0;
+            }
+        } else if (--g.fuse == 20) {
+            // empty if block
+        }
+        if (g.fuse <= 0) {
+            GrenadeManager.explode(g, to);
+        }
+    }
+
+    private static void tickSmokeCards() {
+        if (SMOKE_CARDS.isEmpty() || serverRef == null) {
+            return;
+        }
+        int now = serverRef.getTickCount();
+        ArrayList<SmokeCard> done = new ArrayList<SmokeCard>();
+        for (SmokeCard c : SMOKE_CARDS) {
+            int elapsed = now - c.startTick;
+            if (elapsed < 0) continue;
+            if (elapsed > c.growTicks + 40) {
+                done.add(c);
+                continue;
+            }
+            if (elapsed % 4 != 0) continue;
+            double p = Math.min(1.0, (double)elapsed / (double)Math.max(1, c.growTicks));
+            double ease = 1.0 - Math.pow(1.0 - p, 2.2);
+            Vec3 cur = c.from.add(c.to.subtract(c.from).scale(ease));
+            float scale = (float)((double)c.scale * (0.35 + 0.65 * ease));
+            CommandSourceStack src = c.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            c.level.getServer().getCommands().performPrefixedCommand(src, String.format(Locale.ROOT, "execute as @e[tag=%s] run tp @s %.3f %.3f %.3f", c.tag, cur.x, cur.y, cur.z));
+            c.level.getServer().getCommands().performPrefixedCommand(src, String.format(Locale.ROOT, "execute as @e[tag=%s] run data modify entity @s transformation.scale set value [%.3ff,%.3ff,%.3ff]", c.tag, Float.valueOf(scale), Float.valueOf(scale), Float.valueOf(scale)));
+        }
+        SMOKE_CARDS.removeAll(done);
+    }
+
+    private static void spawnSmokeCards(ServerLevel level, Vec3 pos, double radius, int id) {
+        RandomSource random = level.random;
+        CommandSourceStack src = level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
+        Vec3 center = pos.add(0.0, 0.6, 0.0);
+        int[] ringCounts = new int[]{1, 10, 24, 42, 60};
+        double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
+        float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};
+        float baseScale = 7.6f;
+        int index = 0;
+        for (int ring = 0; ring < ringCounts.length; ++ring) {
+            int n = ringCounts[ring];
+            double ringR = radius * ringRadii[ring];
+            for (int i = 0; i < n; ++i) {
+                double z;
+                double y;
+                double x;
+                if (ringR <= 0.01) {
+                    x = center.x;
+                    y = center.y + 0.2;
+                    z = center.z;
+                } else {
+                    double phi = Math.acos(1.0 - 2.0 * ((double)i + 0.5) / (double)n);
+                    double theta = Math.PI * (1.0 + Math.sqrt(5.0)) * ((double)i + 0.5);
+                    double sinPhi = Math.sin(phi);
+                    x = center.x + Math.cos(theta) * sinPhi * ringR;
+                    y = center.y + Math.cos(phi) * ringR * 0.85;
+                    z = center.z + Math.sin(theta) * sinPhi * ringR;
+                }
+                float scale = (float)((double)baseScale * (1.0 - 0.45 * ringRadii[ring]) * (double)ringScaleBoost[ring]);
+                int modelCmd = 723001 + index % 4;
+                String cardTag = String.format(Locale.ROOT, "cs2_card_%d_%d", id, index);
+                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\"}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35);
+                level.getServer().getCommands().performPrefixedCommand(src, cmd);
+                SMOKE_CARDS.add(new SmokeCard(level, cardTag, center, new Vec3(x, y, z), scale, (serverRef == null ? 0 : serverRef.getTickCount()) + 2, 20));
+                ++index;
+            }
+        }
+    }
+
+    /** 落点是否在已铺开的火区里（燃烧瓶自己铺的火也算）。 */
+    private static boolean inFireZone(ServerLevel level, net.minecraft.core.BlockPos pos) {
+        for (FireZone z : FIRE_ZONES) {
+            if (z.level != level) {
+                continue;
+            }
+            if (z.placed.contains(pos)) {
+                return true;
+            }
+            if (z.center.distanceTo(Vec3.atCenterOf(pos)) <= 2.0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void igniteFire(Grenade g, Vec3 pos) {
+        ServerLevel level = g.level;
+        int life = 140;
+        FIRE_ZONES.add(new FireZone(level, pos, serverRef == null ? 0 : serverRef.getTickCount(), life, g.thrower));
+        level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.8f, 1.1f);
+        if (g.display != null) {
+            g.display.discard();
+        }
+    }
+
+    private static void placeFire(FireZone zone, double radius) {
+        int r = (int)Math.ceil(radius);
+        int cx = (int)Math.floor(zone.center.x);
+        int cz = (int)Math.floor(zone.center.z);
+        int baseY = (int)Math.floor(zone.center.y);
+        for (int dx = -r; dx <= r; ++dx) {
+            for (int dz = -r; dz <= r; ++dz) {
+                if ((double)(dx * dx + dz * dz) > radius * radius) continue;
+                int bx = cx + dx;
+                int bz = cz + dz;
+                BlockPos ground = null;
+                for (int y = baseY + 2; y >= baseY - 4; --y) {
+                    BlockPos below = new BlockPos(bx, y - 1, bz);
+                    BlockPos at = new BlockPos(bx, y, bz);
+                    if (!zone.level.getBlockState(below).isSolidRender((BlockGetter)zone.level, below) || !zone.level.getBlockState(at).isAir()) continue;
+                    ground = at;
+                    break;
+                }
+                if (ground == null) continue;
+                zone.level.setBlockAndUpdate(ground, Blocks.FIRE.defaultBlockState());
+                zone.placed.add(ground);
+            }
+        }
+    }
+
+    private static void extinguish(FireZone z) {
+        for (BlockPos p : z.placed) {
+            if (!z.level.getBlockState(p).is(Blocks.FIRE)) continue;
+            z.level.removeBlock(p, false);
+        }
+        z.placed.clear();
+    }
+
+    private static void tickFires() {
+        if (FIRE_ZONES.isEmpty() || serverRef == null) {
+            return;
+        }
+        int now = serverRef.getTickCount();
+        ArrayList<FireZone> dead = new ArrayList<FireZone>();
+        HashMap<UUID, Float> pending = new HashMap<UUID, Float>();
+        HashMap<UUID, Player> fireSources = new HashMap<UUID, Player>();
+        HashSet<UUID> insideAll = new HashSet<UUID>();
+        HashMap<UUID, LivingEntity> victims = new HashMap<UUID, LivingEntity>();
+        for (FireZone fireZone : FIRE_ZONES) {
+            int elapsed = now - fireZone.startTick;
+            if (elapsed > fireZone.lifeTicks) {
+                GrenadeManager.extinguish(fireZone);
+                dead.add(fireZone);
+                continue;
+            }
+            int stage = Math.max(1, (elapsed + 10) / 20);
+            double radius = 4.0 + Math.min(5.0, (double)(stage - 1));
+            boolean smoked = false;
+            for (SmokeZone s : SMOKE_ZONES) {
+                if (!(s.pos.distanceTo(fireZone.center) < s.maxRadius + radius * 0.6)) continue;
+                smoked = true;
+                break;
+            }
+            if (smoked) {
+                GrenadeManager.extinguish(fireZone);
+                dead.add(fireZone);
+                continue;
+            }
+            if (elapsed % 2 == 0) {
+                int flameCount = (int)Math.round(14.0 + radius * 8.0);
+                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.FLAME, fireZone.center.x, fireZone.center.y + 0.12, fireZone.center.z, flameCount, radius * 0.32, 0.06, radius * 0.32, 0.0);
+                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.SMALL_FLAME, fireZone.center.x, fireZone.center.y + 0.25, fireZone.center.z, flameCount / 2, radius * 0.28, 0.1, radius * 0.28, 0.0);
+                fireZone.level.sendParticles((ParticleOptions)ParticleTypes.SMOKE, fireZone.center.x, fireZone.center.y + 0.4, fireZone.center.z, 3, radius * 0.22, 0.15, radius * 0.22, 0.0);
+                if (elapsed % 10 == 0) {
+                    fireZone.level.sendParticles((ParticleOptions)ParticleTypes.LAVA, fireZone.center.x, fireZone.center.y + 0.12, fireZone.center.z, 2, radius * 0.25, 0.05, radius * 0.25, 0.0);
+                }
+            }
+            if (elapsed > 0 && elapsed % 10 == 0) {
+                float dmg = Math.min(4.0f, (float)stage);
+                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 3.0, radius + 1.0))) {
+                    double dz;
+                    double dx;
+                    Player p;
+                    if (e == fireZone.thrower) continue;
+                    if (e instanceof Player && (p = (Player)e).isSpectator() || (dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius || Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
+                    Float prev = (Float)pending.get(e.getUUID());
+                    if (prev != null && !(dmg > prev.floatValue())) continue;
+                    pending.put(e.getUUID(), Float.valueOf(dmg));
+                    fireSources.put(e.getUUID(), fireZone.thrower);
+                    victims.put(e.getUUID(), e);
+                }
+            }
+            if (elapsed >= fireZone.lifeTicks) {
+                GrenadeManager.extinguish(fireZone);
+                dead.add(fireZone);
+            }
+        }
+        for (Map.Entry entry : pending.entrySet()) {
+            LivingEntity e2 = (LivingEntity)victims.get(entry.getKey());
+            if (e2 == null || e2.isRemoved() || e2.isDeadOrDying()) continue;
+            e2.invulnerableTime = 0;
+            Player thrower = fireSources.get(entry.getKey());
+            if (thrower != null) {
+                e2.hurt(e2.level().damageSources().indirectMagic(thrower, thrower), ((Float)entry.getValue()).floatValue());
+            } else {
+                e2.hurt(e2.level().damageSources().magic(), ((Float)entry.getValue()).floatValue());
+            }
+        }
+        FIRE_ZONES.removeAll(dead);
+    }
+
+    private static void smokeExplode(Grenade g, Vec3 pos) {
+        ServerLevel level = g.level;
+        int life = Math.max(60, g.type.cloudSeconds() * 20);
+        int volumeId = ++smokeVolumeId;
+        GrenadeManager.spawnSmokeCards(level, pos, g.type.cloudRadius(), volumeId);
+        int born = serverRef == null ? 0 : serverRef.getTickCount();
+        SmokeZone zone = new SmokeZone(level, pos, born, life, g.type.cloudRadius(), 0, volumeId, g.display);
+        zone.nextHiss = born + 140;
+        SMOKE_ZONES.add(zone);
+        GrenadeManager.playCs2(level, pos, "smoke.hiss", 0.8f, 1.0f);
+        if (g.display != null && !g.display.isRemoved()) {
+            PERSIST_DISPLAYS.add(g.display.getUUID());
+            g.display.addTag("cs2_smoke_canister");
+        }
+    }
+
+    private static void tickSmoke() {
+        if (SMOKE_ZONES.isEmpty() || serverRef == null) {
+            return;
+        }
+        int now = serverRef.getTickCount();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        ArrayList<SmokeZone> expired = new ArrayList<SmokeZone>();
+        for (SmokeZone z : SMOKE_ZONES) {
+            int elapsed = now - z.startTick;
+            if (elapsed >= z.lifeTicks) {
+                z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), "kill @e[tag=cs2_smoke_" + z.volumeId + "]");
+                if (z.display != null) {
+                    PERSIST_DISPLAYS.remove(z.display.getUUID());
+                    z.display.discard();
+                }
+                expired.add(z);
+                continue;
+            }
+            if (now >= z.nextHiss && elapsed < z.lifeTicks - 60) {
+                z.nextHiss = now + 140;
+                GrenadeManager.playCs2(z.level, z.pos, "smoke.hiss", 0.8f, 1.0f);
+            }
+            if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
+                z.fadedOut = true;
+                GrenadeManager.stopSound(z.level, z.pos, "smoke.hiss");
+                GrenadeManager.playCs2(z.level, z.pos, "smoke.end", 0.8f, 1.0f);
+            }
+            double progress = (double)elapsed / (double)z.lifeTicks;
+            double spread = z.maxRadius * (0.4 + 0.6 * progress);
+            int remaining = z.lifeTicks - elapsed;
+            if (remaining >= 60 || now < z.nextCore) continue;
+            double f = Math.max(0.05, (double)remaining / 60.0);
+            String scaleCmd = String.format(Locale.ROOT, "execute as @e[tag=cs2_smoke_%d] run data modify entity @s transformation.scale set value [%.3ff,%.3ff,%.3ff]", z.volumeId, 3.4 * f, 3.4 * f, 3.4 * f);
+            z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), scaleCmd);
+            z.nextCore = now + 10;
+        }
+        SMOKE_ZONES.removeAll(expired);
+    }
+
+    private static boolean fireFragment(ServerLevel level, Vec3 origin, Vec3 dir, float fragDamage, double fragInner, double fragOuter, Player thrower) {
+        double segLen;
+        Vec3 cur = origin;
+        Vec3 d = dir.normalize();
+        double remaining = fragOuter;
+        for (int bounce = 0; bounce < 4 && remaining > 0.2; remaining -= segLen, ++bounce) {
+            BlockHitResult blockHit = level.clip(new ClipContext(cur, cur.add(d.scale(remaining)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+            segLen = blockHit.getType() == HitResult.Type.MISS ? remaining : Math.max(0.2, blockHit.getLocation().distanceTo(cur) - 0.05);
+            Vec3 segEnd = cur.add(d.scale(segLen));
+            AABB segBox = new AABB(cur, segEnd).inflate(1.2);
+            LivingEntity victim = null;
+            double bestAlong = Double.MAX_VALUE;
+            for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, segBox)) {
+                double along;
+                Player p;
+                if (e == thrower) continue;
+                if (e instanceof Player && (p = (Player)e).isSpectator() || e.isDeadOrDying() || e.getHealth() <= 0.0f) continue;
+                AABB box = e.getBoundingBox().inflate(0.3);
+                if (box.contains(cur)) {
+                    if (!(bestAlong > 0.0)) continue;
+                    bestAlong = 0.0;
+                    victim = e;
+                    continue;
+                }
+                Optional clip = box.clip(cur, segEnd);
+                if (clip.isEmpty() || !((along = ((Vec3)clip.get()).subtract(cur).dot(d)) < bestAlong)) continue;
+                bestAlong = along;
+                victim = e;
+            }
+            if (victim != null) {
+                double dist = victim.position().distanceTo(origin);
+                if (dist <= fragOuter) {
+                    float factor = dist <= fragInner ? 1.0f : (float)(1.0 - 0.25 * (dist - fragInner) / (fragOuter - fragInner));
+                    victim.invulnerableTime = 0;
+                    victim.hurt(level.damageSources().explosion(thrower, null), fragDamage * factor);
+                }
+                return true;
+            }
+            if (blockHit.getType() == HitResult.Type.MISS) {
+                return false;
+            }
+            Vec3 normal = Vec3.atLowerCornerOf((Vec3i)blockHit.getDirection().getNormal());
+            d = d.subtract(normal.scale(2.0 * d.dot(normal))).normalize();
+            cur = blockHit.getLocation().add(normal.scale(0.05));
+        }
+        return false;
+    }
+
+    private static void flashExplode(Grenade g, Vec3 pos) {
+        ServerLevel level = g.level;
+        double range = 40.0;
+        for (ServerPlayer p : level.players()) {
+            if (p.position().distanceTo(pos) > range) continue;
+            level.sendParticles(p, (ParticleOptions)ParticleTypes.FLASH, true, pos.x, pos.y, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
+        }
+        java.util.Map<java.util.UUID, Double> flashPower = new java.util.HashMap<>();
+        for (ServerPlayer pp : level.players()) {
+            if (!GrenadeManager.inMatch(pp) || pp.position().distanceTo(pos) > range) {
+                continue;
+            }
+            BlockHitResult h0 = level.clip(new ClipContext(pp.getEyePosition(), pos,
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)pp));
+            boolean blk = h0.getType() == HitResult.Type.BLOCK
+                    && !(h0.getLocation().distanceTo(pos) < 0.6);
+            if (blk) {
+                continue;
+            }
+            double dd = pp.position().distanceTo(pos);
+            double df = dd <= 5.0 ? 1.0 : Math.max(0.2, 1.0 - 0.8 * (dd - 5.0) / (range - 5.0));
+            Vec3 tf = pos.subtract(pp.getEyePosition()).normalize();
+            double dt = tf.dot(pp.getLookAngle());
+            double af = dt <= 0.0 ? 0.03 : dt * dt;
+            double it = Math.min(1.0, df * af);
+            if (it >= 0.005) {
+                flashPower.put(pp.getUUID(), it);
+            }
+        }
+        for (ServerPlayer p : level.players()) {
+            double d = p.position().distanceTo(pos);
+            if (d > 40.0) {
+                continue;
+            }
+            if (flashPower.getOrDefault(p.getUUID(), 0.0) >= 0.01) {
+                // 耳鸣阶段盖住爆响，不放这一声
+                continue;
+            }
+            String layer;
+            float loud;
+            float pitch;
+            if (d < 10.0) {
+                layer = "grenade.flash_bang";
+                loud = 2.5f;
+                pitch = 1.15f;
+            } else if (d < 25.0) {
+                layer = "flash.far";
+                loud = 2.0f;
+                pitch = 1.08f;
+            } else {
+                layer = "flash.distant";
+                loud = 2.5f;
+                pitch = 1.0f;
+            }
+            GrenadeManager.sendSoundPacket(p, SoundEvent.createVariableRangeEvent(
+                            ResourceLocation.fromNamespaceAndPath("cs2", layer)),
+                    pos, loud, pitch, level.getRandom().nextLong());
+        }
+        for (ServerPlayer p : level.players()) {
+            Vec3 toFlash;
+            double dot;
+            double angleFactor;
+            double dist;
+            double distFactor;
+            double intensity;
+            boolean blocked;
+            if (!GrenadeManager.inMatch(p) || p.position().distanceTo(pos) > range) continue;
+            BlockHitResult hit = level.clip(new ClipContext(p.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)p));
+            boolean bl = blocked = hit.getType() == HitResult.Type.BLOCK;
+            if (blocked && hit.getLocation().distanceTo(pos) < 0.6) {
+                blocked = false;
+            }
+            if (blocked || (intensity = Math.min(1.0, (distFactor = (dist = p.position().distanceTo(pos)) <= 5.0 ? 1.0 : Math.max(0.2, 1.0 - 0.8 * (dist - 5.0) / (range - 5.0))) * (angleFactor = (dot = (toFlash = pos.subtract(p.getEyePosition()).normalize()).dot(p.getLookAngle())) <= 0.0 ? 0.03 : dot * dot))) < 0.005) continue;
+            int alpha = 255;
+            int ticks = Math.max(6, (int)Math.round((double)(g.type.maskSeconds() * 20) * intensity));
+            int ringExpire = (serverRef == null ? 0 : serverRef.getTickCount()) + ticks;
+            int fadeTicks = Math.max(6, (int)Math.round(100.0 * intensity));
+            Cs2Grenade.LOGGER.info("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
+                    p.getScoreboardName(), String.format(Locale.ROOT, "%.2f", intensity), ticks, fadeTicks);
+            RING_STATE.put(p.getUUID(), new Ring(ringExpire, fadeTicks, 0,
+                    (float) (0.35 + 0.85 * intensity), 0));
+            String who = p.getGameProfile().getName();
+            PendingMask current = PENDING_MASKS.get(who);
+            if (current != null) {
+                int nowTick0 = serverRef == null ? 0 : serverRef.getTickCount();
+                int remainingHold = current.expireTick() - nowTick0;
+                if (remainingHold > 0 && ticks <= remainingHold) continue;
+            }
+            MinecraftServer server = level.getServer();
+            CommandSourceStack src = server.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            String maskCmd = "execute as " + who + " run media mask " + g.type.maskColor() + " " + alpha + " 0 @s";
+            server.getCommands().performPrefixedCommand(src, maskCmd);
+            if (ticks <= 0) continue;
+            PENDING_MASKS.put(who, new PendingMask(who, g.type.maskColor(), server.getTickCount() + ticks, Math.max(20, (int)Math.round(100.0 * intensity)), alpha, intensity));
+        }
+        level.sendParticles((ParticleOptions)ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 40, 0.6, 0.6, 0.6, 0.25);
+        if (g.display != null) {
+            g.display.discard();
+        }
+    }
+
+    public static void explodeAt(ServerLevel level, Vec3 pos, Player thrower) {
+        Grenade g = new Grenade(null, level, thrower, Vec3.ZERO, 0, GrenadeType.fallback(ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)"he")));
+        GrenadeManager.explode(g, pos);
+    }
+
+    private static void explode(Grenade g, Vec3 pos) {
+        ServerLevel level = g.level;
+        if ("flash".equals(g.type.effect())) {
+            GrenadeManager.flashExplode(g, pos);
+            return;
+        }
+        if ("smoke".equals(g.type.effect())) {
+            GrenadeManager.smokeExplode(g, pos);
+            return;
+        }
+        if ("fire".equals(g.type.effect())) {
+            GrenadeManager.igniteFire(g, pos);
+            return;
+        }
+        double pierceInner = g.type.pierceInner();
+        double pierceOuter = g.type.pierceOuter();
+        float pierceDamage = g.type.pierceDamage();
+        AABB pierceBox = new AABB(pos, pos).inflate(pierceOuter);
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, pierceBox)) {
+            double dist;
+            Player p;
+            if (e == g.thrower) continue;
+            if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
+            float factor = dist <= pierceInner ? 1.0f : (float)(1.0 - (dist - pierceInner) / (pierceOuter - pierceInner));
+            e.hurt(level.damageSources().explosion(g.thrower, null), pierceDamage * factor);
+        }
+        int rays = g.type.fragRays();
+        float fragDamage = g.type.fragDamage();
+        double fragInner = g.type.fragInner();
+        double fragOuter = g.type.fragOuter();
+        RandomSource random = level.random;
+        for (int r = 0; r < rays; ++r) {
+            double theta = random.nextDouble() * Math.PI * 2.0;
+            double cosPhi = random.nextDouble() * 2.0 - 1.0;
+            double sinPhi = Math.sqrt(1.0 - cosPhi * cosPhi);
+            Vec3 dir = new Vec3(Math.cos(theta) * sinPhi, cosPhi, Math.sin(theta) * sinPhi);
+            GrenadeManager.fireFragment(level, pos, dir, fragDamage, fragInner, fragOuter, g.thrower);
+        }
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(fragOuter))) {
+            Vec3 center;
+            Vec3 base;
+            Player p;
+            if (target == g.thrower) continue;
+            if (target instanceof Player && (p = (Player)target).isSpectator() || (base = (center = target.position().add(0.0, (double)target.getBbHeight() * 0.5, 0.0)).subtract(pos)).lengthSqr() < 0.04) continue;
+            base = base.normalize();
+            for (int k = 0; k < 2; ++k) {
+                Vec3 jitter = new Vec3(random.nextDouble() - 0.5, random.nextDouble() - 0.5, random.nextDouble() - 0.5).scale(0.12);
+                GrenadeManager.fireFragment(level, pos, base.add(jitter).normalize(), fragDamage, fragInner, fragOuter, g.thrower);
+            }
+        }
+        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, pierceBox)) {
+            double dist;
+            Player p;
+            if (e == g.thrower) continue;
+            if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
+            float f = dist <= 1.0 ? 1.0f : (float)(1.0 - dist / pierceOuter);
+            Vec3 push = e.position().subtract(pos).normalize().scale((double)g.type.knockback() * Math.max(0.1, (double)f));
+            e.push(push.x, push.y + 0.3 * Math.max(0.1, (double)f), push.z);
+        }
+        level.sendParticles((ParticleOptions)ParticleTypes.EXPLOSION, pos.x, pos.y, pos.z, 6, 0.3, 0.3, 0.3, 0.05);
+        for (ServerPlayer p : level.players()) {
+            if (p != g.thrower && !GrenadeManager.inMatch(p)) continue;
+            level.sendParticles(p, (ParticleOptions)ParticleTypes.EXPLOSION_EMITTER, true, pos.x, pos.y, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
+            level.sendParticles(p, (ParticleOptions)ParticleTypes.EXPLOSION, true, pos.x, pos.y, pos.z, 4, 0.6, 0.6, 0.6, 0.05);
+        }
+        level.sendParticles((ParticleOptions)ParticleTypes.EXPLOSION_EMITTER, pos.x, pos.y, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
+        boolean fire = "fire".equals(g.type.effect());
+        for (ServerPlayer p : level.players()) {
+            double d = p.position().distanceTo(pos);
+            if (d > 40.0) {
+                continue;
+            }
+            String layer;
+            if (d < 10.0) {
+                layer = fire ? "grenade.explosion_fire_close" : "grenade.explosion_close";
+            } else if (d < 25.0) {
+                layer = "grenade.explosion_far";
+            } else {
+                layer = "grenade.explosion_distant";
+            }
+            float loud = 2.5f;
+            SoundEvent sound = SoundEvent.createVariableRangeEvent(
+                    ResourceLocation.fromNamespaceAndPath("cs2", layer));
+            GrenadeManager.sendSoundPacket(p, sound, pos, loud, 1.0f, level.getRandom().nextLong());
+        }
+        if (g.display != null) {
+            g.display.discard();
+        }
+    }
+
+    static {
+        PENDING_MASKS = new HashMap<String, PendingMask>();
+        sweepTimer = 0;
+        purgedAfterStart = false;
+        DRAW_READY = new HashMap<UUID, Integer>();
+        PENDING_THROW = new HashMap<UUID, PendingThrow>();
+        LAST_HELD = new HashMap<UUID, String>();
+        PERSIST_DISPLAYS = new HashSet<UUID>();
+        SMOKE_ZONES = new ArrayList<SmokeZone>();
+        smokeVolumeId = 0;
+        SMOKE_CARDS = new ArrayList<SmokeCard>();
+        FIRE_ZONES = new ArrayList<FireZone>();
+        BURN_STEPS = new HashMap<UUID, Integer>();
+    }
+
+    private static final class Grenade {
+        final Display.ItemDisplay display;
+        final ServerLevel level;
+        final Player thrower;
+        final GrenadeType type;
+        Vec3 vel;
+        Vec3 lastPos;
+        int fuse;
+        int bounces;
+        int lastSoundTick = -100;
+        int nextFuzeTick = 0;
+        boolean soundStarted;
+        boolean soundTailPlayed;
+        int restTicks;
+        int smokeRest;
+        Vec3 soundPos;
+        int wallSoundEndTick;
+        int tailPendingAt;
+        double travel;
+
+        Grenade(Display.ItemDisplay display, ServerLevel level, Player thrower, Vec3 vel, int fuse, GrenadeType type) {
+            this.display = display;
+            this.level = level;
+            this.thrower = thrower;
+            this.type = type;
+            this.vel = vel;
+            this.lastPos = display == null ? Vec3.ZERO : display.position();
+            this.fuse = fuse;
+        }
+    }
+
+    private record PendingMask(String player, String color, int expireTick, int fadeTicks, int startAlpha, double strength) {
+    }
+
+    private record PendingThrow(int endTick, int slot, String util) {
+    }
+
+    private static final class SmokeZone {
+        final ServerLevel level;
+        final Vec3 pos;
+        final int startTick;
+        final int lifeTicks;
+        final double maxRadius;
+        int nextPuff;
+        int volumeId;
+        Display.ItemDisplay display;
+        int nextCore;
+        int nextHiss;
+        boolean fadedOut;
+
+        SmokeZone(ServerLevel level, Vec3 pos, int startTick, int lifeTicks, double maxRadius, int nextPuff, int volumeId, Display.ItemDisplay display) {
+            this.level = level;
+            this.pos = pos;
+            this.startTick = startTick;
+            this.lifeTicks = lifeTicks;
+            this.maxRadius = maxRadius;
+            this.nextPuff = nextPuff;
+            this.volumeId = volumeId;
+            this.display = display;
+        }
+    }
+
+    private static final class SmokeCard {
+        final ServerLevel level;
+        final String tag;
+        final Vec3 from;
+        final Vec3 to;
+        final float scale;
+        final int startTick;
+        final int growTicks;
+
+        SmokeCard(ServerLevel level, String tag, Vec3 from, Vec3 to, float scale, int startTick, int growTicks) {
+            this.level = level;
+            this.tag = tag;
+            this.from = from;
+            this.to = to;
+            this.scale = scale;
+            this.startTick = startTick;
+            this.growTicks = growTicks;
+        }
+    }
+
+    private static final class FireZone {
+        final ServerLevel level;
+        final Vec3 center;
+        final int startTick;
+        final int lifeTicks;
+        final Player thrower;
+        int lastDamageTick;
+        int lastPlaceTick;
+        final Set<BlockPos> placed = new HashSet<BlockPos>();
+        final Map<UUID, Integer> burnSteps = new HashMap<UUID, Integer>();
+
+        FireZone(ServerLevel level, Vec3 center, int startTick, int lifeTicks, Player thrower) {
+            this.level = level;
+            this.center = center;
+            this.startTick = startTick;
+            this.lifeTicks = lifeTicks;
+            this.thrower = thrower;
+        }
+    }
+}
+

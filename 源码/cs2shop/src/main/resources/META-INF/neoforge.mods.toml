@@ -1,0 +1,25 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "ARR"
+issueTrackerURL = "https://example.invalid"
+
+[[mods]]
+modId = "cs2shop"
+version = "0.1.0"
+displayName = "CS2 Shop GUI"
+description = '''服务端专用：用原版箱子界面显示商店，内容由数据包 JSON 提供，点击执行指令。客户端无需安装。'''
+displayTest = "IGNORE_SERVER_VERSION"
+
+[[dependencies.cs2shop]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.0,)"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.cs2shop]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+ordering = "NONE"
+side = "SERVER"
