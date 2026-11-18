@@ -789,7 +789,6 @@ public final class GrenadeManager {
                     double dz;
                     double dx;
                     Player p;
-                    if (e == fireZone.thrower) continue;
                     if (e instanceof Player && (p = (Player)e).isSpectator() || (dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius || Math.abs(e.getY() - fireZone.center.y) > 3.0) continue;
                     Float prev = (Float)pending.get(e.getUUID());
                     if (prev != null && !(dmg > prev.floatValue())) continue;
@@ -887,7 +886,6 @@ public final class GrenadeManager {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, segBox)) {
                 double along;
                 Player p;
-                if (e == thrower) continue;
                 if (e instanceof Player && (p = (Player)e).isSpectator() || e.isDeadOrDying() || e.getHealth() <= 0.0f) continue;
                 AABB box = e.getBoundingBox().inflate(0.3);
                 if (box.contains(cur)) {
@@ -1047,7 +1045,6 @@ public final class GrenadeManager {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, pierceBox)) {
             double dist;
             Player p;
-            if (e == g.thrower) continue;
             if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
             float factor = dist <= pierceInner ? 1.0f : (float)(1.0 - (dist - pierceInner) / (pierceOuter - pierceInner));
             e.hurt(level.damageSources().explosion(g.thrower, null), pierceDamage * factor);
@@ -1068,7 +1065,6 @@ public final class GrenadeManager {
             Vec3 center;
             Vec3 base;
             Player p;
-            if (target == g.thrower) continue;
             if (target instanceof Player && (p = (Player)target).isSpectator() || (base = (center = target.position().add(0.0, (double)target.getBbHeight() * 0.5, 0.0)).subtract(pos)).lengthSqr() < 0.04) continue;
             base = base.normalize();
             for (int k = 0; k < 2; ++k) {
@@ -1079,7 +1075,6 @@ public final class GrenadeManager {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, pierceBox)) {
             double dist;
             Player p;
-            if (e == g.thrower) continue;
             if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
             float f = dist <= 1.0 ? 1.0f : (float)(1.0 - dist / pierceOuter);
             Vec3 push = e.position().subtract(pos).normalize().scale((double)g.type.knockback() * Math.max(0.1, (double)f));

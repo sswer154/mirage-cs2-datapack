@@ -40,11 +40,12 @@ public final class KillFeedHandler {
 
         DamageSource source = event.getSource();
         Entity attackerEntity = source.getEntity();
+        boolean selfKill = attackerEntity == victim && isGrenadeDamage(source);
         ServerPlayer killer = attackerEntity instanceof ServerPlayer p && p != victim ? p : null;
         int victimTeam = team(server, victim);
         int killerTeam = killer == null ? 0 : team(server, killer);
 
-        Component message = buildMessage(source, victim, victimTeam, killer, killerTeam);
+        Component message = buildMessage(source, victim, victimTeam, killer, killerTeam, selfKill);
         for (ServerPlayer receiver : server.getPlayerList().getPlayers()) {
             if (isInMatch(server, receiver) || "cs2_cast".equals(teamName(receiver))) {
                 receiver.sendSystemMessage(message);
@@ -63,7 +64,16 @@ public final class KillFeedHandler {
         }
     }
 
-    private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam, ServerPlayer killer, int killerTeam) {
+    private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam, ServerPlayer killer, int killerTeam, boolean selfKill) {
+        if (selfKill) {
+            Component weapon = weaponLabel(source, victim);
+            MutableComponent result = Component.empty();
+            result.append(victim.getDisplayName())
+                    .append(Component.literal(" 被自己的").withStyle(ChatFormatting.GRAY))
+                    .append(weapon != null ? weapon : Component.literal("投掷物").withStyle(ChatFormatting.GOLD))
+                    .append(Component.literal(" 炸死了").withStyle(ChatFormatting.GRAY));
+            return result;
+        }
         if (killer == null) {
             return victim.getCombatTracker().getDeathMessage();
         }
@@ -86,6 +96,11 @@ public final class KillFeedHandler {
                 .append(teamTag(victimTeam))
                 .append(victim.getDisplayName());
         return result;
+    }
+
+    private static boolean isGrenadeDamage(DamageSource source) {
+        String damageId = source.getMsgId();
+        return damageId.startsWith("explosion") || "indirect_magic".equals(damageId);
     }
 
     private static Component weaponLabel(DamageSource source, ServerPlayer killer) {
