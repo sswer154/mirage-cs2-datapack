@@ -18,6 +18,17 @@ foreach ($p in $pairs) {
         Get-ChildItem $p.From -File | Where-Object { $_.Name -like 'cs2*' } | Copy-Item -Destination $p.To -Force
     }
 }
+
+# 数据包目录是源：复制完成后重打包 zip，避免两者不一致
+$zipSrc = Join-Path $repo "数据包\cs2_bomb_datapack"
+$zipPath = Join-Path $repo "数据包\cs2_bomb_datapack.zip"
+if (Test-Path $zipSrc) {
+    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::CreateFromDirectory($zipSrc, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
+    Write-Output "已重打包数据包 zip"
+}
+
 Set-Location $repo
 $changes = & git status --porcelain
 if (-not $changes) { Write-Output "没有变更需要同步"; return }
