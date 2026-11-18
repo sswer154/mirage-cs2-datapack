@@ -618,8 +618,16 @@ public final class GrenadeManager {
 
     private static void step(Grenade g) {
         Vec3 from = g.lastPos;
+        if (!g.level.isLoaded(BlockPos.containing(from))) {
+            return;
+        }
+        Vec3 previousVel = g.vel;
         g.vel = g.vel.add(0.0, -g.type.gravity(), 0.0).scale(g.type.drag());
         Vec3 to = from.add(g.vel);
+        if (!g.level.isLoaded(BlockPos.containing(to))) {
+            g.vel = previousVel;
+            return;
+        }
         BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)g.thrower));
         if (hit.getType() == HitResult.Type.BLOCK) {
             int nowTick;
@@ -699,7 +707,9 @@ public final class GrenadeManager {
             boolean burning = g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.FIRE)
                     || g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.LAVA)
                     || inFireZone(g.level, at);
-            if (g.smokeRest >= 3 || burning) {
+            // 烟雾弹也要递减兜底引信，避免卡在未加载区块或水面时永不起烟
+            --g.fuse;
+            if (g.smokeRest >= 3 || burning || g.fuse <= 0) {
                 g.fuse = 0;
             }
         } else if (--g.fuse == 20) {
@@ -739,6 +749,8 @@ public final class GrenadeManager {
         RandomSource random = level.random;
         CommandSourceStack src = level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
         Vec3 center = pos.add(0.0, 0.6, 0.0);
+        // 确保烟片生成的区块已加载；远距离投掷时落点区块可能还没到手
+        level.getChunkAt(BlockPos.containing(center));
         int[] ringCounts = new int[]{1, 10, 24, 42, 60};
         double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
         float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};

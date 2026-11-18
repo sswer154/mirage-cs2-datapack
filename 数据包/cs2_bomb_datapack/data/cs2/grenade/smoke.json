@@ -9,7 +9,7 @@
   "gravity": 0.04,
   "drag": 0.99,
   "bounce": 0.3,
-  "fuse": 400,
+  "fuse": 120,
   "radius": 0,
   "damage": 0,
   "knockback": 0,
