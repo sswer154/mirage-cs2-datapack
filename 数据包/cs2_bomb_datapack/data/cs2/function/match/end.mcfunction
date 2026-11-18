@@ -1,4 +1,5 @@
 # 比赛结束：按比分决定胜者（含平局），参赛者离队但不强制清包/传送
+function cs2:practice/cleanup
 scoreboard players set #state cs2_state 7
 gamerule keepInventory true
 function cs2:pvp/on

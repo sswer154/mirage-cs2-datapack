@@ -29,6 +29,8 @@ execute as @a[scores={cs2_pause=1..}] run function cs2:panel/pause_request
 execute as @a[scores={cs2_vote_restart=1..}] run function cs2:panel/vote_restart
 execute as @a[scores={cs2_vote_end=1..}] run function cs2:panel/vote_end
 execute as @a[scores={cs2_practice_leave=1..}] run function cs2:practice/leave
+execute as @a[scores={cs2_train_hold=1..}] run function cs2:practice/hold_timer
+execute as @a[scores={cs2_train_spawn=1..}] run function cs2:practice/spawn_enemy
 execute as @a[scores={cs2_match_pause=1..}] run function cs2:panel/match_pause
 execute as @a[scores={cs2_match_resume=1..}] run function cs2:panel/match_resume
 

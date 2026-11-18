@@ -72,6 +72,11 @@ execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives 
 execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_practice_leave trigger
 execute unless score #panel_ready cs2_const matches 1 run scoreboard players set #panel_ready cs2_const 1
 
+# 训练模式：暂停倒计时 / 召唤训练敌人（旧存档首次 reload 补建）
+execute unless score #train_ready cs2_const matches 1 run scoreboard objectives add cs2_train_hold trigger
+execute unless score #train_ready cs2_const matches 1 run scoreboard objectives add cs2_train_spawn trigger
+execute unless score #train_ready cs2_const matches 1 run scoreboard players set #train_ready cs2_const 1
+
 # 比赛暂停：投票发起 + 随时解除（旧存档补建）
 execute unless score #mpause_ready cs2_const matches 1 run scoreboard objectives add cs2_match_pause trigger
 execute unless score #mpause_ready cs2_const matches 1 run scoreboard objectives add cs2_match_resume trigger
@@ -120,6 +125,8 @@ execute if entity @a run scoreboard players enable @a cs2_pause
 execute if entity @a run scoreboard players enable @a cs2_vote_restart
 execute if entity @a run scoreboard players enable @a cs2_vote_end
 execute if entity @a run scoreboard players enable @a cs2_practice_leave
+execute if entity @a run scoreboard players enable @a cs2_train_hold
+execute if entity @a run scoreboard players enable @a cs2_train_spawn
 execute if entity @a run scoreboard players enable @a cs2_match_pause
 execute if entity @a run scoreboard players enable @a cs2_match_resume
 # 升级清理：旧版商店木棍不再使用，移除在线玩家背包里的旧道具

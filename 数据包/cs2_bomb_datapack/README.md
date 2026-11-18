@@ -411,6 +411,8 @@ execute as @p run function cs2:join/leave
 - **投票重开本小局**：`/trigger cs2_vote_restart`。需要**所有 `cs2_inmatch=1` 的参赛者**同意；练习模式或暂停中不可用。
 - **投票结束战局**：`/trigger cs2_vote_end`。准备阶段和 live 阶段都可以发起；需要**所有 `cs2_inmatch=1` 的参赛者**同意；练习模式或暂停中不可用。
 - **练习模式退出**：准备阶段和 live 阶段的战术菜单里，`#solo=1/2` 时会显示 `[退出训练]`，等价于 `/trigger cs2_practice_leave`；只影响当前练习战局。
+- **训练模式 · 取消回合倒计时**：`#solo=1/2` 的准备阶段，战术菜单显示 `[取消回合倒计时]`，对应 `/trigger cs2_train_hold`；停住准备计时并隐藏 BossBar，方便自由练习。
+- **训练模式 · 召唤训练敌人**：`#solo=1/2` 的准备/live/炸弹阶段，战术菜单显示 `[召唤训练敌人]`，对应 `/trigger cs2_train_spawn`；在面前 3 格召唤无 AI、全套无附魔下界合金甲僵尸，带 `cs2_training_dummy` 标签。退出训练、结束比赛或停止比赛时统一清除。
 
 ### HUD 显示开关
 
@@ -430,7 +432,7 @@ execute as @p run function cs2:join/leave
 
 关闭后不会再收到动作栏和胜负标题，队友不受影响；BossBar（回合/炸弹计时）仍会显示。
 
-> 首次进入服务器时，数据包会自动启用 `cs2_join_t`、`cs2_join_ct`、`cs2_join_cast`、`cs2_leave`、`cs2_hud_toggle`、`cs2_stats`，以及战术/练习触发器 `cs2_panel`、`cs2_pause`、`cs2_vote_restart`、`cs2_vote_end`、`cs2_practice_leave`；每次使用后也会自动重新启用。
+> 首次进入服务器时，数据包会自动启用 `cs2_join_t`、`cs2_join_ct`、`cs2_join_cast`、`cs2_leave`、`cs2_hud_toggle`、`cs2_stats`，以及战术/练习触发器 `cs2_panel`、`cs2_pause`、`cs2_vote_restart`、`cs2_vote_end`、`cs2_practice_leave`、`cs2_train_hold`、`cs2_train_spawn`；每次使用后也会自动重新启用。
 >
 > 如果仍然提示“无法触发该积分项”，说明当前存档里的触发器没有启用。管理员执行一次 `/reload`，或对单个玩家执行：
 >
@@ -446,6 +448,8 @@ execute as @p run function cs2:join/leave
 > /scoreboard players enable @s cs2_vote_restart
 > /scoreboard players enable @s cs2_vote_end
 > /scoreboard players enable @s cs2_practice_leave
+> /scoreboard players enable @s cs2_train_hold
+> /scoreboard players enable @s cs2_train_spawn
 > ```
 >
 > 注意：旧版本数据包升级到本版本后，必须 `/reload` 一次，才能补建金钱/购买计分项、`cs2_stats`、战术/练习 trigger，并重新启用它们。

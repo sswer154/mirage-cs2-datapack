@@ -7,6 +7,7 @@ kill @e[type=marker,tag=cs2_fire]
 
 scoreboard players operation #timer cs2_timer = freeze cs2_cfg
 scoreboard players operation #timer cs2_timer *= #20 cs2_const
+scoreboard players set #train_hold cs2_counts 0
 bossbar set cs2:round visible true
 execute store result bossbar cs2:round max run scoreboard players get #timer cs2_timer
 execute store result bossbar cs2:round value run scoreboard players get #timer cs2_timer
