@@ -12,5 +12,7 @@ execute if score #state cs2_state matches 4 run function cs2:player/rejoin_live
 execute if score #state cs2_state matches 5 run function cs2:player/rejoin_intermission
 execute if score #state cs2_state matches 6 run function cs2:player/wait_lobby
 execute if score #state cs2_state matches 7 run function cs2:player/make_spec
+# 比赛已停止/未开始（state 0）时，残留的参赛者也要清理锁跳/减速
+execute if score #state cs2_state matches 0 if score @s cs2_inmatch matches 1 run function cs2:player/make_spec
 # 拆弹器改为纯标记：清理旧版遗留物品
 execute as @s run clear @s minecraft:shears[minecraft:custom_data={cs2_kit:1b}]

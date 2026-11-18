@@ -4,3 +4,7 @@ execute unless score #cfg_ready cs2_const matches 1 run function cs2:config/defa
 # 旧存档迁移：准备时间统一改为 25 秒；只迁移一次，之后仍可在 cs2_cfg 里改
 execute unless score #freeze25 cs2_const matches 1 run scoreboard players set freeze cs2_cfg 25
 execute unless score #freeze25 cs2_const matches 1 run scoreboard players set #freeze25 cs2_const 1
+
+# 旧存档迁移：补上赛后音乐盒预设编号（0=关闭）
+execute unless score #music_ready cs2_const matches 1 run scoreboard players set #music_preset cs2_cfg 0
+execute unless score #music_ready cs2_const matches 1 run scoreboard players set #music_ready cs2_const 1

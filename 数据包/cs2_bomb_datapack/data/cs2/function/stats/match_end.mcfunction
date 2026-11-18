@@ -6,6 +6,9 @@ execute as @a[scores={cs2_inmatch=1}] run tellraw @s [{"text":"本场 K/D  ","co
 scoreboard players set #top_kills cs2_econ 0
 execute as @a[scores={cs2_inmatch=1}] if score @s cs2_kills > #top_kills cs2_econ run scoreboard players operation #top_kills cs2_econ = @s cs2_kills
 
-execute if score #top_kills cs2_econ matches 1.. run tellraw @a[scores={cs2_inmatch=1}] [{"text":"本场击杀王：","color":"gold"}]
+tag @a remove cs2_top_killer
+execute as @a[scores={cs2_inmatch=1}] if score @s cs2_kills = #top_kills cs2_econ if score #top_kills cs2_econ matches 1.. run tag @s add cs2_top_killer
+
+execute if score #top_kills cs2_econ matches 1.. run tellraw @a[scores={cs2_inmatch=1}] [{"text":"本场击杀王：","color":"gold"},{"selector":"@a[tag=cs2_top_killer]","color":"yellow"},{"text":"  ","color":"gray"},{"score":{"name":"#top_kills","objective":"cs2_econ"},"color":"gold"},{"text":" 杀","color":"gray"}]
 execute if score #top_kills cs2_econ matches 0 run tellraw @a[scores={cs2_inmatch=1}] [{"text":"本场没有产生击杀。","color":"gray"}]
-execute as @a[scores={cs2_inmatch=1}] if score @s cs2_kills = #top_kills cs2_econ if score #top_kills cs2_econ matches 1.. run tellraw @a[scores={cs2_inmatch=1}] [{"text":"- ","color":"gray"},{"selector":"@s","color":"yellow"},{"text":"  ","color":"gray"},{"score":{"name":"@s","objective":"cs2_kills"},"color":"gold"},{"text":" 杀","color":"gray"}]
+tag @a remove cs2_top_killer

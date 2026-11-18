@@ -4,6 +4,7 @@ execute unless score @s cs2_inmatch matches 1 run return 0
 execute if score @s cs2_team matches 0 run function cs2:join/to_lobby
 execute if score @s cs2_team matches 0 run return 0
 
+function cs2:util/clear_match_state
 gamemode adventure @s
 function cs2:util/speed
 function cs2:player/tag

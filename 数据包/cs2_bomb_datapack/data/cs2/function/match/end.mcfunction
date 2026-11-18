@@ -11,7 +11,7 @@ kill @e[type=marker,tag=cs2_smoke]
 kill @e[type=marker,tag=cs2_fire]
 
 # 结束比赛：不再清空背包/效果，也不再自动传送；只解除队伍
-execute as @a[scores={cs2_inmatch=1}] run function cs2:util/jump_unlock
+execute as @a[scores={cs2_inmatch=1}] run function cs2:util/clear_match_state
 
 execute if score #t cs2_score_t > #ct cs2_score_ct run scoreboard players set #winner cs2_counts 1
 execute if score #ct cs2_score_ct > #t cs2_score_t run scoreboard players set #winner cs2_counts 2
@@ -26,6 +26,9 @@ playsound minecraft:ui.toast.challenge_complete master @a[scores={cs2_inmatch=1}
 
 # 结束前再发一次本场 K/D 与击杀王
 function cs2:stats/match_end
+
+# 赛后音乐盒接口
+function cs2:music/play
 
 # 参赛者先回大厅，再解除队伍；未参赛人员保持原地
 execute if entity @e[type=marker,tag=cs2_lobby,limit=1] run tp @a[scores={cs2_inmatch=1}] @e[type=marker,tag=cs2_lobby,limit=1]
