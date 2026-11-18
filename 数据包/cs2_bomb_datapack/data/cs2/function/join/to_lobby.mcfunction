@@ -15,6 +15,7 @@ clear @s minecraft:diamond[minecraft:custom_data~{cs2_shop_item:1b}]
 clear @s minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 effect clear @s minecraft:speed
 effect clear @s minecraft:night_vision
+effect clear @s minecraft:invisibility
 effect clear @s minecraft:slowness
 effect clear @s minecraft:resistance
 function cs2:util/jump_unlock
