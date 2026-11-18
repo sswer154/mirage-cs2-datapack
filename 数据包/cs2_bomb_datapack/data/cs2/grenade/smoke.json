@@ -2,7 +2,7 @@
   "effect": "smoke",
   "cloud_count": 12,
   "cloud_radius": 6.0,
-  "cloud_seconds": 30,
+  "cloud_seconds": 20,
   "cloud_particle": "minecraft:campfire_cosy_smoke",
   "model_cmd": 722001,
   "speed": 2.0,
