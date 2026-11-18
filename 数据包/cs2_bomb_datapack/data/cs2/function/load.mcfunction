@@ -136,3 +136,10 @@ execute if score #state cs2_state matches 7 run function cs2:pvp/on
 execute if score #state cs2_state matches 1..6 run function cs2:pvp/off
 # 拆弹器改为纯标记：清掉旧版遗留在背包里的剪刀
 execute as @a run clear @s minecraft:shears[minecraft:custom_data={cs2_kit:1b}]
+
+# C4 音效信号（独立标记，避免被 panel_ready 挡住）
+execute unless score #sfx_ready cs2_const matches 1 run scoreboard objectives add cs2_sfx dummy
+execute unless score #sfx_ready cs2_const matches 1 run scoreboard players set #sfx_ready cs2_const 1
+# C4 蜂鸣计时
+execute unless score #beep_ready cs2_const matches 1 run scoreboard objectives add cs2_beep dummy
+execute unless score #beep_ready cs2_const matches 1 run scoreboard players set #beep_ready cs2_const 1

@@ -10,6 +10,11 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import org.slf4j.Logger;
 
 /**
@@ -22,12 +27,16 @@ public class Cs2Grenade {
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG;
+    public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         DEBUG = builder
                 .comment("输出逐 tick / 逐事件的调试日志（碰撞、音效、耳鸣、右键）。默认关闭。")
                 .define("debug", false);
+        PLANT_SECONDS = builder
+                .comment("C4 安放读条时长（秒）。默认 3.2。")
+                .defineInRange("plant_seconds", 3.2, 0.6, 10.0);
         SPEC = builder.build();
     }
 
@@ -37,6 +46,8 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::onLivingTick);
         NeoForge.EVENT_BUS.addListener(this::onItemToss);
+        NeoForge.EVENT_BUS.addListener(this::onEntityInteract);
+        NeoForge.EVENT_BUS.addListener(this::onEntityInteractSpecific);
         NeoForge.EVENT_BUS.addListener(KillFeedHandler::onLivingDeath);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::onReload);
@@ -53,6 +64,8 @@ public class Cs2Grenade {
     }
 
     private void onReload(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
+        C4Plant.clearAll();
+        C4Defuse.clearAll();
         event.addListener(new GrenadeLoader());
         GrenadeManager.purgeTransientVisuals(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer());
     }
@@ -73,9 +86,12 @@ public class Cs2Grenade {
     private void onServerTick(ServerTickEvent.Post event) {
         GrenadeManager.tick();
         if (event.getServer() != null) {
+            C4Sfx.tick(event.getServer());
             int now = event.getServer().getTickCount();
             for (net.minecraft.server.level.ServerPlayer p : event.getServer().getPlayerList().getPlayers()) {
                 GrenadeManager.playerTick(p, now);
+                C4Plant.tick(p);
+                C4Defuse.tick(p);
             }
         }
         if (event.getServer() != null) {
@@ -98,7 +114,36 @@ public class Cs2Grenade {
         }
     }
 
-    /** 对着方块右键时走的是这个事件，医疗用品也要接管。 */
+    private void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (onEntityInteract0(event.getEntity(), event.getTarget())) {
+            event.setCanceled(true);
+        }
+    }
+
+    private void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        if (onEntityInteract0(event.getEntity(), event.getTarget())) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** 返回 true 表示这次右键被 C4 拆除接管。 */
+    private boolean onEntityInteract0(net.minecraft.world.entity.Entity e,
+                                      net.minecraft.world.entity.Entity target) {
+        if (!(e instanceof net.minecraft.server.level.ServerPlayer player)) {
+            return false;
+        }
+        Cs2Grenade.debug("右键实体 {} tags={}", target.getType(), target.getTags());
+        if (!target.getTags().contains("cs2_c4_hit")) {
+            return false;
+        }
+        Cs2Grenade.debug("命中 C4 点击实体，sneak={}", player.isShiftKeyDown());
+        if (!player.isShiftKeyDown()) {
+            return false;
+        }
+        C4Defuse.toggle(player);
+        return true;
+    }
+
     private void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
             return;
@@ -119,6 +164,12 @@ public class Cs2Grenade {
         }
         var stack = event.getItemStack();
         var data = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (data != null && data.contains("cs2_bomb")) {
+            // C4：点一次开始/取消读条，不走食物消耗
+            C4Plant.toggle(player, PLANT_SECONDS.get());
+            event.setCanceled(true);
+            return;
+        }
         if (data == null || !data.contains("cs2_util")) {
             return;
         }

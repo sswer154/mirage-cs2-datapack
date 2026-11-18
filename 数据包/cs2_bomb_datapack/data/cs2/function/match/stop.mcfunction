@@ -3,6 +3,7 @@ gamerule keepInventory true
 function cs2:match/reset
 kill @e[tag=cs2_bomb]
 kill @e[type=item_display,tag=cs2_c4_display]
+kill @e[type=armor_stand,tag=cs2_c4_hit]
 kill @e[type=item,tag=cs2_util_projectile]
 kill @e[type=marker,tag=cs2_smoke]
 kill @e[type=marker,tag=cs2_fire]
