@@ -458,7 +458,22 @@ Bob 阵亡
 /trigger cs2_stats
 ```
 
-比赛结束时，所有参赛者还会再收到一次自己的本场 K/D，并列出本场击杀最多的玩家；并列第一时逐行列出。
+比赛结束时，所有参赛者还会再收到一次自己的本场 K/D，并列出本场击杀最多的玩家；并列第一时用同一个击杀王标签一起列出，不再按玩家逐个解析名字。
+
+### 赛后音乐盒接口
+
+比赛正常结束后，`match/end` 会调用 `cs2:music/play`。预设编号存放在 `cs2_cfg` 的 `#music_preset`：
+
+- `0`：关闭，默认值；
+- `1..`：留给自定义曲目。
+
+当前没有配置任何曲目，函数只保留接口。添加曲目时在 `data/cs2/function/music/play.mcfunction` 里按编号加入 `playsound`，例如：
+
+```mcfunction
+execute if score #music_preset cs2_cfg matches 1 run playsound cs2:music.victory master @a
+```
+
+如果要只让参赛者听到，把 `@a` 改成 `@a[scores={cs2_inmatch=1}]`。
 
 - 死亡数使用原版 `deathCount`，所以坠落、爆炸、友伤等所有死亡都会计入。
 - 击杀者由 `cs2grenade` 的 `LivingDeathEvent` 读取 `DamageSource` 得到；没有玩家击杀者时显示原版死亡信息。不再使用 `player_killed_entity` 或 `cs2_recent_killer` 标签配对。
@@ -487,6 +502,7 @@ Bob 阵亡
 - 准备阶段会把参赛者的 `minecraft:generic.jump_strength` 基础值设为 `0`，防止在出生点跳跃/卡位。
 - 进入 live 时恢复为默认 `0.42`；重连到准备阶段会重新锁定，离场/比赛结束会恢复。
 - 相关函数：`data/cs2/function/util/jump_lock.mcfunction`、`util/jump_unlock.mcfunction`。
+- 退出训练、投票结束战局、比赛结束、重连到已结束比赛时，统一调用 `util/clear_match_state`：清除准备阶段的 `slowness` / `resistance` 并恢复跳跃，避免减速和锁跳残留。
 - 如果你给玩家改过自定义跳跃属性，请把 `jump_unlock.mcfunction` 里的 `0.42` 改成你的默认值。
 
 ### 回合胜负
@@ -508,6 +524,7 @@ Bob 阵亡
 - 本队已经没有存活队友时，视角回到大厅观战点，避免卡在空镜头。
 - 阵亡者保留 `cs2_team`，下一回合开始会自动回到本方出生点。
 - 比赛正常结束只把 `cs2_inmatch=1` 的参赛者传回大厅，未参赛人员保持原地，也不清空背包；终止比赛只让参赛者离队，不传送、不清包。
+- 退出训练/结束战局/比赛结束会清除 `slowness`、`resistance` 并恢复跳跃；准备阶段掉线、比赛结束后重连也会在 `player/make_spec` 中补做同一套清理。
 
 ### 炸弹
 
