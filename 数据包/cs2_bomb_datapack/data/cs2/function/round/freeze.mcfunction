@@ -15,6 +15,8 @@ bossbar set cs2:bomb visible false
 title @a[scores={cs2_inmatch=1}] times 10 40 10
 title @a[scores={cs2_inmatch=1,cs2_hud=1}] title [{"text":"第 ","color":"gold"},{"score":{"name":"#round","objective":"cs2_round"}},{"text":" 回合","color":"gold"}]
 title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"准备阶段 · 用商店钻石购买装备","color":"gray"}
+# 先核对副武器分数与背包：枪已经不在的，把分数清回 0 以便下面补发
+execute as @a[scores={cs2_inmatch=1}] run function cs2:shop/reconcile_secondary
 # 只有本回合需要默认装备的人（阵亡/新加入）才发默认手枪，存活者保留自己的装备
 execute as @a[team=cs2_t,scores={cs2_inmatch=1,cs2_needs_default=1}] run function cs2:shop/default_t
 execute as @a[team=cs2_ct,scores={cs2_inmatch=1,cs2_needs_default=1}] run function cs2:shop/default_ct
