@@ -39,6 +39,12 @@ execute unless score #stats_ready cs2_const matches 1 run scoreboard objectives 
 execute unless score #stats_ready cs2_const matches 1 run scoreboard objectives add cs2_stats trigger
 execute unless score #stats_ready cs2_const matches 1 run scoreboard players set #stats_ready cs2_const 1
 
+# 回合高光统计：每回合击杀/燃烧伤害/手雷伤害
+execute unless score #highlight_ready cs2_const matches 1 run scoreboard objectives add cs2_round_kills dummy
+execute unless score #highlight_ready cs2_const matches 1 run scoreboard objectives add cs2_fire_dmg dummy
+execute unless score #highlight_ready cs2_const matches 1 run scoreboard objectives add cs2_grenade_dmg dummy
+execute unless score #highlight_ready cs2_const matches 1 run scoreboard players set #highlight_ready cs2_const 1
+
 # 实验性投掷物（烟雾弹 / 高爆手雷 / 闪光弹）
 execute unless score #util_ready cs2_const matches 1 run scoreboard objectives add cs2_util_fuse dummy
 execute unless score #util_ready cs2_const matches 1 run scoreboard objectives add cs2_util_duration dummy

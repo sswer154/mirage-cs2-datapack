@@ -4,6 +4,17 @@ scoreboard players set @s cs2_planter 1
 scoreboard players operation #bomb_timer cs2_bomb_timer = bomb cs2_cfg
 scoreboard players operation #bomb_timer cs2_bomb_timer *= #20 cs2_const
 scoreboard players set #drop_timer cs2_counts 0
+# 记录安放时的人数劣势：安放方参赛人数比对方少 1 人及以上
+scoreboard players set #plant_disadvantage cs2_counts 0
+scoreboard players set #plant_ally cs2_counts 0
+scoreboard players set #plant_enemy cs2_counts 0
+execute if entity @s[team=cs2_t] as @a[team=cs2_t,scores={cs2_inmatch=1}] run scoreboard players add #plant_ally cs2_counts 1
+execute if entity @s[team=cs2_t] as @a[team=cs2_ct,scores={cs2_inmatch=1}] run scoreboard players add #plant_enemy cs2_counts 1
+execute if entity @s[team=cs2_ct] as @a[team=cs2_ct,scores={cs2_inmatch=1}] run scoreboard players add #plant_ally cs2_counts 1
+execute if entity @s[team=cs2_ct] as @a[team=cs2_t,scores={cs2_inmatch=1}] run scoreboard players add #plant_enemy cs2_counts 1
+scoreboard players operation #plant_diff cs2_counts = #plant_enemy cs2_counts
+scoreboard players operation #plant_diff cs2_counts -= #plant_ally cs2_counts
+execute if score #plant_diff cs2_counts matches 1.. run scoreboard players set #plant_disadvantage cs2_counts 1
 scoreboard players set #blink cs2_blink 0
 scoreboard players set #blink_on cs2_blink 0
 scoreboard players set @s cs2_carrier 0

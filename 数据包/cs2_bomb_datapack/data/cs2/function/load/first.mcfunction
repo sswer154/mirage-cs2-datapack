@@ -23,6 +23,9 @@ scoreboard objectives add cs2_cfg dummy
 scoreboard objectives add cs2_hud dummy
 scoreboard objectives add cs2_deaths deathCount
 scoreboard objectives add cs2_kills dummy
+scoreboard objectives add cs2_round_kills dummy
+scoreboard objectives add cs2_fire_dmg dummy
+scoreboard objectives add cs2_grenade_dmg dummy
 scoreboard objectives add cs2_death_pending dummy
 scoreboard objectives add cs2_killer_timer dummy
 scoreboard objectives add cs2_stats trigger

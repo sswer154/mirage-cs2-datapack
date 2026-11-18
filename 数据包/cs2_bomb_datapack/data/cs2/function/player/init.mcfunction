@@ -20,6 +20,9 @@ scoreboard players set @s cs2_inmatch 0
 scoreboard players set @s cs2_needs_default 1
 scoreboard players set @s cs2_was_alive 0
 scoreboard players set @s cs2_kills 0
+scoreboard players set @s cs2_round_kills 0
+scoreboard players set @s cs2_fire_dmg 0
+scoreboard players set @s cs2_grenade_dmg 0
 scoreboard players set @s cs2_death_pending 0
 scoreboard players set @s cs2_killer_timer 0
 scoreboard players operation @s cs2_seen = #tick cs2_const

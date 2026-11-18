@@ -10,6 +10,7 @@ bossbar set cs2:bomb visible false
 
 # 经济结算必须早于 #bomb 清零，结算里要用 #bomb=3 判断“安包后输”
 function cs2:econ/round_end
+function cs2:stats/round_highlights
 
 gamemode adventure @a[scores={cs2_inmatch=1,cs2_team=1}]
 gamemode adventure @a[scores={cs2_inmatch=1,cs2_team=2}]

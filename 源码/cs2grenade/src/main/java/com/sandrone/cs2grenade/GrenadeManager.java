@@ -541,43 +541,27 @@ public final class GrenadeManager {
         return board.getOrCreatePlayerScore((ScoreHolder)player, obj).get() == 1;
     }
 
-    /** C4 安放开始音：给附近玩家。 */
-    static void playPlantSound(ServerLevel level, Vec3 pos) {
-        GrenadeManager.playCs2(level, pos, "c4.plant_start", 1.0f, 1.0f);
+    private static boolean isEnemy(Player source, LivingEntity victim) {
+        if (source == null || !(victim instanceof Player target) || target == source) {
+            return false;
+        }
+        var sourceTeam = source.getTeam();
+        var victimTeam = target.getTeam();
+        return sourceTeam != null && victimTeam != null && !sourceTeam.getName().equals(victimTeam.getName());
     }
 
-    /** C4 拆除开始音：给附近玩家。 */
-    static void playDefuseSound(ServerLevel level, Vec3 pos) {
-        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.0f, 1.0f);
-    }
-
-    /** 数据包通过计分板信号触发的 C4 音效。 */
-    static void playC4Sfx(ServerPlayer player, Vec3 pos, String id, float volume) {
-        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
-        SoundEvent sound = SoundEvent.createVariableRangeEvent(loc);
-        GrenadeManager.sendSoundPacket(player, sound, pos, volume, 1.0f,
-                player.getServer().overworld().getRandom().nextLong());
-    }
-
-    /** 中断时掐掉安放开始音。 */
-    static void stopPlantSound(ServerLevel level, Vec3 pos) {
-        GrenadeManager.stopSound(level, pos, "c4.plant_start");
-    }
-
-    /** 拆除/爆炸时掐掉还在播的倒计时。 */
-    static void stopC4Countdown(ServerLevel level, Vec3 pos) {
-        GrenadeManager.stopSound(level, pos, "c4.countdown");
-    }
-
-    /** 全服掐掉倒计时：拆除函数会先杀掉炸弹标记，不能靠坐标找。 */
-    static void stopC4CountdownAll() {
-        if (serverRef == null) {
+    private static void addDamageScore(Player source, String objectiveName, float amount) {
+        if (!(source instanceof ServerPlayer player) || amount <= 0.0f || serverRef == null) {
             return;
         }
-        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", "c4.countdown");
-        for (ServerPlayer p : serverRef.getPlayerList().getPlayers()) {
-            p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
+        if (!GrenadeManager.inMatch(player)) {
+            return;
         }
+        Objective objective = serverRef.getScoreboard().getObjective(objectiveName);
+        if (objective == null) {
+            return;
+        }
+        serverRef.getScoreboard().getOrCreatePlayerScore((ScoreHolder)player, objective).add(Math.round(amount));
     }
 
     private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
@@ -1052,7 +1036,10 @@ public final class GrenadeManager {
             if (e2 == null || e2.isRemoved() || e2.isDeadOrDying()) continue;
             e2.invulnerableTime = 0;
             Player thrower = fireSources.get(entry.getKey());
-            e2.hurt(e2.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), ((Float)entry.getValue()).floatValue());
+            float fireDamage = ((Float)entry.getValue()).floatValue();
+            if (e2.hurt(e2.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), fireDamage) && isEnemy(thrower, e2)) {
+                GrenadeManager.addDamageScore(thrower, "cs2_fire_dmg", fireDamage);
+            }
         }
         FIRE_ZONES.removeAll(dead);
     }
@@ -1145,7 +1132,9 @@ public final class GrenadeManager {
                 if (dist <= fragOuter) {
                     float factor = dist <= fragInner ? 1.0f : (float)(1.0 - 0.25 * (dist - fragInner) / (fragOuter - fragInner));
                     victim.invulnerableTime = 0;
-                    victim.hurt(level.damageSources().explosion(thrower, null), fragDamage * factor);
+                    if (victim.hurt(level.damageSources().explosion(thrower, null), fragDamage * factor) && isEnemy(thrower, victim)) {
+                        GrenadeManager.addDamageScore(thrower, "cs2_grenade_dmg", fragDamage * factor);
+                    }
                 }
                 return true;
             }
@@ -1193,8 +1182,10 @@ public final class GrenadeManager {
             if (d > 40.0) {
                 continue;
             }
-            // 被闪到的玩家也听得到这一发爆响，但按闪光强度衰减；耳鸣仍然盖在上面
-            double ownPower = flashPower.getOrDefault(p.getUUID(), 0.0);
+            if (flashPower.getOrDefault(p.getUUID(), 0.0) >= 0.01) {
+                // 耳鸣阶段盖住爆响，不放这一声
+                continue;
+            }
             String layer;
             float loud;
             float pitch;
@@ -1210,10 +1201,6 @@ public final class GrenadeManager {
                 layer = "flash.distant";
                 loud = 2.5f;
                 pitch = 1.0f;
-            }
-            if (ownPower >= 0.01) {
-                // 中闪越重，自己听到的爆响越轻，最低保留 0.6
-                loud = Math.max(0.6f, (float) (loud * (1.0 - 0.7 * Math.min(1.0, ownPower))));
             }
             GrenadeManager.sendSoundPacket(p, SoundEvent.createVariableRangeEvent(
                             ResourceLocation.fromNamespaceAndPath("cs2", layer)),
@@ -1290,7 +1277,9 @@ public final class GrenadeManager {
             Player p;
             if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
             float factor = dist <= pierceInner ? 1.0f : (float)(1.0 - (dist - pierceInner) / (pierceOuter - pierceInner));
-            e.hurt(level.damageSources().explosion(g.thrower, null), pierceDamage * factor);
+            if (e.hurt(level.damageSources().explosion(g.thrower, null), pierceDamage * factor) && isEnemy(g.thrower, e)) {
+                GrenadeManager.addDamageScore(g.thrower, "cs2_grenade_dmg", pierceDamage * factor);
+            }
         }
         int rays = g.type.fragRays();
         float fragDamage = g.type.fragDamage();

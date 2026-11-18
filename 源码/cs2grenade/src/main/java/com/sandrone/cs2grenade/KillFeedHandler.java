@@ -55,6 +55,9 @@ public final class KillFeedHandler {
         if (killer != null && (killerTeam == 1 || killerTeam == 2) && (victimTeam == 1 || victimTeam == 2)) {
             // K/D 完全由模组维护；数据包旧 advancement 已停用，避免重复计数。
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_kills 1");
+            if (killerTeam != victimTeam) {
+                command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
+            }
             // 击杀奖金/CT 团队击杀仍由数据包计算；同队击杀不会获得奖金。
             String fn = "cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
             server.getCommands().performPrefixedCommand(

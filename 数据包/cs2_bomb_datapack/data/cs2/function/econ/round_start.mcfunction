@@ -1,5 +1,8 @@
 # 每回合开始：清空本回合 CT 击杀数与安包标记
 scoreboard players set #ct_kills cs2_econ 0
+scoreboard players set @a[scores={cs2_inmatch=1}] cs2_round_kills 0
+scoreboard players set @a[scores={cs2_inmatch=1}] cs2_fire_dmg 0
+scoreboard players set @a[scores={cs2_inmatch=1}] cs2_grenade_dmg 0
 scoreboard players set @a[scores={cs2_inmatch=1}] cs2_planter 0
 scoreboard players set @a[scores={cs2_inmatch=1}] cs2_util_smoke 0
 scoreboard players set @a[scores={cs2_inmatch=1}] cs2_util_he 0
