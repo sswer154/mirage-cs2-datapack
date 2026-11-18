@@ -178,7 +178,7 @@ execute as @p run function cs2:map/switch {map:"dust"}
 /function cs2:map/doors/reset
 ```
 
-三个地图的函数分别是 `map/doors/nuke`、`map/doors/overpass`、`map/doors/inferno`，内部按上下半门分别 `setblock`。新增地图时复制一份函数并把坐标改成自己的门即可；`reset` 只对已配置的地图生效，未知地图不会误动。
+三个地图的函数分别是 `map/doors/nuke`、`map/doors/overpass`、`map/doors/inferno`，内部会先用 `fill ... air` 清空上下半门，再按 `lower` / `upper` 顺序放回，避免打开状态的门残留旧方块状态。新增地图时复制一份函数并把坐标改成自己的门即可；`reset` 只对已配置的地图生效，未知地图不会误动。
 
 需要重来：
 
