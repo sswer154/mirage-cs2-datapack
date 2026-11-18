@@ -15,7 +15,10 @@
       },
       "name": "高爆手雷",
       "lore": [
-        "价格 $300"
+        "价格 $300",
+        "引信 4.0s",
+        "中心爆炸半径约 6 格",
+        "破片最远约 10 格"
       ],
       "commands": [
         "function cs2:shop/items/util_he"
@@ -33,7 +36,9 @@
       },
       "name": "高爆手雷（短引线）",
       "lore": [
-        "价格 $500"
+        "价格 $500",
+        "引信 2.0s",
+        "伤害与高爆手雷相同"
       ],
       "commands": [
         "function cs2:shop/items/util_he_fast"
@@ -51,7 +56,10 @@
       },
       "name": "闪光弹",
       "lore": [
-        "价格 $200"
+        "价格 $200",
+        "引信 1.5s",
+        "最大闪黑 5s",
+        "距离越远、背对或被墙挡住效果越弱"
       ],
       "commands": [
         "function cs2:shop/items/util_flash"
@@ -69,7 +77,9 @@
       },
       "name": "烟雾弹",
       "lore": [
-        "价格 $300"
+        "价格 $300",
+        "落地约 0.15s 起烟",
+        "烟幕持续 30s，半径约 6 格"
       ],
       "commands": [
         "function cs2:shop/items/util_smoke"
@@ -87,7 +97,10 @@
       },
       "name": "燃烧弹",
       "lore": [
-        "价格 $400 / CT $500"
+        "价格 $400 / CT $500",
+        "引信 3.0s",
+        "火区持续 7s，半径 4→9 格",
+        "踩火每 0.5s 受伤，伤害随火势增强"
       ],
       "commands": [
         "function cs2:shop/items/util_fire"
@@ -105,7 +118,10 @@
       },
       "name": "碰炸手雷",
       "lore": [
-        "价格 $600"
+        "价格 $600",
+        "触碰即爆",
+        "未命中时约 4.0s 自爆",
+        "中心爆炸 + 破片"
       ],
       "commands": [
         "function cs2:shop/items/util_impact"
