@@ -8,6 +8,7 @@ scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #blink cs2_blink 0
 scoreboard players set #blink_on cs2_blink 0
 function cs2:econ/round_start
+function cs2:map/doors/reset
 function cs2:panel/reset_votes
 
 function cs2:player/round_all
