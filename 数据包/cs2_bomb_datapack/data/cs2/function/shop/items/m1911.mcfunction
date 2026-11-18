@@ -1,3 +1,5 @@
+# 购买前先核对副武器分数：枪已经丢了就不该拦购买
+function cs2:shop/reconcile_secondary
 # M1911  $500
 execute unless score #state cs2_state matches 2 run return 0
 execute unless score @s cs2_team matches 1..2 run return 0
