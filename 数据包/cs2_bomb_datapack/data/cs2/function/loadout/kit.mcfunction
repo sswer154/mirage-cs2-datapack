@@ -1,2 +1,2 @@
-# 拆弹器：只有 cs2_kit=1 的 CT 会拿到
-give @s minecraft:shears[minecraft:custom_data={cs2_kit:1b},minecraft:custom_model_data=721003,minecraft:item_name='{"text":"拆弹器","color":"aqua"}',minecraft:enchantment_glint_override=1b]
+# 拆弹器只作为标记，不发放物品；仅对 cs2_kit=1 的 CT 有意义
+execute if score @s cs2_kit matches 1 run title @s actionbar {"text":"拆弹器已就绪","color":"aqua"}

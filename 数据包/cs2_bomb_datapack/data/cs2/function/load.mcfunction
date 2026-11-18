@@ -134,3 +134,5 @@ gamerule keepInventory true
 execute if score #state cs2_state matches 0 run function cs2:pvp/on
 execute if score #state cs2_state matches 7 run function cs2:pvp/on
 execute if score #state cs2_state matches 1..6 run function cs2:pvp/off
+# 拆弹器改为纯标记：清掉旧版遗留在背包里的剪刀
+execute as @a run clear @s minecraft:shears[minecraft:custom_data={cs2_kit:1b}]
