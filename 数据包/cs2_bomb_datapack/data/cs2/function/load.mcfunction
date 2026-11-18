@@ -16,6 +16,9 @@ execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives a
 execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_wclass dummy
 execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_shop trigger
 execute unless score #shop_ready cs2_const matches 1 run scoreboard players set #shop_ready cs2_const 1
+scoreboard players set #5 cs2_const 5
+scoreboard players set #20 cs2_const 20
+scoreboard players set #100 cs2_const 100
 scoreboard players set #50 cs2_const 50
 
 # 每玩家独立经济/HUD 所需的附加计分项

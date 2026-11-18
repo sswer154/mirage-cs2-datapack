@@ -7,4 +7,5 @@ kill @e[type=armor_stand,tag=cs2_c4_hit]
 function cs2:util/feed_target
 # 拆除成功提示音：只给参赛者与解说
 scoreboard players set #c4_sfx cs2_sfx 2
+tag @s add cs2_last_defuser
 function cs2:round/end_ct

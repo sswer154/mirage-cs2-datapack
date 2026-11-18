@@ -75,7 +75,9 @@ bossbar set cs2:bomb visible false
 
 gamerule doImmediateRespawn true
 
+scoreboard players set #5 cs2_const 5
 scoreboard players set #20 cs2_const 20
+scoreboard players set #100 cs2_const 100
 scoreboard players set #tick cs2_const 0
 scoreboard players set #loaded cs2_const 1
 scoreboard players set #cast_ready cs2_const 1
