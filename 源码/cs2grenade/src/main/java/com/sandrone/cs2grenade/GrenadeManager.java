@@ -564,6 +564,45 @@ public final class GrenadeManager {
         serverRef.getScoreboard().getOrCreatePlayerScore((ScoreHolder)player, objective).add(Math.round(amount));
     }
 
+    /** C4 安放开始音：给附近玩家。 */
+    static void playPlantSound(ServerLevel level, Vec3 pos) {
+        GrenadeManager.playCs2(level, pos, "c4.plant_start", 1.0f, 1.0f);
+    }
+
+    /** C4 拆除开始音：给附近玩家。 */
+    static void playDefuseSound(ServerLevel level, Vec3 pos) {
+        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.0f, 1.0f);
+    }
+
+    /** 数据包通过计分板信号触发的 C4 音效。 */
+    static void playC4Sfx(ServerPlayer player, Vec3 pos, String id, float volume) {
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
+        SoundEvent sound = SoundEvent.createVariableRangeEvent(loc);
+        GrenadeManager.sendSoundPacket(player, sound, pos, volume, 1.0f,
+                player.getServer().overworld().getRandom().nextLong());
+    }
+
+    /** 中断时掐掉安放开始音。 */
+    static void stopPlantSound(ServerLevel level, Vec3 pos) {
+        GrenadeManager.stopSound(level, pos, "c4.plant_start");
+    }
+
+    /** 拆除/爆炸时掐掉还在播的倒计时。 */
+    static void stopC4Countdown(ServerLevel level, Vec3 pos) {
+        GrenadeManager.stopSound(level, pos, "c4.countdown");
+    }
+
+    /** 全服掐掉倒计时：拆除函数会先杀掉炸弹标记，不能靠坐标找。 */
+    static void stopC4CountdownAll() {
+        if (serverRef == null) {
+            return;
+        }
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", "c4.countdown");
+        for (ServerPlayer p : serverRef.getPlayerList().getPlayers()) {
+            p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
+        }
+    }
+
     private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
         ResourceLocation loc = ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)id);
         SoundEvent sound = SoundEvent.createVariableRangeEvent((ResourceLocation)loc);
@@ -1182,10 +1221,8 @@ public final class GrenadeManager {
             if (d > 40.0) {
                 continue;
             }
-            if (flashPower.getOrDefault(p.getUUID(), 0.0) >= 0.01) {
-                // 耳鸣阶段盖住爆响，不放这一声
-                continue;
-            }
+            // 被闪到的玩家也听得到这一发爆响，但按闪光强度衰减；耳鸣仍然盖在上面
+            double ownPower = flashPower.getOrDefault(p.getUUID(), 0.0);
             String layer;
             float loud;
             float pitch;
@@ -1201,6 +1238,10 @@ public final class GrenadeManager {
                 layer = "flash.distant";
                 loud = 2.5f;
                 pitch = 1.0f;
+            }
+            if (ownPower >= 0.01) {
+                // 中闪越重，自己听到的爆响越轻，最低保留 0.6
+                loud = Math.max(0.6f, (float) (loud * (1.0 - 0.7 * Math.min(1.0, ownPower))));
             }
             GrenadeManager.sendSoundPacket(p, SoundEvent.createVariableRangeEvent(
                             ResourceLocation.fromNamespaceAndPath("cs2", layer)),
