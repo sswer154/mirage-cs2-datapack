@@ -911,6 +911,7 @@ public final class GrenadeManager {
                 if (dy < -1 || dy > 1) continue;
                 if (next.getY() > centerY + 1) continue;
                 if (!fireHasHeadroom(zone.level, next)) continue;
+                if (!fireSpreadPathAllowed(zone.level, cur, next)) continue;
                 if (visited.add(next)) {
                     queue.add(next);
                 }
@@ -965,6 +966,22 @@ public final class GrenadeManager {
             }
         }
         return true;
+    }
+
+    private static boolean fireSpreadPathAllowed(ServerLevel level, BlockPos cur, BlockPos next) {
+        // Horizontal probe at the current fire layer: a two-block wall hits its lower block,
+        // whose upper neighbor is solid, so it stops; a one-block ledge exposes air above and can be crossed.
+        Vec3 from = new Vec3((double)cur.getX() + 0.5, (double)cur.getY() + 0.5, (double)cur.getZ() + 0.5);
+        Vec3 to = new Vec3((double)next.getX() + 0.5, (double)cur.getY() + 0.5, (double)next.getZ() + 0.5);
+        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+        if (hit.getType() == HitResult.Type.MISS) {
+            return true;
+        }
+        BlockPos hitPos = hit.getBlockPos();
+        if (!level.getBlockState(hitPos.above()).isAir()) {
+            return false;
+        }
+        return Math.abs(next.getY() - hitPos.getY()) <= 1;
     }
 
     private static boolean inFire(FireZone zone, LivingEntity e) {
