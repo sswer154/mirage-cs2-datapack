@@ -38,7 +38,7 @@ public class ShopLoader implements PreparableReloadListener {
                 .thenAcceptAsync(loaded -> {
                     MENUS.clear();
                     MENUS.putAll(loaded);
-                    Cs2Shop.LOGGER.info("已读取 {} 个商店菜单", MENUS.size());
+                    Cs2Shop.LOGGER.info("[cs2shop] 已读取 {} 个商店菜单", MENUS.size());
                 }, gameExecutor);
     }
 
@@ -68,7 +68,7 @@ public class ShopLoader implements PreparableReloadListener {
     public static void ensureLoaded(MinecraftServer server) {
         if (MENUS.isEmpty()) {
             MENUS.putAll(loadAll(server.getResourceManager()));
-            Cs2Shop.LOGGER.info("首次按需读取了 {} 个商店菜单", MENUS.size());
+            Cs2Shop.LOGGER.info("[cs2shop] 首次按需读取了 {} 个商店菜单", MENUS.size());
         }
     }
 }

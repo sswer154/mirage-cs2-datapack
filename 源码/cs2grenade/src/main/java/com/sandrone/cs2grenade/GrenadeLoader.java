@@ -38,7 +38,7 @@ public class GrenadeLoader implements PreparableReloadListener {
                 .thenAcceptAsync(loaded -> {
                     TYPES.clear();
                     TYPES.putAll(loaded);
-                    Cs2Grenade.LOGGER.info("已读取 {} 种投掷物配置", TYPES.size());
+                    Cs2Grenade.LOGGER.info("[cs2] 已读取 {} 种投掷物配置", TYPES.size());
                 }, gameExecutor);
     }
 
@@ -68,7 +68,7 @@ public class GrenadeLoader implements PreparableReloadListener {
     public static void ensureLoaded(MinecraftServer server) {
         if (TYPES.isEmpty()) {
             TYPES.putAll(loadAll(server.getResourceManager()));
-            Cs2Grenade.LOGGER.info("首次按需读取了 {} 种投掷物配置", TYPES.size());
+            Cs2Grenade.LOGGER.info("[cs2] 首次按需读取了 {} 种投掷物配置", TYPES.size());
         }
     }
 }

@@ -53,9 +53,15 @@
 - 击杀奖金仍由数据包 `econ/kill/on_t|on_ct` 按阵营结算，同队击杀不发奖金。
 - 播报只发给 `cs2_inmatch=1` 的参赛者和 `cs2_cast` 解说。
 
+## 八、调试日志开关
+
+- `cs2grenade`、`cs2shop` 各自新增 common 配置，默认 `debug = false`，正常游玩只保留启动、警告与错误日志。
+- 需要排查碰撞、音效、耳鸣、商店点击或指令执行时，把 `config/cs2grenade-common.toml` / `config/cs2shop-common.toml` 里的 `debug` 改成 `true`，重启服务器生效。
+- 日志前缀统一为 `[cs2]` / `[cs2shop]`，方便过滤；关闭时不会输出逐 tick / 逐点击日志。
+
 ## 涉及文件
 
-- 模组：cs2grenade-0.1.0.jar（56872 字节）
+- 模组：cs2grenade-0.1.0.jar（57480 字节）、cs2shop-0.1.0.jar（26130 字节）
 - 数据包：cs2_bomb_datapack
 - 资源包：cs2_bomb_resourcepack.zip（约 1.15 MB）
 

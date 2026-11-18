@@ -39,10 +39,10 @@ public final class ShopCommand {
                         .then(Commands.argument("id", StringArgumentType.greedyString()).executes(ctx -> {
                             if (!(ctx.getSource().getEntity() instanceof ServerPlayer player)
                                     || !(player.containerMenu instanceof ShopMenu menu)) {
-                                Cs2Shop.LOGGER.info("[cs2shop] switch 失败：没有打开的商店菜单");
+                                Cs2Shop.debug("switch 失败：没有打开的商店菜单");
                                 return 0;
                             }
-                            Cs2Shop.LOGGER.info("[cs2shop] switch 请求 {} -> {}", player.getScoreboardName(), StringArgumentType.getString(ctx, "id"));
+                            Cs2Shop.debug("switch 请求 {} -> {}", player.getScoreboardName(), StringArgumentType.getString(ctx, "id"));
                             String raw = StringArgumentType.getString(ctx, "id");
                             ResourceLocation id = raw.contains(":")
                                     ? ResourceLocation.tryParse(raw)
@@ -82,7 +82,7 @@ public final class ShopCommand {
 
     /** 给玩家打开某个菜单。 */
     public static int open(ServerPlayer player, ResourceLocation id) {
-        Cs2Shop.LOGGER.info("[cs2shop] 请求打开 {} -> {}", player.getScoreboardName(), id);
+        Cs2Shop.debug("请求打开 {} -> {}", player.getScoreboardName(), id);
         ShopDefinition def = ShopLoader.get(id);
         if (def == null) {
             player.sendSystemMessage(Component.literal("找不到菜单: " + id));

@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -17,8 +19,19 @@ import org.slf4j.Logger;
 public class Cs2Grenade {
     public static final String MODID = "cs2grenade";
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue DEBUG;
+
+    static {
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        DEBUG = builder
+                .comment("输出逐 tick / 逐事件的调试日志（碰撞、音效、耳鸣、右键）。默认关闭。")
+                .define("debug", false);
+        SPEC = builder.build();
+    }
 
     public Cs2Grenade(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, SPEC);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::onLivingTick);
@@ -27,7 +40,14 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::onReload);
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
-        LOGGER.info("CS2 投掷物已加载（服务端专用）");
+        LOGGER.info("[cs2] CS2 投掷物已加载（服务端专用）");
+    }
+
+    /** 只在 config/cs2grenade-common.toml 的 debug=true 时输出，避免刷屏。 */
+    public static void debug(String format, Object... args) {
+        if (DEBUG.get()) {
+            LOGGER.info("[cs2] " + format, args);
+        }
     }
 
     private void onReload(net.neoforged.neoforge.event.AddReloadListenerEvent event) {
@@ -92,7 +112,7 @@ public class Cs2Grenade {
         if (data == null || !data.contains("cs2_util")) {
             return;
         }
-        Cs2Grenade.LOGGER.info("右键物品 util={} ", data.copyTag().getString("cs2_util"));
+        Cs2Grenade.debug("右键物品 util={}", data.copyTag().getString("cs2_util"));
         if (SurgeryKit.isMedical(stack)) {
             if (SurgeryKit.tryStart(player, stack, player.getServer().getTickCount())) {
                 event.setCanceled(true);

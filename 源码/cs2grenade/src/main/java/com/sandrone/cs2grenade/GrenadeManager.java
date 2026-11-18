@@ -150,7 +150,7 @@ public final class GrenadeManager {
                 e.discard();
             }
             if (doomed.isEmpty()) continue;
-            Cs2Grenade.LOGGER.info("\u6e05\u7406\u6b8b\u7559\u624b\u96f7 {} \u4e2a", (Object)doomed.size());
+            Cs2Grenade.debug("\u6e05\u7406\u6b8b\u7559\u624b\u96f7 {} \u4e2a", doomed.size());
         }
     }
 
@@ -212,7 +212,7 @@ public final class GrenadeManager {
             Ring r = e.getValue();
             int end = r.holdEnd() + r.fadeTicks();
             if (now >= end) {
-                Cs2Grenade.LOGGER.info("耳鸣结束，停止播放 fadeSec={}", r.fadeSec());
+                Cs2Grenade.debug("耳鸣结束，停止播放 fadeSec={}", r.fadeSec());
                 // 淡出素材可能比黑屏长，结束时要主动停掉，否则会一直响
                 player4Stop(serverRef, e.getKey(), "flash.ring_long");
                 if (r.fadeSec() > 0) {
@@ -250,7 +250,7 @@ public final class GrenadeManager {
                     player.connection.send(new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
                             ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_long"), SoundSource.PLAYERS));
                     int sec = Math.max(1, Math.min(5, Math.round(r.fadeTicks() / 20.0f)));
-                    Cs2Grenade.LOGGER.info("耳鸣进入淡出: fadeTicks={} 使用{}秒档", r.fadeTicks(), sec);
+                    Cs2Grenade.debug("耳鸣进入淡出: fadeTicks={} 使用{}秒档", r.fadeTicks(), sec);
                     player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundEntityPacket(
                             net.minecraft.core.Holder.direct(SoundEvent.createVariableRangeEvent(
                                     ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_fade_" + sec))),
@@ -381,7 +381,7 @@ public final class GrenadeManager {
                 ++before;
             }
             if (before <= 0) continue;
-            Cs2Grenade.LOGGER.info("\u6e05\u7406\u6b8b\u7559\u70df\u7247 {} \u4e2a", (Object)before);
+            Cs2Grenade.debug("\u6e05\u7406\u6b8b\u7559\u70df\u7247 {} \u4e2a", before);
         }
         SMOKE_ZONES.clear();
         SMOKE_CARDS.clear();
@@ -416,7 +416,7 @@ public final class GrenadeManager {
             e.discard();
         }
         if (!doomed.isEmpty()) {
-            Cs2Grenade.LOGGER.info("\u6e05\u7406\u65e0\u4e3b\u70df\u7247/\u7f50\u4f53 {} \u4e2a", (Object)doomed.size());
+            Cs2Grenade.debug("\u6e05\u7406\u65e0\u4e3b\u70df\u7247/\u7f50\u4f53 {} \u4e2a", doomed.size());
         }
     }
 
@@ -455,7 +455,7 @@ public final class GrenadeManager {
     private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
         ResourceLocation loc = ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)id);
         SoundEvent sound = SoundEvent.createVariableRangeEvent((ResourceLocation)loc);
-        Cs2Grenade.LOGGER.info("\u64ad\u653e\u6295\u63b7\u97f3\u6548 {} vol={} pitch={} at {} {} {}", new Object[]{id, Float.valueOf(volume), Float.valueOf(pitch), (int)pos.x, (int)pos.y, (int)pos.z});
+        Cs2Grenade.debug("\u64ad\u653e\u6295\u63b7\u97f3\u6548 {} vol={} pitch={} at {} {} {}", id, volume, pitch, (int)pos.x, (int)pos.y, (int)pos.z);
         double range = 16.0 * (double)volume;
         for (ServerPlayer p : level.players()) {
             if (p.distanceToSqr(pos) > range * range) continue;
@@ -480,7 +480,7 @@ public final class GrenadeManager {
 
     private static void playHit(Grenade g, Vec3 pos, String id, float volume, float pitch) {
         int now = serverRef == null ? 0 : serverRef.getTickCount();
-        Cs2Grenade.LOGGER.info("\u78b0\u649e\u89e6\u53d1 type={} effect={} speed={} \u8ddd\u4e0a\u6b21={}", new Object[]{g.type.id(), g.type.effect(), g.vel.length(), now - g.lastSoundTick});
+        Cs2Grenade.debug("\u78b0\u649e\u89e6\u53d1 type={} effect={} speed={} \u8ddd\u4e0a\u6b21={}", g.type.id(), g.type.effect(), g.vel.length(), now - g.lastSoundTick);
         volume = Math.max(0.8f, volume * 2.6f);
         if (now - g.lastSoundTick < 3) {
             return;
@@ -995,7 +995,7 @@ public final class GrenadeManager {
             int ticks = Math.max(6, (int)Math.round((double)(g.type.maskSeconds() * 20) * intensity));
             int ringExpire = (serverRef == null ? 0 : serverRef.getTickCount()) + ticks;
             int fadeTicks = Math.max(6, (int)Math.round(100.0 * intensity));
-            Cs2Grenade.LOGGER.info("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
+            Cs2Grenade.debug("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
                     p.getScoreboardName(), String.format(Locale.ROOT, "%.2f", intensity), ticks, fadeTicks);
             RING_STATE.put(p.getUUID(), new Ring(ringExpire, fadeTicks, 0,
                     (float) (0.35 + 0.85 * intensity), 0));

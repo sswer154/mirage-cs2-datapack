@@ -68,7 +68,7 @@ public final class ShopActions {
     }
 
     private static void run(ServerPlayer player, String rawCommand) {
-        Cs2Shop.LOGGER.info("[cs2shop] 执行指令: {}", rawCommand);
+        Cs2Shop.debug("执行指令: {}", rawCommand);
         String cmd = rawCommand.startsWith("/") ? rawCommand.substring(1) : rawCommand;
         CommandSourceStack source = player.createCommandSourceStack().withPermission(2);
         // tellraw 是给玩家看的提示，要放行；其余命令吞掉，免得刷「正在运行函数 …」

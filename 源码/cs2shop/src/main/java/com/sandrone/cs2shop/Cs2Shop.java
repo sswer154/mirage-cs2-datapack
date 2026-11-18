@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -19,17 +21,35 @@ import org.slf4j.Logger;
 public class Cs2Shop {
     public static final String MODID = "cs2shop";
     public static final Logger LOGGER = LogUtils.getLogger();
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue DEBUG;
+
+    static {
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        DEBUG = builder
+                .comment("输出逐点击 / 逐指令的调试日志（打开、切换、点击、执行指令）。默认关闭。")
+                .define("debug", false);
+        SPEC = builder.build();
+    }
 
     public Cs2Shop(IEventBus modBus, ModContainer container) {
+        container.registerConfig(ModConfig.Type.COMMON, SPEC);
         NeoForge.EVENT_BUS.addListener(this::onReload);
         NeoForge.EVENT_BUS.addListener(this::onCommands);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onContainerClose);
-        LOGGER.info("CS2 Shop GUI 已加载（服务端专用）");
+        LOGGER.info("[cs2shop] CS2 Shop GUI 已加载（服务端专用）");
+    }
+
+    /** 只在 config/cs2shop-common.toml 的 debug=true 时输出，避免刷屏。 */
+    public static void debug(String format, Object... args) {
+        if (DEBUG.get()) {
+            LOGGER.info("[cs2shop] " + format, args);
+        }
     }
 
     private void onContainerClose(net.neoforged.neoforge.event.entity.player.PlayerContainerEvent.Close event) {
-        LOGGER.info("[cs2shop] 容器关闭: {} ({})", event.getContainer().getClass().getSimpleName(), event.getEntity().getScoreboardName());
+        debug("容器关闭: {} ({})", event.getContainer().getClass().getSimpleName(), event.getEntity().getScoreboardName());
     }
 
     private void onReload(AddReloadListenerEvent event) {

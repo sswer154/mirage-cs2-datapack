@@ -367,7 +367,7 @@ public final class SurgeryKit {
         if (id == null || id.isEmpty() || player.connection == null) {
             return;
         }
-        Cs2Grenade.LOGGER.info("播放医疗音效 {} ({})", id, player.getScoreboardName());
+        Cs2Grenade.debug("播放医疗音效 {} ({})", id, player.getScoreboardName());
         var loc = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("cs2", id);
         var sound = net.minecraft.sounds.SoundEvent.createVariableRangeEvent(loc);
         player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(

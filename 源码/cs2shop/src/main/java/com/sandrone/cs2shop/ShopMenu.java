@@ -224,7 +224,7 @@ public class ShopMenu extends AbstractContainerMenu {
 
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
-        Cs2Shop.LOGGER.info("[cs2shop] 点击槽位 {} 按钮 {}", slotId, button);
+        Cs2Shop.debug("点击槽位 {} 按钮 {}", slotId, button);
         if (slotId >= 0 && slotId < shopSlots) {
             ShopDefinition.ShopEntry entry = shown.get(slotId);
             if (entry != null && !allowedForTeam(entry, playerTeam())) {
