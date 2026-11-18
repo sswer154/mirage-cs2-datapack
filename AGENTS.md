@@ -115,3 +115,19 @@ git rebase origin/master                  # 有就先变基
 - 推送前必须执行第 4 节的 fetch / rebase 检查，并在回复中报告结果。
 - 推送后必须按第 6 节发布变更内容。
 - 不确定谁负责、或涉及覆盖他人改动时，停下来询问，不要自行决定。
+
+## 10. 同步检查清单
+
+每次拉取或合并前后，按下面顺序过一遍，别只看 open issue：
+
+```bash
+git fetch origin
+git log --oneline HEAD..origin/master          # 远端有没有新提交
+gh issue list --state open --limit 30          # 待办
+gh issue list --state closed --limit 10        # 最近关掉的，确认自己没漏看结论
+git log --oneline -20 --format='%h %s'         # 最近提交，和 CHANGELOG 对得上
+```
+
+- 关闭 issue 前把验证结论写进关闭评论，不要只点关闭
+- 每次合并进 master 或关闭 issue，在 `CHANGELOG.md` 追加一行，格式：`- YYYY-MM-DD <类型> <一句话> (refs #N)`
+- 同步时先读 `CHANGELOG.md` 最新几行，能快速知道上一轮改了什么，不依赖 issue 是否还开着
