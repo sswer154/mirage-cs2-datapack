@@ -97,6 +97,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -140,18 +141,96 @@ public final class GrenadeManager {
 
     public static void cleanupOrphans(MinecraftServer server) {
         serverRef = server;
+        int entities = 0;
+        int fires = 0;
         for (ServerLevel level : server.getAllLevels()) {
-            ArrayList<Entity> doomed = new ArrayList<Entity>();
             for (Entity e : level.getAllEntities()) {
-                if (!e.getTags().contains(GRENADE_TAG) && !GrenadeManager.isGrenadeVisual(e)) continue;
-                doomed.add(e);
+                if (GrenadeManager.isOrphanVisual(e)) {
+                    e.discard();
+                    ++entities;
+                }
             }
-            for (Entity e : doomed) {
-                e.discard();
-            }
-            if (doomed.isEmpty()) continue;
-            Cs2Grenade.debug("\u6e05\u7406\u6b8b\u7559\u624b\u96f7 {} \u4e2a", doomed.size());
+            fires += GrenadeManager.cleanupTrackedFire(level);
         }
+        if (entities > 0 || fires > 0) {
+            Cs2Grenade.LOGGER.info("[cs2] 启动清理残留投掷物实体 {} 个、火方块 {} 个", entities, fires);
+        }
+    }
+
+    /**
+     * 区块加载时清理上一局残留。重启后区块往往还没加载，只靠 getAllEntities 会漏；
+     * 这里按标签即时清掉，且不会误删仍在 ACTIVE / 烟区 / 持久展示里的对象。
+     */
+    public static void cleanupChunk(ServerLevel level, LevelChunk chunk) {
+        int entities = 0;
+        AABB chunkBounds = new AABB(
+                chunk.getPos().getMinBlockX(),
+                level.getMinBuildHeight(),
+                chunk.getPos().getMinBlockZ(),
+                chunk.getPos().getMaxBlockX() + 1,
+                level.getMaxBuildHeight(),
+                chunk.getPos().getMaxBlockZ() + 1);
+        for (Entity e : level.getEntitiesOfClass(Entity.class, chunkBounds)) {
+            if (!e.isRemoved() && GrenadeManager.isOrphanVisual(e)) {
+                e.discard();
+                ++entities;
+            }
+        }
+        int fires = 0;
+        FireBlockTracker tracker = FireBlockTracker.get(level);
+        int chunkX = chunk.getPos().x;
+        int chunkZ = chunk.getPos().z;
+        for (long packed : tracker.snapshot()) {
+            BlockPos pos = BlockPos.of(packed);
+            if ((pos.getX() >> 4) != chunkX || (pos.getZ() >> 4) != chunkZ) continue;
+            if (level.getBlockState(pos).is(Blocks.FIRE)) {
+                level.removeBlock(pos, false);
+                ++fires;
+            }
+            tracker.remove(pos);
+        }
+        if (entities > 0 || fires > 0) {
+            Cs2Grenade.debug("区块清理残留投掷物实体 {} 个、火方块 {} 个", entities, fires);
+        }
+    }
+
+    private static boolean isOrphanVisual(Entity e) {
+        if (e.isRemoved()) {
+            return false;
+        }
+        if (e.getTags().contains(GRENADE_TAG) || GrenadeManager.isGrenadeVisual(e)) {
+            for (Grenade g : ACTIVE) {
+                if (g.display == e) return false;
+            }
+            return !PERSIST_DISPLAYS.contains(e.getUUID());
+        }
+        if (e.getTags().contains("cs2_smoke_canister")) {
+            for (SmokeZone z : SMOKE_ZONES) {
+                if (z.display == e) return false;
+            }
+            return true;
+        }
+        if (e.getTags().contains("cs2_smoke_card")) {
+            for (SmokeZone z : SMOKE_ZONES) {
+                if (e.getTags().contains("cs2_smoke_" + z.volumeId)) return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static int cleanupTrackedFire(ServerLevel level) {
+        FireBlockTracker tracker = FireBlockTracker.get(level);
+        int removed = 0;
+        for (long packed : tracker.snapshot()) {
+            BlockPos pos = BlockPos.of(packed);
+            if (level.getBlockState(pos).is(Blocks.FIRE)) {
+                level.removeBlock(pos, false);
+                ++removed;
+            }
+            tracker.remove(pos);
+        }
+        return removed;
     }
 
     public static boolean throwGrenade(Player player, ItemStack stack, int heldTicks) {
@@ -373,7 +452,7 @@ public final class GrenadeManager {
             int before = 0;
             ArrayList<Entity> doomed = new ArrayList<Entity>();
             for (Entity e : level.getAllEntities()) {
-                if (!e.getTags().contains("cs2_smoke_card")) continue;
+                if (!e.getTags().contains("cs2_smoke_card") && !e.getTags().contains("cs2_smoke_canister")) continue;
                 doomed.add(e);
             }
             for (Entity e : doomed) {
@@ -436,6 +515,9 @@ public final class GrenadeManager {
             GrenadeManager.sweepOrphanSmokeCards(level);
             for (Entity e : doomed) {
                 e.discard();
+            }
+            if (!doomed.isEmpty()) {
+                Cs2Grenade.debug("清理无主手雷 {} 个", doomed.size());
             }
         }
     }
@@ -730,16 +812,21 @@ public final class GrenadeManager {
                     break;
                 }
                 if (ground == null) continue;
-                zone.level.setBlockAndUpdate(ground, Blocks.FIRE.defaultBlockState());
-                zone.placed.add(ground);
+                if (zone.level.setBlockAndUpdate(ground, Blocks.FIRE.defaultBlockState())) {
+                    zone.placed.add(ground);
+                    FireBlockTracker.get(zone.level).add(ground);
+                }
             }
         }
     }
 
     private static void extinguish(FireZone z) {
+        FireBlockTracker tracker = FireBlockTracker.get(z.level);
         for (BlockPos p : z.placed) {
-            if (!z.level.getBlockState(p).is(Blocks.FIRE)) continue;
-            z.level.removeBlock(p, false);
+            if (z.level.getBlockState(p).is(Blocks.FIRE)) {
+                z.level.removeBlock(p, false);
+            }
+            tracker.remove(p);
         }
         z.placed.clear();
     }

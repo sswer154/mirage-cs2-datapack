@@ -8,6 +8,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
@@ -39,6 +40,7 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(KillFeedHandler::onLivingDeath);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::onReload);
+        NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
         LOGGER.info("[cs2] CS2 投掷物已加载（服务端专用）");
     }
@@ -58,6 +60,14 @@ public class Cs2Grenade {
     private void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         GrenadeManager.cleanupOrphans(event.getServer());
         GrenadeManager.purgeTransientVisuals(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer());
+    }
+
+    /** 重启时落点区块未必已加载，区块一加载就按标签清掉上一局残留。 */
+    private void onChunkLoad(ChunkEvent.Load event) {
+        if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel level
+                && event.getChunk() instanceof net.minecraft.world.level.chunk.LevelChunk chunk) {
+            GrenadeManager.cleanupChunk(level, chunk);
+        }
     }
 
     private void onServerTick(ServerTickEvent.Post event) {
