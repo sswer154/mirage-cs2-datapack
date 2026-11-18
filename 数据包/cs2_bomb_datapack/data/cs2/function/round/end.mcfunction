@@ -20,6 +20,7 @@ effect clear @a[scores={cs2_inmatch=1,cs2_team=2}] minecraft:resistance
 
 kill @e[tag=cs2_bomb]
 kill @e[type=item_display,tag=cs2_c4_display]
+kill @e[type=armor_stand,tag=cs2_c4_hit]
 execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_bomb run kill @s
 scoreboard players set #bomb cs2_bomb_state 0
 scoreboard players set #bomb_timer cs2_bomb_timer 0

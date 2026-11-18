@@ -13,6 +13,7 @@ kill @e[type=text_display,tag=cs2_map_text]
 data modify storage cs2:map active set value "未选择"
 kill @e[tag=cs2_bomb]
 kill @e[type=item_display,tag=cs2_c4_display]
+kill @e[type=armor_stand,tag=cs2_c4_hit]
 kill @e[type=item,tag=cs2_util_projectile]
 kill @e[type=marker,tag=cs2_smoke]
 kill @e[type=marker,tag=cs2_fire]
