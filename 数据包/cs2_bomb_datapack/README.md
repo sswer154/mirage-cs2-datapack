@@ -169,6 +169,17 @@ execute as @p run function cs2:map/switch {map:"dust"}
 - 只有“在坐标存储机制加入前建好、又从未执行过 `map/adopt`”的地图，才会没有坐标记录；如果它的区块已经完全卸载，`@e` 找不到 marker，数据包也无法仅凭地图名推断坐标。请先站到该地图附近让区块加载，执行一次 `map/adopt`（或重新执行该地图的 `setup/map/...`）。之后即可正常自动加载。
 - 已加载但未 forceload 的零散地图点，可用 `/function cs2:map/forceload_all` 一次性补加载。
 
+### 3.2 可操作门重置
+
+`nuke`、`overpass`、`inferno` 三张地图在回合开始时会把配置过的门恢复为关闭状态，门类型、朝向和铰链关系不变：
+
+```mcfunction
+# 内置地图（按 cs2:map 的 active 字段自动分派）
+/function cs2:map/doors/reset
+```
+
+三个地图的函数分别是 `map/doors/nuke`、`map/doors/overpass`、`map/doors/inferno`，内部按上下半门分别 `setblock`。新增地图时复制一份函数并把坐标改成自己的门即可；`reset` 只对已配置的地图生效，未知地图不会误动。
+
 需要重来：
 
 ```mcfunction
