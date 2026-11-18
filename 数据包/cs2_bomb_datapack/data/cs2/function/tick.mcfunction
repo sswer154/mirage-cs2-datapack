@@ -7,6 +7,8 @@ scoreboard players add #tick cs2_const 1
 # 实验性投掷物：烟雾弹 / 高爆手雷
 # 死亡掉落物品规则
 function cs2:util/item_tick
+# 准备阶段持续维持冻结：医疗用品会清掉 slowness，这里每 tick 补回（跳跃锁走属性，不受影响）
+execute if score #state cs2_state matches 2 as @a[scores={cs2_inmatch=1}] run function cs2:util/freeze_lock
 # 准备阶段确保每名参赛者有商店钻石；清掉被丢弃的商店钻石
 execute if score #state cs2_state matches 2 as @a[scores={cs2_inmatch=1}] run function cs2:util/give_shop_item
 execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_shop_item run kill @s
