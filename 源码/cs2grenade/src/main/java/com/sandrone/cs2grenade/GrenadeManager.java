@@ -706,16 +706,25 @@ public final class GrenadeManager {
     private static final double BOUNCE_MIN_VERTICAL = 0.05;
     /** 贴地滑行时每 tick 的水平速度保留比例。 */
     private static final double GROUND_ROLL_FRICTION = 0.78;
+    private static final int PROJECTILE_CHUNK_WAIT_TICKS = 100;
 
     /** 弹体正下方 0.08 格内有没有碰撞面，用来判断是不是贴着地面在滑。 */
     private static boolean hasSupportBelow(ServerLevel level, Vec3 pos) {
-        BlockPos below = BlockPos.containing(pos.x, pos.y - 0.08, pos.z);
-        return !level.getBlockState(below).getCollisionShape(level, below).isEmpty();
+        BlockHitResult hit = level.clip(new ClipContext(pos, pos.add(0.0, -0.08, 0.0),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+        return hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.UP && !hit.isInside();
+    }
+
+    private static void waitForProjectileChunk(Grenade grenade) {
+        if (++grenade.chunkWaitTicks < PROJECTILE_CHUNK_WAIT_TICKS) return;
+        if (grenade.display != null) grenade.display.discard();
+        grenade.fuse = 0;
     }
 
     private static void step(Grenade g) {
         Vec3 from = g.lastPos;
         if (!g.level.isLoaded(BlockPos.containing(from))) {
+            waitForProjectileChunk(g);
             return;
         }
         Vec3 previousVel = g.vel;
@@ -724,8 +733,10 @@ public final class GrenadeManager {
         Vec3 to = from.add(g.vel);
         if (!g.level.isLoaded(BlockPos.containing(to))) {
             g.vel = previousVel;
+            waitForProjectileChunk(g);
             return;
         }
+        g.chunkWaitTicks = 0;
         // 燃烧弹把水也当成碰撞面：落水时在水面爆开，而不是一路沉到水底才炸
         ClipContext.Fluid fluidClip = "fire".equals(g.type.effect()) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
         BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, fluidClip, (Entity)g.thrower));
@@ -1746,6 +1757,7 @@ public final class GrenadeManager {
         int smokeRest;
         /** 弹体存活的 tick 数，用于尾迹等周期性效果，不再借用 fuse。 */
         int age;
+        int chunkWaitTicks;
         Vec3 soundPos;
         int wallSoundEndTick;
         int tailPendingAt;
