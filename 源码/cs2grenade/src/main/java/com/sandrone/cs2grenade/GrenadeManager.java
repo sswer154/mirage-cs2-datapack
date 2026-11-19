@@ -1122,10 +1122,7 @@ public final class GrenadeManager {
                 expired.add(z);
                 continue;
             }
-            if (now >= z.nextHiss && elapsed < z.lifeTicks - 60) {
-                z.nextHiss = now + 140;
-                GrenadeManager.playCs2(z.level, z.pos, "smoke.hiss", 0.8f, 1.0f);
-            }
+            // 放烟声只在起烟时播一次；这里不再周期重放，避免走动时同一段声音被反复重入而丢音
             if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
                 z.fadedOut = true;
                 GrenadeManager.stopSound(z.level, z.pos, "smoke.hiss");
