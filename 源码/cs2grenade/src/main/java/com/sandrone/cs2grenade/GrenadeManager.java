@@ -473,6 +473,33 @@ public final class GrenadeManager {
         return true;
     }
 
+    static void clearRoundGrenades(MinecraftServer server) {
+        for (Grenade grenade : ACTIVE) {
+            if (grenade.display != null) {
+                grenade.display.discard();
+            }
+        }
+        ACTIVE.clear();
+        PENDING_THROW.clear();
+        FIRE_ZONES.forEach(GrenadeManager::extinguish);
+        FIRE_ZONES.clear();
+        FIRE_VICTIMS.clear();
+
+        for (SmokeZone zone : SMOKE_ZONES) {
+            for (UUID playerId : zone.hissTicks.keySet()) {
+                ServerPlayer player = server.getPlayerList().getPlayer(playerId);
+                if (player != null) {
+                    stopSoundFor(player, "smoke.hiss");
+                }
+            }
+            if (zone.display != null) {
+                PERSIST_DISPLAYS.remove(zone.display.getUUID());
+                zone.display.discard();
+            }
+        }
+        purgeTransientVisuals(server);
+    }
+
     public static void purgeTransientVisuals(MinecraftServer server) {
         if (server == null) {
             return;
