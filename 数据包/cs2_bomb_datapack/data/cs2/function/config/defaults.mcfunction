@@ -9,7 +9,7 @@ scoreboard players set defuse cs2_cfg 10
 scoreboard players set kit_time cs2_cfg 5
 scoreboard players set kit cs2_cfg 1
 scoreboard players set overtime cs2_cfg 1
-scoreboard players set #music_preset cs2_cfg 0
+scoreboard players set #music_preset cs2_cfg 1
 
 # 内部状态初始化（只在首次写默认值时执行）
 scoreboard players set #state cs2_state 0
