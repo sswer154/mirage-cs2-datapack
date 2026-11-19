@@ -878,15 +878,25 @@ public final class GrenadeManager {
     private static void igniteFire(Grenade g, Vec3 pos) {
         ServerLevel level = g.level;
         int life = 140;
-        FIRE_ZONES.add(new FireZone(level, pos, serverRef == null ? 0 : serverRef.getTickCount(), life, g.thrower));
+        int startTick = serverRef == null ? 0 : serverRef.getTickCount();
+        FireZone zone = new FireZone(level, pos, startTick, life, g.thrower);
+        FIRE_ZONES.add(zone);
+        // 立刻铺一次火，别等下一 tick 的 tickFires：落点是不完整方块时也要当场有火，
+        // 不能出现“弹体已删、火区为空、20 tick 后安静消失”的空窗
+        placeFire(zone, 4.0);
+        zone.lastPlaceTick = startTick;
         level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.8f, 1.1f);
-        if (g.display != null) {
+        if (g.display != null && !g.display.isRemoved()) {
             g.display.discard();
         }
     }
 
     private static final double FIRE_NODE_RADIUS = 0.8;
     private static final double FIRE_VERTICAL_TOLERANCE = 0.65;
+    /** 支撑面最小厚度（格）：1/16 即可，铁轨 2/16、活板门 3/16、地毯 1/16 这些不完整方块都算支撑面。 */
+    private static final double FIRE_SUPPORT_MIN_TOP = 0.0625;
+    /** 落点正下方找不到火格时，向四周补找支撑面的最大水平半径。 */
+    private static final int FIRE_NEARBY_RADIUS = 2;
 
     private static void placeFire(FireZone zone, double radius) {
         zone.nodes.clear();
@@ -895,6 +905,12 @@ public final class GrenadeManager {
         int baseY = (int)Math.floor(zone.center.y);
         BlockPos centerGround = findFireCenter(zone.level, cx, cz, baseY);
         if (centerGround == null) {
+            // 落点正下方没有能直接放火的格（薄片方块、碰撞体内部等），先在附近找最近的支撑面
+            centerGround = findFireCenterNearby(zone.level, cx, cz, baseY);
+        }
+        if (centerGround == null) {
+            // 实在找不到支撑面也要留一个火节点：宁可火悬在落点，也不能静默空掉
+            zone.nodes.add(new FireNode(zone.center, (float)FIRE_NODE_RADIUS));
             return;
         }
         int centerY = centerGround.getY();
@@ -943,6 +959,25 @@ public final class GrenadeManager {
         return null;
     }
 
+    /** 落点这一列放不下火时，在水平方向最多 FIRE_NEARBY_RADIUS 格内找最近的可用火格。 */
+    private static BlockPos findFireCenterNearby(ServerLevel level, int cx, int cz, int baseY) {
+        BlockPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (int dx = -FIRE_NEARBY_RADIUS; dx <= FIRE_NEARBY_RADIUS; ++dx) {
+            for (int dz = -FIRE_NEARBY_RADIUS; dz <= FIRE_NEARBY_RADIUS; ++dz) {
+                if (dx == 0 && dz == 0) continue;
+                double dist = (double)(dx * dx + dz * dz);
+                if (dist >= bestDist) continue;
+                BlockPos candidate = findFireCenter(level, cx + dx, cz + dz, baseY);
+                if (candidate != null) {
+                    best = candidate;
+                    bestDist = dist;
+                }
+            }
+        }
+        return best;
+    }
+
     private static BlockPos findFireGround(ServerLevel level, int x, int z, int fromY) {
         for (int y = fromY + 1; y >= fromY - 1; --y) {
             BlockPos at = new BlockPos(x, y, z);
@@ -959,24 +994,22 @@ public final class GrenadeManager {
         }
         BlockPos below = pos.below();
         VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
-        return !support.isEmpty() && support.max(Direction.Axis.Y) >= 0.45;
+        return !support.isEmpty() && support.max(Direction.Axis.Y) >= FIRE_SUPPORT_MIN_TOP;
+    }
+
+    /** 火节点所在格子的支撑面世界高度；没有碰撞形状时退回格子底面。 */
+    private static double fireSurfaceY(ServerLevel level, BlockPos cell) {
+        BlockPos below = cell.below();
+        VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
+        return (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
     }
 
     private static void addFireNode(FireZone zone, BlockPos cell) {
-        BlockPos below0 = cell.below();
-        VoxelShape support0 = zone.level.getBlockState(below0).getCollisionShape(zone.level, below0);
-        double surfaceY0 = (double)below0.getY() + (support0.isEmpty() ? 0.0 : support0.max(Direction.Axis.Y));
-        Vec3 at = new Vec3((double)cell.getX() + 0.5, surfaceY0 + 0.05, (double)cell.getZ() + 0.5);
+        Vec3 at = new Vec3((double)cell.getX() + 0.5, fireSurfaceY(zone.level, cell) + 0.05, (double)cell.getZ() + 0.5);
         if (GrenadeManager.smokeCovers(zone.level, at)) {
             return;
         }
-        BlockPos below = cell.below();
-        VoxelShape support = zone.level.getBlockState(below).getCollisionShape(zone.level, below);
-        double surfaceY = (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
-        zone.nodes.add(new FireNode(
-            new Vec3((double)cell.getX() + 0.5, surfaceY + 0.05, (double)cell.getZ() + 0.5),
-            (float)FIRE_NODE_RADIUS
-        ));
+        zone.nodes.add(new FireNode(at, (float)FIRE_NODE_RADIUS));
     }
 
     private static boolean fireHasHeadroom(ServerLevel level, BlockPos to) {
@@ -995,7 +1028,9 @@ public final class GrenadeManager {
         if (dy > 1 || dy < -1) {
             return false;
         }
-        double rayY = (double)Math.max(cur.getY(), next.getY()) + 0.5;
+        // 射线高度取两边支撑面的较高者再抬 0.1：栅栏/铁轨这类比一格矮的支撑面上，
+        // 用格子中心 +0.5 会正好擦着碰撞面，火就下不到旁边的地面
+        double rayY = Math.max(fireSurfaceY(level, cur), fireSurfaceY(level, next)) + 0.1;
         Vec3 from = new Vec3(cur.getX() + 0.5, rayY, cur.getZ() + 0.5);
         Vec3 to = new Vec3(next.getX() + 0.5, rayY, next.getZ() + 0.5);
         BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
