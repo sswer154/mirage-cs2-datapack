@@ -1,5 +1,5 @@
-tag @a remove cs2_voted_restart
-tag @a remove cs2_voted_end
+scoreboard players reset * cs2_voted_restart
+scoreboard players reset * cs2_voted_end
 scoreboard players set #vote_restart_t cs2_counts 0
 scoreboard players set #vote_restart_c cs2_counts 0
 scoreboard players set #vote_end_t cs2_counts 0
