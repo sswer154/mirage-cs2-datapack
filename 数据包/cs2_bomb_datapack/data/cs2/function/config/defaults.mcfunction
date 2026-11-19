@@ -1,5 +1,7 @@
 # 首次运行或删掉 cs2_cfg 后写入默认配置。
 # 想改默认值，改这里，然后执行 /function cs2:config/defaults。
+execute if score #state cs2_state matches 1..6 run tellraw @s {"text":"比赛进行中，请先通过正常流程结束比赛再恢复默认配置。","color":"red"}
+execute if score #state cs2_state matches 1..6 run return fail
 scoreboard players set warmup cs2_cfg 10
 scoreboard players set freeze cs2_cfg 25
 scoreboard players set round cs2_cfg 115
@@ -11,7 +13,10 @@ scoreboard players set kit cs2_cfg 1
 scoreboard players set overtime cs2_cfg 1
 scoreboard players set #music_preset cs2_cfg 1
 
-# 内部状态初始化（只在首次写默认值时执行）
+scoreboard players set #cfg_ready cs2_const 1
+# 已有比赛状态时只恢复配置，保留比分及参赛流程。
+execute if score #state cs2_state = #state cs2_state run return 1
+# 内部状态初始化，仅用于新的世界。
 scoreboard players set #state cs2_state 0
 scoreboard players set #timer cs2_timer 0
 scoreboard players set #round cs2_round 0
@@ -30,4 +35,3 @@ scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #hud_tick cs2_const 0
 scoreboard players set #blink cs2_blink 0
 scoreboard players set #blink_on cs2_blink 0
-scoreboard players set #cfg_ready cs2_const 1
