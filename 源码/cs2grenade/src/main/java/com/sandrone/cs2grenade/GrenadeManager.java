@@ -716,6 +716,7 @@ public final class GrenadeManager {
             return;
         }
         Vec3 previousVel = g.vel;
+        ++g.age;
         g.vel = g.vel.add(0.0, -g.type.gravity(), 0.0).scale(g.type.drag());
         Vec3 to = from.add(g.vel);
         if (!g.level.isLoaded(BlockPos.containing(to))) {
@@ -815,23 +816,34 @@ public final class GrenadeManager {
         if (g.display != null && g.display.isAlive()) {
             g.display.setPos(to.x, to.y + g.type.renderOffsetY(), to.z);
         }
-        if (g.fuse % 2 == 0) {
+        if ((g.age & 1) == 0) {
             g.level.sendParticles((ParticleOptions)ParticleTypes.SMOKE, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
         }
         if ("smoke".equals(g.type.effect())) {
-            // 烟雾弹没有引信：停稳或接触火才起烟
-            if (g.vel.length() < 0.12) {
+            // 烟雾弹没有引信：只有真正贴地停稳、或碰到火才起烟。
+            // 下方没有支撑面的一律不算停稳：抛物线顶点、卡方块边缘、被击退的短暂零速都不起烟。
+            boolean supported = hasSupportBelow(g.level, to)
+                    && Math.abs(g.vel.y) < BOUNCE_MIN_VERTICAL * 3.0
+                    && g.vel.horizontalDistanceSqr() < 0.12 * 0.12;
+            if (supported) {
                 ++g.smokeRest;
             } else {
                 g.smokeRest = 0;
+            }
+            if (to.y < g.level.getMinBuildHeight() - 8) {
+                // 掉进虚空的兜底：直接移除，不在虚空里凭空起烟
+                if (g.display != null && !g.display.isRemoved()) {
+                    g.display.discard();
+                }
+                g.fuse = 0;
+                return;
             }
             net.minecraft.core.BlockPos at = net.minecraft.core.BlockPos.containing(to);
             boolean burning = g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.FIRE)
                     || g.level.getBlockState(at).is(net.minecraft.world.level.block.Blocks.LAVA)
                     || inFireZone(g.level, at);
-            // 烟雾弹也要递减兜底引信，避免卡在未加载区块或水面时永不起烟
-            --g.fuse;
-            if (g.smokeRest >= 3 || burning || g.fuse <= 0) {
+            // 不再递减兜底引信：飞行时间再长也不在空中起烟
+            if (g.smokeRest >= 3 || burning) {
                 g.fuse = 0;
             }
         } else if (--g.fuse == 20) {
@@ -1670,6 +1682,8 @@ public final class GrenadeManager {
         boolean soundTailPlayed;
         int restTicks;
         int smokeRest;
+        /** 弹体存活的 tick 数，用于尾迹等周期性效果，不再借用 fuse。 */
+        int age;
         Vec3 soundPos;
         int wallSoundEndTick;
         int tailPendingAt;
