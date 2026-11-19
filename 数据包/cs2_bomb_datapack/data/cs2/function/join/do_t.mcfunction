@@ -24,7 +24,9 @@ scoreboard players set @s cs2_killer_timer 0
 scoreboard players set @s cs2_needs_default 1
 scoreboard players set @s cs2_was_alive 0
 execute if score #state cs2_state matches 1..6 run scoreboard players set @s cs2_inmatch 1
-execute if score #state cs2_state matches 0 run scoreboard players set @s cs2_inmatch 0
+scoreboard players reset @s cs2_ready_team
+execute unless score #state cs2_state matches 1..6 run scoreboard players set @s cs2_inmatch 0
+execute if score @s cs2_inmatch matches 0 run scoreboard players set @s cs2_ready_team 1
 clear @s
 effect clear @s
 execute if score @s cs2_inmatch matches 1 run function cs2:util/speed

@@ -1,4 +1,7 @@
 # 重连/中途加入
+# 等候开赛的玩家保留阵营和选边时保存的背包。
+execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_t] run return 0
+execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_ct] run return 0
 # 赛后离线玩家先按退队流程清理状态，再返还背包。
 execute unless score @s cs2_inmatch matches 1 if function cs2:player/has_saved_inventory run return run function cs2:join/to_lobby
 # 升级清理：旧版商店木棍已废弃，参赛者重连时移除。
