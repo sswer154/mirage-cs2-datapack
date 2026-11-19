@@ -42,3 +42,6 @@ execute if score #reason cs2_counts matches 6 run title @a[scores={cs2_inmatch=1
 
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"回合结束  比分  T ","color":"gold"},{"score":{"name":"#t","objective":"cs2_score_t"}},{"text":" : ","color":"white"},{"score":{"name":"#ct","objective":"cs2_score_ct"}},{"text":" CT","color":"gold"}]
 playsound minecraft:ui.toast.challenge_complete master @a[scores={cs2_inmatch=1}]
+
+# 每回合结束音乐盒接口
+function cs2:music/play
