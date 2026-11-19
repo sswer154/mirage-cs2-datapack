@@ -39,7 +39,9 @@ public final class KillFeedHandler {
         }
 
         DamageSource source = event.getSource();
-        Entity attackerEntity = source.getEntity();
+        // 爆炸伤害把伤害者放在 directEntity（explosion(exploder, cause)），
+        // getEntity() 取的是 causingEntity，这里两者都兼容
+        Entity attackerEntity = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
         boolean selfKill = attackerEntity == victim && isGrenadeDamage(source);
         ServerPlayer killer = attackerEntity instanceof ServerPlayer p && p != victim ? p : null;
         int victimTeam = team(server, victim);
