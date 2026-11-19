@@ -1501,7 +1501,7 @@ public final class GrenadeManager {
                 if (dist <= fragOuter) {
                     float factor = dist <= fragInner ? 1.0f : (float)(1.0 - 0.25 * (dist - fragInner) / (fragOuter - fragInner));
                     victim.invulnerableTime = 0;
-                    if (victim.hurt(level.damageSources().explosion(thrower, null), fragDamage * factor) && isEnemy(thrower, victim)) {
+                    if (victim.hurt(new GrenadeExplosionDamageSource(level, thrower), fragDamage * factor) && isEnemy(thrower, victim)) {
                         GrenadeManager.addDamageScore(thrower, "cs2_grenade_dmg", fragDamage * factor);
                     }
                 }
@@ -1658,7 +1658,7 @@ public final class GrenadeManager {
             Player p;
             if (e instanceof Player && (p = (Player)e).isSpectator() || (dist = e.position().distanceTo(pos)) > pierceOuter) continue;
             float factor = dist <= pierceInner ? 1.0f : (float)(1.0 - (dist - pierceInner) / (pierceOuter - pierceInner));
-            if (e.hurt(level.damageSources().explosion(g.thrower, null), pierceDamage * factor) && isEnemy(g.thrower, e)) {
+            if (e.hurt(new GrenadeExplosionDamageSource(level, g.thrower), pierceDamage * factor) && isEnemy(g.thrower, e)) {
                 GrenadeManager.addDamageScore(g.thrower, "cs2_grenade_dmg", pierceDamage * factor);
             }
         }
