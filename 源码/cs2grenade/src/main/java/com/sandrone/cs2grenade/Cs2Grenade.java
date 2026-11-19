@@ -10,6 +10,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.ScoreHolder;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -30,6 +31,7 @@ public class Cs2Grenade {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG;
     public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
+    private boolean roundWasLive;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -74,6 +76,7 @@ public class Cs2Grenade {
     }
 
     private void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        roundWasLive = false;
         GrenadeManager.cleanupOrphans(event.getServer());
         GrenadeManager.purgeTransientVisuals(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer());
     }
@@ -94,6 +97,16 @@ public class Cs2Grenade {
     }
 
     private void onServerTick(ServerTickEvent.Post event) {
+        var server = event.getServer();
+        var scoreboard = server.getScoreboard();
+        var stateObjective = scoreboard.getObjective("cs2_state");
+        var state = stateObjective == null ? null : scoreboard.getPlayerScoreInfo(
+                ScoreHolder.forNameOnly("#state"), stateObjective);
+        boolean roundIsLive = state != null && (state.value() == 3 || state.value() == 4);
+        if (roundWasLive && !roundIsLive) {
+            GrenadeManager.clearRoundGrenades(server);
+        }
+        roundWasLive = roundIsLive;
         GrenadeManager.tick();
         if (event.getServer() != null) {
             C4Sfx.tick(event.getServer());
