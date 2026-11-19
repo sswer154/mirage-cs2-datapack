@@ -45,6 +45,10 @@ execute unless score #state cs2_state matches 1..6 run scoreboard players set #e
 execute if score #paused cs2_counts matches 1 run function cs2:panel/pause_tick
 execute if score #paused cs2_counts matches 1 run return 0
 
+# 在处理离队和暂停后，以当前在线参赛者重新核定正在进行的投票。
+execute if score #solo cs2_counts matches 0 if score #state cs2_state matches 3..4 if entity @a[scores={cs2_inmatch=1,cs2_voted_restart=1}] run function cs2:panel/check_votes
+execute if score #solo cs2_counts matches 0 if score #state cs2_state matches 2..4 if entity @a[scores={cs2_inmatch=1,cs2_voted_end=1}] run function cs2:panel/check_votes
+
 # 双方在准备阶段组齐时，用干净的正式经济与装备重新开始购买阶段。
 execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run return run function cs2:practice/to_formal
 # 状态计时
