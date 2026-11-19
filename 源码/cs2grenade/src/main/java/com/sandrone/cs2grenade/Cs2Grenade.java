@@ -7,7 +7,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -50,6 +52,7 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(this::onEntityInteractSpecific);
         NeoForge.EVENT_BUS.addListener(KillFeedHandler::onLivingDeath);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
+        NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(this::onReload);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(this::onServerStarted);
@@ -80,6 +83,13 @@ public class Cs2Grenade {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel level
                 && event.getChunk() instanceof net.minecraft.world.level.chunk.LevelChunk chunk) {
             GrenadeManager.cleanupChunk(level, chunk);
+        }
+    }
+
+    private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            C4Plant.cancel(player, false);
+            C4Defuse.cancel(player);
         }
     }
 
