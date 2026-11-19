@@ -966,6 +966,7 @@ public final class GrenadeManager {
     }
 
     private static final double FIRE_NODE_RADIUS = 0.8;
+    private static final int MAX_FIRE_NODES = 320;
     private static final double FIRE_VERTICAL_TOLERANCE = 0.65;
     /** 支撑面最小厚度（格）：1/16 即可，铁轨 2/16、活板门 3/16、地毯 1/16 这些不完整方块都算支撑面。 */
     private static final double FIRE_SUPPORT_MIN_TOP = 0.0625;
@@ -993,7 +994,7 @@ public final class GrenadeManager {
         Map<BlockPos, Double> shortest = new HashMap<>();
         shortest.put(centerGround, 0.0);
         queue.add(new FireStep(centerGround, 0.0));
-        while (!queue.isEmpty()) {
+        while (!queue.isEmpty() && zone.nodes.size() < MAX_FIRE_NODES) {
             FireStep step = queue.remove();
             BlockPos current = step.cell();
             if (step.distance() > shortest.get(current)) continue;
