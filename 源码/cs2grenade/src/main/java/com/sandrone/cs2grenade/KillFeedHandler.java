@@ -69,7 +69,7 @@ public final class KillFeedHandler {
 
     private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam, ServerPlayer killer, int killerTeam, boolean selfKill) {
         if (selfKill) {
-            Component weapon = weaponLabel(source, victim);
+            Component weapon = weaponLabel(source);
             MutableComponent result = Component.empty();
             result.append(victim.getDisplayName())
                     .append(Component.literal(" 被自己的").withStyle(ChatFormatting.GRAY))
@@ -87,7 +87,7 @@ public final class KillFeedHandler {
         }
         result.append(teamTag(killerTeam))
                 .append(killer.getDisplayName());
-        Component weapon = weaponLabel(source, killer);
+        Component weapon = weaponLabel(source);
         if (weapon != null) {
             result.append(Component.literal(" [").withStyle(ChatFormatting.GRAY))
                     .append(weapon)
@@ -103,22 +103,19 @@ public final class KillFeedHandler {
 
     private static boolean isGrenadeDamage(DamageSource source) {
         String damageId = source.getMsgId();
-        return damageId.startsWith("explosion") || "indirect_magic".equals(damageId);
+        return damageId.startsWith("explosion") || source.is(GrenadeManager.FIRE_DAMAGE_TYPE);
     }
 
-    private static Component weaponLabel(DamageSource source, ServerPlayer killer) {
+    private static Component weaponLabel(DamageSource source) {
         String damageId = source.getMsgId();
         if (damageId.startsWith("explosion")) {
             return Component.literal("高爆手雷").withStyle(ChatFormatting.GOLD);
         }
-        if ("indirect_magic".equals(damageId)) {
+        if (source.is(GrenadeManager.FIRE_DAMAGE_TYPE)) {
             return Component.literal("燃烧弹").withStyle(ChatFormatting.GOLD);
         }
         ItemStack weapon = source.getWeaponItem();
-        // 子弹/间接伤害的 DamageSource 可能没有武器字段，getWeaponItem() 会返回 null
-        if (weapon == null || weapon.isEmpty()) {
-            weapon = killer.getMainHandItem();
-        }
+        // 伤害源未记录武器时省略名称，避免把命中前换到手上的物品当成凶器。
         if (weapon == null || weapon.isEmpty()) {
             return null;
         }
