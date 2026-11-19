@@ -61,10 +61,19 @@ public final class KillFeedHandler {
                 command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
             }
             // 击杀奖金/CT 团队击杀仍由数据包计算；同队击杀不会获得奖金。
-            String fn = "cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
+            String rewardCommand;
+            if (isGrenadeDamage(source)) {
+                if (killerTeam == victimTeam) {
+                    return;
+                }
+                String enemyTeam = victimTeam == 1 ? "cs2_ct" : "cs2_t";
+                rewardCommand = "execute if entity @s[team=" + enemyTeam + "] run function cs2:econ/kill/reward_grenade";
+            } else {
+                rewardCommand = "function cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
+            }
             server.getCommands().performPrefixedCommand(
                     killer.createCommandSourceStack().withPermission(4).withSuppressedOutput(),
-                    "function " + fn
+                    rewardCommand
             );
         }
     }
