@@ -1,6 +1,8 @@
 # 重连/中途加入
-# 升级清理：旧版商店木棍已废弃，重连时移除
-clear @s minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
+# 赛后离线玩家先按退队流程清理状态，再返还背包。
+execute unless score @s cs2_inmatch matches 1 if function cs2:player/has_saved_inventory run return run function cs2:join/to_lobby
+# 升级清理：旧版商店木棍已废弃，参赛者重连时移除。
+execute if score @s cs2_inmatch matches 1 run clear @s minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 # 非参赛者：不自动传送、不改模式、不清背包；顺手清掉残留队伍
 execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_t] run team leave @s
 execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_ct] run team leave @s

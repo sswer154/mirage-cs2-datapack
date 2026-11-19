@@ -21,5 +21,6 @@ effect give @s minecraft:night_vision infinite 0 true
 effect give @s minecraft:invisibility infinite 0 true
 function cs2:util/jump_unlock
 gamemode spectator @s
+cs2inventory restore
 tellraw @s {"text":"已加入解说队伍：可查看击杀播报，不参与回合、不影响比分。","color":"aqua"}
 tellraw @s {"text":"离开解说请使用 /trigger cs2_leave。","color":"gray"}
