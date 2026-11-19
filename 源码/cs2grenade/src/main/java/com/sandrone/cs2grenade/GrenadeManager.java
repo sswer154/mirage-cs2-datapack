@@ -52,7 +52,7 @@ package com.sandrone.cs2grenade;
 import com.sandrone.cs2grenade.Cs2Grenade;
 import com.sandrone.cs2grenade.GrenadeLoader;
 import com.sandrone.cs2grenade.GrenadeType;
-import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -965,6 +966,7 @@ public final class GrenadeManager {
     }
 
     private static final double FIRE_NODE_RADIUS = 0.8;
+    private static final int MAX_FIRE_NODES = 320;
     private static final double FIRE_VERTICAL_TOLERANCE = 0.65;
     /** 支撑面最小厚度（格）：1/16 即可，铁轨 2/16、活板门 3/16、地毯 1/16 这些不完整方块都算支撑面。 */
     private static final double FIRE_SUPPORT_MIN_TOP = 0.0625;
@@ -979,7 +981,7 @@ public final class GrenadeManager {
         BlockPos centerGround = findFireCenter(zone.level, cx, cz, baseY);
         if (centerGround == null) {
             // 落点正下方没有能直接放火的格（薄片方块、碰撞体内部等），先在附近找最近的支撑面
-            centerGround = findFireCenterNearby(zone.level, cx, cz, baseY);
+            centerGround = findFireCenterNearby(zone.level, zone.center, cx, cz, baseY);
         }
         if (centerGround == null) {
             // 实在找不到支撑面也要留一个火节点：宁可火悬在落点，也不能静默空掉
@@ -987,40 +989,46 @@ public final class GrenadeManager {
             return;
         }
         int centerY = centerGround.getY();
-        // 以“沿地面走过的格数”限制蔓延，而不是两点直线距离
-        int maxSteps = Math.max(2, (int)Math.ceil(radius));
-        ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
-        HashMap<BlockPos, Integer> depth = new HashMap<BlockPos, Integer>();
-        HashSet<BlockPos> visited = new HashSet<BlockPos>();
-        visited.add(centerGround);
-        depth.put(centerGround, 0);
-        queue.add(centerGround);
-        while (!queue.isEmpty()) {
-            BlockPos cur = queue.poll();
-            int d = depth.getOrDefault(cur, 0);
-            addFireNode(zone, cur);
-            if (d >= maxSteps) {
-                continue;
-            }
-            BlockPos[] neighbors = new BlockPos[]{
-                cur.offset(1, 0, 0), cur.offset(-1, 0, 0),
-                cur.offset(0, 0, 1), cur.offset(0, 0, -1)
-            };
-            for (BlockPos n : neighbors) {
-                BlockPos next = findFireGround(zone.level, n.getX(), n.getZ(), cur.getY());
-                if (next == null) continue;
-                int dy = next.getY() - cur.getY();
-                if (dy < -1 || dy > 1) continue;
-                if (next.getY() > centerY + 1) continue;
-                if (!fireHasHeadroom(zone.level, next)) continue;
-                if (!fireSpreadPathAllowed(zone.level, cur, next)) continue;
-                if (visited.add(next)) {
-                    depth.put(next, d + 1);
-                    queue.add(next);
+        // 按最短可行路径计距离。斜向步长为 √2，开阔地形成接近圆形的火区。
+        PriorityQueue<FireStep> queue = new PriorityQueue<>(Comparator.comparingDouble(FireStep::distance));
+        Map<BlockPos, Double> shortest = new HashMap<>();
+        shortest.put(centerGround, 0.0);
+        queue.add(new FireStep(centerGround, 0.0));
+        while (!queue.isEmpty() && zone.nodes.size() < MAX_FIRE_NODES) {
+            FireStep step = queue.remove();
+            BlockPos current = step.cell();
+            if (step.distance() > shortest.get(current)) continue;
+            addFireNode(zone, current);
+            for (int dx = -1; dx <= 1; ++dx) {
+                for (int dz = -1; dz <= 1; ++dz) {
+                    if (dx == 0 && dz == 0) continue;
+                    boolean diagonal = dx != 0 && dz != 0;
+                    double distance = step.distance() + (diagonal ? Math.sqrt(2.0) : 1.0);
+                    if (distance > radius) continue;
+                    BlockPos next = findFireGround(zone.level, current.getX() + dx, current.getZ() + dz, current.getY());
+                    if (next == null || next.getY() > centerY + 1
+                            || distance >= shortest.getOrDefault(next, Double.POSITIVE_INFINITY)) continue;
+                    if (!fireHasHeadroom(zone.level, next) || !fireSpreadPathAllowed(zone.level, current, next)) continue;
+                    if (diagonal && !canSpreadDiagonally(zone.level, current, next, dx, dz)) continue;
+                    shortest.put(next, distance);
+                    queue.add(new FireStep(next, distance));
                 }
             }
         }
     }
+
+    private static boolean canSpreadDiagonally(ServerLevel level, BlockPos from, BlockPos to, int dx, int dz) {
+        // 跨高度走原有的直向路径。平地只有两侧都通畅时才允许斜向穿过拐角。
+        if (from.getY() != to.getY()) return false;
+        BlockPos xSide = from.offset(dx, 0, 0);
+        BlockPos zSide = from.offset(0, 0, dz);
+        return isFireCell(level, xSide) && fireHasHeadroom(level, xSide)
+                && isFireCell(level, zSide) && fireHasHeadroom(level, zSide)
+                && fireSpreadPathAllowed(level, from, xSide) && fireSpreadPathAllowed(level, xSide, to)
+                && fireSpreadPathAllowed(level, from, zSide) && fireSpreadPathAllowed(level, zSide, to);
+    }
+
+    private record FireStep(BlockPos cell, double distance) {}
 
     private static BlockPos findFireCenter(ServerLevel level, int cx, int cz, int baseY) {
         for (int y = baseY + 2; y >= baseY - 4; --y) {
@@ -1033,7 +1041,7 @@ public final class GrenadeManager {
     }
 
     /** 落点这一列放不下火时，在水平方向最多 FIRE_NEARBY_RADIUS 格内找最近的可用火格。 */
-    private static BlockPos findFireCenterNearby(ServerLevel level, int cx, int cz, int baseY) {
+    private static BlockPos findFireCenterNearby(ServerLevel level, Vec3 origin, int cx, int cz, int baseY) {
         BlockPos best = null;
         double bestDist = Double.MAX_VALUE;
         for (int dx = -FIRE_NEARBY_RADIUS; dx <= FIRE_NEARBY_RADIUS; ++dx) {
@@ -1042,7 +1050,12 @@ public final class GrenadeManager {
                 double dist = (double)(dx * dx + dz * dz);
                 if (dist >= bestDist) continue;
                 BlockPos candidate = findFireCenter(level, cx + dx, cz + dz, baseY);
-                if (candidate != null) {
+                if (candidate != null && fireHasHeadroom(level, candidate)) {
+                    Vec3 target = new Vec3(candidate.getX() + 0.5, fireSurfaceY(level, candidate) + 0.1,
+                            candidate.getZ() + 0.5);
+                    Vec3 start = origin.add(0.0, 0.1, 0.0);
+                    if (level.clip(new ClipContext(start, target, ClipContext.Block.COLLIDER,
+                            ClipContext.Fluid.NONE, CollisionContext.empty())).getType() == HitResult.Type.BLOCK) continue;
                     best = candidate;
                     bestDist = dist;
                 }
