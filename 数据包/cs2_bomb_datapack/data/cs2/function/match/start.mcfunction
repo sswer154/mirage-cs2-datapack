@@ -27,7 +27,8 @@ execute at @e[type=marker,tag=cs2_lobby,limit=1] run forceload add ~ ~
 execute as @a[team=cs2_t] run scoreboard players set @s cs2_team 1
 execute as @a[team=cs2_ct] run scoreboard players set @s cs2_team 2
 
-# 先标记本场参赛者，后面的清包/重置/经济只作用于这批人
+# 先清理旧存档中残留的参赛资格，再登记本场在线参赛者。
+scoreboard players set * cs2_inmatch 0
 execute as @a[team=cs2_t] run scoreboard players set @s cs2_inmatch 1
 execute as @a[team=cs2_ct] run scoreboard players set @s cs2_inmatch 1
 
