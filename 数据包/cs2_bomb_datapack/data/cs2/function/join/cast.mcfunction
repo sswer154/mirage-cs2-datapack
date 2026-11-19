@@ -11,6 +11,7 @@ scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0
 scoreboard players set @s cs2_inmatch 0
+scoreboard players reset @s cs2_ready_team
 scoreboard players set @s cs2_needs_default 0
 scoreboard players set @s cs2_was_alive 0
 function cs2:player/tag
