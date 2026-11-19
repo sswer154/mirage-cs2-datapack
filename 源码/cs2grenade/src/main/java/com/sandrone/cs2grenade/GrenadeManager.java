@@ -52,7 +52,7 @@ package com.sandrone.cs2grenade;
 import com.sandrone.cs2grenade.Cs2Grenade;
 import com.sandrone.cs2grenade.GrenadeLoader;
 import com.sandrone.cs2grenade.GrenadeType;
-import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -965,40 +966,46 @@ public final class GrenadeManager {
             return;
         }
         int centerY = centerGround.getY();
-        // 以“沿地面走过的格数”限制蔓延，而不是两点直线距离
-        int maxSteps = Math.max(2, (int)Math.ceil(radius));
-        ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
-        HashMap<BlockPos, Integer> depth = new HashMap<BlockPos, Integer>();
-        HashSet<BlockPos> visited = new HashSet<BlockPos>();
-        visited.add(centerGround);
-        depth.put(centerGround, 0);
-        queue.add(centerGround);
+        // 按最短可行路径计距离。斜向步长为 √2，开阔地形成接近圆形的火区。
+        PriorityQueue<FireStep> queue = new PriorityQueue<>(Comparator.comparingDouble(FireStep::distance));
+        Map<BlockPos, Double> shortest = new HashMap<>();
+        shortest.put(centerGround, 0.0);
+        queue.add(new FireStep(centerGround, 0.0));
         while (!queue.isEmpty()) {
-            BlockPos cur = queue.poll();
-            int d = depth.getOrDefault(cur, 0);
-            addFireNode(zone, cur);
-            if (d >= maxSteps) {
-                continue;
-            }
-            BlockPos[] neighbors = new BlockPos[]{
-                cur.offset(1, 0, 0), cur.offset(-1, 0, 0),
-                cur.offset(0, 0, 1), cur.offset(0, 0, -1)
-            };
-            for (BlockPos n : neighbors) {
-                BlockPos next = findFireGround(zone.level, n.getX(), n.getZ(), cur.getY());
-                if (next == null) continue;
-                int dy = next.getY() - cur.getY();
-                if (dy < -1 || dy > 1) continue;
-                if (next.getY() > centerY + 1) continue;
-                if (!fireHasHeadroom(zone.level, next)) continue;
-                if (!fireSpreadPathAllowed(zone.level, cur, next)) continue;
-                if (visited.add(next)) {
-                    depth.put(next, d + 1);
-                    queue.add(next);
+            FireStep step = queue.remove();
+            BlockPos current = step.cell();
+            if (step.distance() > shortest.get(current)) continue;
+            addFireNode(zone, current);
+            for (int dx = -1; dx <= 1; ++dx) {
+                for (int dz = -1; dz <= 1; ++dz) {
+                    if (dx == 0 && dz == 0) continue;
+                    boolean diagonal = dx != 0 && dz != 0;
+                    double distance = step.distance() + (diagonal ? Math.sqrt(2.0) : 1.0);
+                    if (distance > radius) continue;
+                    BlockPos next = findFireGround(zone.level, current.getX() + dx, current.getZ() + dz, current.getY());
+                    if (next == null || next.getY() > centerY + 1
+                            || distance >= shortest.getOrDefault(next, Double.POSITIVE_INFINITY)) continue;
+                    if (!fireHasHeadroom(zone.level, next) || !fireSpreadPathAllowed(zone.level, current, next)) continue;
+                    if (diagonal && !canSpreadDiagonally(zone.level, current, next, dx, dz)) continue;
+                    shortest.put(next, distance);
+                    queue.add(new FireStep(next, distance));
                 }
             }
         }
     }
+
+    private static boolean canSpreadDiagonally(ServerLevel level, BlockPos from, BlockPos to, int dx, int dz) {
+        // 跨高度走原有的直向路径。平地只有两侧都通畅时才允许斜向穿过拐角。
+        if (from.getY() != to.getY()) return false;
+        BlockPos xSide = from.offset(dx, 0, 0);
+        BlockPos zSide = from.offset(0, 0, dz);
+        return isFireCell(level, xSide) && fireHasHeadroom(level, xSide)
+                && isFireCell(level, zSide) && fireHasHeadroom(level, zSide)
+                && fireSpreadPathAllowed(level, from, xSide) && fireSpreadPathAllowed(level, xSide, to)
+                && fireSpreadPathAllowed(level, from, zSide) && fireSpreadPathAllowed(level, zSide, to);
+    }
+
+    private record FireStep(BlockPos cell, double distance) {}
 
     private static BlockPos findFireCenter(ServerLevel level, int cx, int cz, int baseY) {
         for (int y = baseY + 2; y >= baseY - 4; --y) {
