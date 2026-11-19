@@ -63,18 +63,15 @@ public final class KillFeedHandler {
             }
         }
 
-        if (killer != null && (killerTeam == 1 || killerTeam == 2) && (victimTeam == 1 || victimTeam == 2)) {
-            // K/D 完全由模组维护；数据包旧 advancement 已停用，避免重复计数。
+        if (killer != null && isInMatch(server, killer) && (killerTeam == 1 || killerTeam == 2)
+                && (victimTeam == 1 || victimTeam == 2) && killerTeam != victimTeam) {
+            // 友伤保留播报，只有击杀敌方参赛者计入击杀统计。
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_kills 1");
-            if (killerTeam != victimTeam) {
-                command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
-            }
+            command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
             // 击杀奖金/CT 团队击杀仍由数据包计算；同队击杀不会获得奖金。
             String rewardCommand;
             if (isGrenadeDamage(source)) {
-                if (killerTeam == victimTeam) {
-                    return;
-                }
+
                 String enemyTeam = victimTeam == 1 ? "cs2_ct" : "cs2_t";
                 rewardCommand = "execute if entity @s[team=" + enemyTeam + "] run function cs2:econ/kill/reward_grenade";
             } else {
