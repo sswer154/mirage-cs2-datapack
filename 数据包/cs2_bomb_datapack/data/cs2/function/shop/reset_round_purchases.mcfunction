@@ -1,0 +1,9 @@
+scoreboard players set @s cs2_util_smoke 0
+scoreboard players set @s cs2_util_he 0
+scoreboard players set @s cs2_util_flash 0
+scoreboard players set @s cs2_util_fire 0
+scoreboard players set @s cs2_util_he_fast 0
+scoreboard players set @s cs2_util_impact 0
+scoreboard players set @s cs2_util_surgery 0
+scoreboard players set @s cs2_util_golden 0
+scoreboard players set @s cs2_item_count 0
