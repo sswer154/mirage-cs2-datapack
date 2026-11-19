@@ -8,10 +8,10 @@ execute unless score #solo cs2_counts matches 0 run tellraw @s {"text":"练习�
 execute unless score #solo cs2_counts matches 0 run return 0
 execute unless score @s cs2_inmatch matches 1 run tellraw @s {"text":"你不是本场参赛者。","color":"red"}
 execute unless score @s cs2_inmatch matches 1 run return 0
-execute if entity @s[tag=cs2_voted_end] run tellraw @s {"text":"你已经同意结束战局了。","color":"yellow"}
-execute if entity @s[tag=cs2_voted_end] run return 0
-tag @s add cs2_voted_end
-execute store result score #vote_end_yes cs2_counts if entity @a[tag=cs2_voted_end,scores={cs2_inmatch=1}]
+execute if score @s cs2_voted_end matches 1 run tellraw @s {"text":"你已经同意结束战局了。","color":"yellow"}
+execute if score @s cs2_voted_end matches 1 run return 0
+scoreboard players set @s cs2_voted_end 1
+execute store result score #vote_end_yes cs2_counts if entity @a[scores={cs2_inmatch=1,cs2_voted_end=1}]
 execute store result score #vote_end_total cs2_counts if entity @a[scores={cs2_inmatch=1}]
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"结束战局投票：","color":"gold"},{"text":"已同意 ","color":"gray"},{"score":{"name":"#vote_end_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_end_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
 execute if score #vote_end_total cs2_counts matches 1.. if score #vote_end_yes cs2_counts >= #vote_end_total cs2_counts run function cs2:panel/end
