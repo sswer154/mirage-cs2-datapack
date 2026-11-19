@@ -989,11 +989,14 @@ public final class GrenadeManager {
         int life = 140;
         int startTick = serverRef == null ? 0 : serverRef.getTickCount();
         FireZone zone = new FireZone(level, pos, startTick, life, g.thrower);
-        FIRE_ZONES.add(zone);
-        // 立刻铺一次火，别等下一 tick 的 tickFires：落点是不完整方块时也要当场有火，
-        // 不能出现“弹体已删、火区为空、20 tick 后安静消失”的空窗
+        // 落点没有可用支撑面时也要给引爆反馈，但不能在空中留下伤害区。
         placeFire(zone, 4.0);
         zone.lastPlaceTick = startTick;
+        if (zone.nodes.isEmpty()) {
+            level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.25, 0.15, 0.25, 0.03);
+        } else {
+            FIRE_ZONES.add(zone);
+        }
         level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GLASS_BREAK, SoundSource.PLAYERS, 0.8f, 1.1f);
         if (g.display != null && !g.display.isRemoved()) {
             g.display.discard();
@@ -1003,133 +1006,134 @@ public final class GrenadeManager {
     private static final double FIRE_NODE_RADIUS = 0.8;
     private static final int MAX_FIRE_NODES = 320;
     private static final double FIRE_VERTICAL_TOLERANCE = 0.65;
-    /** 支撑面最小厚度（格）：1/16 即可，铁轨 2/16、活板门 3/16、地毯 1/16 这些不完整方块都算支撑面。 */
-    private static final double FIRE_SUPPORT_MIN_TOP = 0.0625;
-    /** 落点正下方找不到火格时，向四周补找支撑面的最大水平半径。 */
     private static final int FIRE_NEARBY_RADIUS = 2;
+    private static final double FIRE_HEADROOM = 1.8;
+    private static final double FIRE_SURFACE_OFFSET = 0.05;
+    private static final double FIRE_STEP_HEIGHT = 1.0 + 1.0e-6;
 
     private static void placeFire(FireZone zone, double radius) {
         zone.nodes.clear();
-        int cx = (int)Math.floor(zone.center.x);
-        int cz = (int)Math.floor(zone.center.z);
-        int baseY = (int)Math.floor(zone.center.y);
-        BlockPos centerGround = findFireCenter(zone.level, cx, cz, baseY);
-        if (centerGround == null) {
-            // 落点正下方没有能直接放火的格（薄片方块、碰撞体内部等），先在附近找最近的支撑面
-            centerGround = findFireCenterNearby(zone.level, zone.center, cx, cz, baseY);
+        BlockPos origin = BlockPos.containing(zone.center);
+        Map<BlockPos, Optional<FireSurface>> surfaces = new HashMap<>();
+        FireSurface center = findFireCenter(zone.level, zone.center, origin, surfaces);
+        if (center == null) {
+            center = findFireCenterNearby(zone.level, zone.center, origin, surfaces);
         }
-        if (centerGround == null) {
-            // 实在找不到支撑面也要留一个火节点：宁可火悬在落点，也不能静默空掉
-            addFireNodeAt(zone, zone.center);
+        if (center == null) {
             return;
         }
-        int centerY = centerGround.getY();
-        // 按最短可行路径计距离。斜向步长为 √2，开阔地形成接近圆形的火区。
+        double maxY = center.pos().y + FIRE_STEP_HEIGHT;
         PriorityQueue<FireStep> queue = new PriorityQueue<>(Comparator.comparingDouble(FireStep::distance));
         Map<BlockPos, Double> shortest = new HashMap<>();
-        shortest.put(centerGround, 0.0);
-        queue.add(new FireStep(centerGround, 0.0));
+        shortest.put(center.cell(), 0.0);
+        queue.add(new FireStep(center, 0.0));
         while (!queue.isEmpty() && zone.nodes.size() < MAX_FIRE_NODES) {
             FireStep step = queue.remove();
-            BlockPos current = step.cell();
-            if (step.distance() > shortest.get(current)) continue;
-            addFireNode(zone, current);
+            FireSurface current = step.surface();
+            if (step.distance() > shortest.get(current.cell())) continue;
+            addFireNodeAt(zone, current.pos());
             for (int dx = -1; dx <= 1; ++dx) {
                 for (int dz = -1; dz <= 1; ++dz) {
                     if (dx == 0 && dz == 0) continue;
                     boolean diagonal = dx != 0 && dz != 0;
                     double distance = step.distance() + (diagonal ? Math.sqrt(2.0) : 1.0);
                     if (distance > radius) continue;
-                    BlockPos next = findFireGround(zone.level, current.getX() + dx, current.getZ() + dz, current.getY());
-                    if (next == null || next.getY() > centerY + 1
-                            || distance >= shortest.getOrDefault(next, Double.POSITIVE_INFINITY)) continue;
-                    if (!fireHasHeadroom(zone.level, next) || !fireSpreadPathAllowed(zone.level, current, next)) continue;
-                    if (diagonal && !canSpreadDiagonally(zone.level, current, next, dx, dz)) continue;
-                    shortest.put(next, distance);
+                    FireSurface next = findFireGround(zone.level, current, dx, dz, surfaces);
+                    if (next == null || next.pos().y > maxY
+                            || distance >= shortest.getOrDefault(next.cell(), Double.POSITIVE_INFINITY)) continue;
+                    if (!fireSpreadPathAllowed(zone.level, current, next)) continue;
+                    if (diagonal && !canSpreadDiagonally(zone.level, current, next, dx, dz, surfaces)) continue;
+                    shortest.put(next.cell(), distance);
                     queue.add(new FireStep(next, distance));
                 }
             }
         }
     }
 
-    private static boolean canSpreadDiagonally(ServerLevel level, BlockPos from, BlockPos to, int dx, int dz) {
-        // 跨高度走原有的直向路径。平地只有两侧都通畅时才允许斜向穿过拐角。
-        if (from.getY() != to.getY()) return false;
-        BlockPos xSide = from.offset(dx, 0, 0);
-        BlockPos zSide = from.offset(0, 0, dz);
-        return isFireCell(level, xSide) && fireHasHeadroom(level, xSide)
-                && isFireCell(level, zSide) && fireHasHeadroom(level, zSide)
+    private static boolean canSpreadDiagonally(ServerLevel level, FireSurface from, FireSurface to,
+            int dx, int dz, Map<BlockPos, Optional<FireSurface>> cache) {
+        // 薄层可留在同一条斜向路径里。真实台阶仍走直向，且两侧都必须能通行。
+        if (Math.abs(from.pos().y - to.pos().y) > 0.25) return false;
+        FireSurface xSide = findFireGround(level, from, dx, 0, cache);
+        FireSurface zSide = findFireGround(level, from, 0, dz, cache);
+        double maxSideHeight = Math.max(from.pos().y, to.pos().y) + 0.25;
+        return xSide != null && zSide != null
+                && xSide.pos().y <= maxSideHeight && zSide.pos().y <= maxSideHeight
                 && fireSpreadPathAllowed(level, from, xSide) && fireSpreadPathAllowed(level, xSide, to)
                 && fireSpreadPathAllowed(level, from, zSide) && fireSpreadPathAllowed(level, zSide, to);
     }
 
-    private record FireStep(BlockPos cell, double distance) {}
+    private record FireSurface(BlockPos cell, Vec3 pos) {}
+    private record FireStep(FireSurface surface, double distance) {}
 
-    private static BlockPos findFireCenter(ServerLevel level, int cx, int cz, int baseY) {
-        for (int y = baseY + 2; y >= baseY - 4; --y) {
-            BlockPos at = new BlockPos(cx, y, cz);
-            if (isFireCell(level, at)) {
-                return at;
+    private static FireSurface findFireCenter(ServerLevel level, Vec3 impact, BlockPos column,
+            Map<BlockPos, Optional<FireSurface>> cache) {
+        FireSurface best = null;
+        double bestDistance = Double.POSITIVE_INFINITY;
+        Vec3 start = impact.add(0.0, 0.1, 0.0);
+        for (int dy = -4; dy <= 2; ++dy) {
+            FireSurface candidate = fireSurface(level, column.above(dy), cache);
+            if (candidate == null) continue;
+            double distance = impact.distanceToSqr(candidate.pos());
+            if (distance < bestDistance && fireRayClear(level, start, candidate.pos())) {
+                best = candidate;
+                bestDistance = distance;
             }
         }
-        return null;
+        return best;
     }
 
-    /** 落点这一列放不下火时，在水平方向最多 FIRE_NEARBY_RADIUS 格内找最近的可用火格。 */
-    private static BlockPos findFireCenterNearby(ServerLevel level, Vec3 origin, int cx, int cz, int baseY) {
-        BlockPos best = null;
-        double bestDist = Double.MAX_VALUE;
+    private static FireSurface findFireCenterNearby(ServerLevel level, Vec3 impact, BlockPos origin,
+            Map<BlockPos, Optional<FireSurface>> cache) {
+        FireSurface best = null;
+        double bestDistance = Double.POSITIVE_INFINITY;
         for (int dx = -FIRE_NEARBY_RADIUS; dx <= FIRE_NEARBY_RADIUS; ++dx) {
             for (int dz = -FIRE_NEARBY_RADIUS; dz <= FIRE_NEARBY_RADIUS; ++dz) {
                 if (dx == 0 && dz == 0) continue;
-                double dist = (double)(dx * dx + dz * dz);
-                if (dist >= bestDist) continue;
-                BlockPos candidate = findFireCenter(level, cx + dx, cz + dz, baseY);
-                if (candidate != null && fireHasHeadroom(level, candidate)) {
-                    Vec3 target = new Vec3(candidate.getX() + 0.5, fireSurfaceY(level, candidate) + 0.1,
-                            candidate.getZ() + 0.5);
-                    Vec3 start = origin.add(0.0, 0.1, 0.0);
-                    if (level.clip(new ClipContext(start, target, ClipContext.Block.COLLIDER,
-                            ClipContext.Fluid.NONE, CollisionContext.empty())).getType() == HitResult.Type.BLOCK) continue;
+                FireSurface candidate = findFireCenter(level, impact, origin.offset(dx, 0, dz), cache);
+                if (candidate == null) continue;
+                double distance = impact.distanceToSqr(candidate.pos());
+                if (distance < bestDistance) {
                     best = candidate;
-                    bestDist = dist;
+                    bestDistance = distance;
                 }
             }
         }
         return best;
     }
 
-    private static BlockPos findFireGround(ServerLevel level, int x, int z, int fromY) {
-        for (int y = fromY + 1; y >= fromY - 1; --y) {
-            BlockPos at = new BlockPos(x, y, z);
-            if (isFireCell(level, at)) {
-                return at;
-            }
+    private static FireSurface findFireGround(ServerLevel level, FireSurface from, int dx, int dz,
+            Map<BlockPos, Optional<FireSurface>> cache) {
+        BlockPos column = BlockPos.containing(from.pos()).offset(dx, 0, dz);
+        for (int dy = 2; dy >= -1; --dy) {
+            FireSurface next = fireSurface(level, column.above(dy), cache);
+            if (next != null && Math.abs(next.pos().y - from.pos().y) <= FIRE_STEP_HEIGHT) return next;
         }
         return null;
     }
 
-    private static boolean isFireCell(ServerLevel level, BlockPos pos) {
-        if (!level.getBlockState(pos).isAir()) {
-            return false;
-        }
-        BlockPos below = pos.below();
-        if (isWater(level, below)) {
-            // 水没有碰撞形状，但水面上的空气格也要能放火，否则整片水面都找不到火格
-            return true;
-        }
-        VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
-        return !support.isEmpty() && support.max(Direction.Axis.Y) >= FIRE_SUPPORT_MIN_TOP;
+    private static FireSurface fireSurface(ServerLevel level, BlockPos cell,
+            Map<BlockPos, Optional<FireSurface>> cache) {
+        return cache.computeIfAbsent(cell, pos -> Optional.ofNullable(sampleFireSurface(level, pos))).orElse(null);
     }
 
-    /** 火节点的支撑高度取实际碰撞面和实际水面中的较高者。 */
-    private static double fireSurfaceY(ServerLevel level, BlockPos cell) {
-        BlockPos below = cell.below();
-        VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
-        double solidHeight = support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y);
-        FluidState fluid = level.getFluidState(below);
-        double waterHeight = fluid.is(FluidTags.WATER) ? fluid.getHeight(level, below) : 0.0;
-        return below.getY() + Math.max(solidHeight, waterHeight);
+    private static FireSurface sampleFireSurface(ServerLevel level, BlockPos cell) {
+        BlockPos support = cell.below();
+        if (!level.isLoaded(support) || isWater(level, cell)) return null;
+        double x = support.getX() + 0.5;
+        double z = support.getZ() + 0.5;
+        double bottom = support.getY();
+        VoxelShape shape = level.getBlockState(support).getCollisionShape(level, support);
+        // 只认格子中心能支撑的上表面，如关闭的活板门。草、铁轨等由下面的方块支撑。
+        BlockHitResult hit = shape.clip(new Vec3(x, bottom + 2.0, z), new Vec3(x, bottom - 0.01, z), support);
+        double height = hit == null || hit.getDirection() != Direction.UP ? 0.0 : hit.getLocation().y - bottom;
+        FluidState fluid = level.getFluidState(support);
+        if (fluid.is(FluidTags.WATER)) {
+            height = Math.max(height, fluid.getHeight(level, support));
+        }
+        if (height <= 0.0) return null;
+        Vec3 surface = new Vec3(x, bottom + height + FIRE_SURFACE_OFFSET, z);
+        return fireRayClear(level, surface, surface.add(0.0, FIRE_HEADROOM, 0.0)) ? new FireSurface(cell, surface) : null;
     }
 
     /** 该格是不是水（含水源、流动水和含水方块）。 */
@@ -1147,11 +1151,6 @@ public final class GrenadeManager {
         return top.getY() + level.getFluidState(top).getHeight(level, top);
     }
 
-    private static void addFireNode(FireZone zone, BlockPos cell) {
-        Vec3 at = new Vec3((double)cell.getX() + 0.5, fireSurfaceY(zone.level, cell) + 0.05, (double)cell.getZ() + 0.5);
-        addFireNodeAt(zone, at);
-    }
-
     private static void addFireNodeAt(FireZone zone, Vec3 at) {
         if (zone.extinguished.contains(at)) return;
         if (GrenadeManager.smokeCovers(zone.level, at)) {
@@ -1161,30 +1160,18 @@ public final class GrenadeManager {
         zone.nodes.add(new FireNode(at, (float)FIRE_NODE_RADIUS));
     }
 
-    private static boolean fireHasHeadroom(ServerLevel level, BlockPos to) {
-        for (int y = to.getY(); y <= to.getY() + 1; ++y) {
-            BlockPos p = new BlockPos(to.getX(), y, to.getZ());
-            if (!level.getBlockState(p).isAir()) {
-                return false;
-            }
-        }
-        return true;
+    private static boolean fireSpreadPathAllowed(ServerLevel level, FireSurface from, FireSurface to) {
+        Vec3 start = from.pos();
+        Vec3 end = to.pos();
+        if (Math.abs(start.y - end.y) > FIRE_STEP_HEIGHT) return false;
+        // 高的一侧为踏步高度，两格中心之间仍须有净空。
+        double height = Math.max(start.y, end.y);
+        return fireRayClear(level, new Vec3(start.x, height, start.z), new Vec3(end.x, height, end.z));
     }
 
-    private static boolean fireSpreadPathAllowed(ServerLevel level, BlockPos cur, BlockPos next) {
-        // 只允许相邻格高度差 1 以内；上坡时在较高那层打射线（可越过 1 格台阶），平走/下坡在当前层挡住墙体
-        int dy = next.getY() - cur.getY();
-        if (dy > 1 || dy < -1) {
-            return false;
-        }
-        // 射线高度取两边支撑面的较高者再抬 0.1：栅栏/铁轨这类比一格矮的支撑面上，
-        // 用格子中心 +0.5 会正好擦着碰撞面，火就下不到旁边的地面
-        double rayY = Math.max(fireSurfaceY(level, cur), fireSurfaceY(level, next)) + 0.1;
-        Vec3 from = new Vec3(cur.getX() + 0.5, rayY, cur.getZ() + 0.5);
-        Vec3 to = new Vec3(next.getX() + 0.5, rayY, next.getZ() + 0.5);
-        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE, CollisionContext.empty()));
-        return hit.getType() == HitResult.Type.MISS;
+    private static boolean fireRayClear(ServerLevel level, Vec3 start, Vec3 end) {
+        return level.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, CollisionContext.empty())).getType() == HitResult.Type.MISS;
     }
 
     private static boolean inFire(FireZone zone, LivingEntity e) {
