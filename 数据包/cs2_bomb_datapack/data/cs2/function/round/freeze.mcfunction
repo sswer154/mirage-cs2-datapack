@@ -1,6 +1,10 @@
-# 准备阶段开始：先恢复死亡不掉落，再清理地面掉落物
+# 准备阶段开始：只清理由对局回收的物品。
 gamerule keepInventory true
-kill @e[type=item]
+function cs2:util/item_tick
+execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_primary_gun run kill @s
+execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_util run kill @s
+kill @e[type=item,tag=cs2_util_projectile]
+execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_bomb run kill @s
 # 清理上一局的烟雾
 kill @e[type=marker,tag=cs2_smoke]
 kill @e[type=marker,tag=cs2_fire]
