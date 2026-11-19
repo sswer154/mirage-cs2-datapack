@@ -694,6 +694,21 @@ public final class GrenadeManager {
         }
     }
 
+    /** 地面反弹时切向速度的保留比例（带一点摩擦，避免落地后像冰壶一样滑）。 */
+    private static final double BOUNCE_FRICTION_GROUND = 0.82;
+    /** 墙面反弹时切向速度的保留比例，墙面基本不吃摩擦，回弹更明显。 */
+    private static final double BOUNCE_FRICTION_WALL = 0.96;
+    /** 反弹后的竖直速度低于这个值就直接压到 0，避免停在方块上每 tick 抖一下。 */
+    private static final double BOUNCE_MIN_VERTICAL = 0.05;
+    /** 贴地滑行时每 tick 的水平速度保留比例。 */
+    private static final double GROUND_ROLL_FRICTION = 0.78;
+
+    /** 弹体正下方 0.08 格内有没有碰撞面，用来判断是不是贴着地面在滑。 */
+    private static boolean hasSupportBelow(ServerLevel level, Vec3 pos) {
+        BlockPos below = BlockPos.containing(pos.x, pos.y - 0.08, pos.z);
+        return !level.getBlockState(below).getCollisionShape(level, below).isEmpty();
+    }
+
     private static void step(Grenade g) {
         Vec3 from = g.lastPos;
         if (!g.level.isLoaded(BlockPos.containing(from))) {
@@ -713,7 +728,19 @@ public final class GrenadeManager {
             int nowTick;
             Vec3 normal = Vec3.atLowerCornerOf((Vec3i)hit.getDirection().getNormal());
             double impactSpeed = g.vel.length();
-            g.vel = g.vel.subtract(normal.scale(2.0 * g.vel.dot(normal))).scale(g.type.bounce());
+            // 只对法向做反弹、切向按摩擦保留：以前整条速度一起乘 bounce，落地一脚就趴下
+            double vn = g.vel.dot(normal);
+            Vec3 normalPart = normal.scale(vn);
+            Vec3 tangentPart = g.vel.subtract(normalPart);
+            boolean floorHit = normal.y > 0.7;
+            double restitution = floorHit ? g.type.bounce() : g.type.bounceWall();
+            double friction = floorHit ? BOUNCE_FRICTION_GROUND : BOUNCE_FRICTION_WALL;
+            Vec3 bounced = tangentPart.scale(friction).subtract(normalPart.scale(restitution));
+            // 反弹后竖直速度已经很小就直接压实，避免贴在地面上每 tick 抖一下
+            if (floorHit && Math.abs(bounced.y) < BOUNCE_MIN_VERTICAL) {
+                bounced = new Vec3(bounced.x, 0.0, bounced.z);
+            }
+            g.vel = bounced;
             to = hit.getLocation().add(normal.scale(0.02));
             ++g.bounces;
             if ("fire".equals(g.type.effect()) && isWater(g.level, hit.getBlockPos())) {
@@ -778,6 +805,10 @@ public final class GrenadeManager {
             }
             g.vel = v.scale(0.9);
             to = after;
+        }
+        // 贴地滑行：竖直速度已经被压平、下面又有支撑面时，水平速度每 tick 掉一点
+        if (Math.abs(g.vel.y) < BOUNCE_MIN_VERTICAL && hasSupportBelow(g.level, to)) {
+            g.vel = new Vec3(g.vel.x * GROUND_ROLL_FRICTION, g.vel.y, g.vel.z * GROUND_ROLL_FRICTION);
         }
         g.lastPos = to;
         if (g.display != null && g.display.isAlive()) {
