@@ -29,8 +29,7 @@ execute if score @s cs2_team matches 0 run scoreboard players set @s cs2_needs_d
 # 只清除准备阶段的限制效果，保留玩家自己的其他 buff
 effect clear @s minecraft:slowness
 effect clear @s minecraft:resistance
-effect give @s minecraft:instant_health 1 10 true
-effect give @s minecraft:saturation 1 10 true
+function cs2:player/restore_health
 
 function cs2:player/tag
 scoreboard players operation @s cs2_prev_deaths = @s cs2_deaths
