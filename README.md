@@ -62,7 +62,7 @@
 
 ## 涉及文件
 
-- 模组：cs2grenade-0.1.0.jar（66799 字节）、cs2shop-0.1.0.jar（26130 字节）
+- 模组：cs2grenade-0.1.0.jar（66757 字节）、cs2shop-0.1.0.jar（26130 字节）
 - 数据包：cs2_bomb_datapack
 - 资源包：cs2_bomb_resourcepack.zip（约 1.15 MB）
 
