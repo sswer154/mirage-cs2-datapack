@@ -1151,8 +1151,9 @@ public final class GrenadeManager {
                 expired.add(z);
                 continue;
             }
-            // 放烟声按玩家维护：进烟区补一次，留在里面每 5 秒续一次，走远了停掉
+            // 放烟声按玩家维护：进烟区补一次，留在里面按样本续播；淡出后交给 smoke.end
             java.util.HashSet<java.util.UUID> seen = new java.util.HashSet<>();
+            if (!z.fadedOut) {
             for (net.minecraft.server.level.ServerPlayer p : z.level.players()) {
                 double ddx = p.getX() - z.pos.x;
                 double ddz = p.getZ() - z.pos.z;
@@ -1175,9 +1176,14 @@ public final class GrenadeManager {
                 // 走远不掐声，也不清记录：8 秒内回来听到的还是同一段，超过就由上面的续播补
                 it.remove();
             }
+            }
             if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
                 z.fadedOut = true;
-                GrenadeManager.stopSound(z.level, z.pos, "smoke.hiss");
+                for (java.util.UUID id : z.hissTicks.keySet()) {
+                    net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
+                    if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                }
+                z.hissTicks.clear();
                 GrenadeManager.playCs2(z.level, z.pos, "smoke.end", 0.8f, 1.0f);
             }
             double progress = (double)elapsed / (double)z.lifeTicks;
