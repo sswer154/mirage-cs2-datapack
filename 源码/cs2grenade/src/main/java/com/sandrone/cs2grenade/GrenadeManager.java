@@ -129,6 +129,12 @@ public final class GrenadeManager {
     private static final List<SmokeCard> SMOKE_CARDS;
     private static final List<FireZone> FIRE_ZONES;
     private static final Map<UUID, Integer> BURN_STEPS;
+    /** 每个受害者的火区叠层，按各自停留时间结算，不跟火区建成时刻绑定。 */
+    private static final Map<UUID, FireVictim> FIRE_VICTIMS = new HashMap<UUID, FireVictim>();
+    /** 火区一跳的间隔（tick），对应 0.5 秒。 */
+    private static final int FIRE_HIT_INTERVAL = 10;
+    /** 离开火区超过这个 tick 数就清掉叠层，防止贴着边缘进出无限重置。 */
+    private static final int FIRE_STAY_GRACE = 10;
 
     private GrenadeManager() {
     }
@@ -1102,10 +1108,8 @@ public final class GrenadeManager {
         }
         int now = serverRef.getTickCount();
         ArrayList<FireZone> dead = new ArrayList<FireZone>();
-        HashMap<UUID, Float> pending = new HashMap<UUID, Float>();
+        HashMap<UUID, LivingEntity> inFireNow = new HashMap<UUID, LivingEntity>();
         HashMap<UUID, Player> fireSources = new HashMap<UUID, Player>();
-        HashSet<UUID> insideAll = new HashSet<UUID>();
-        HashMap<UUID, LivingEntity> victims = new HashMap<UUID, LivingEntity>();
         for (FireZone fireZone : FIRE_ZONES) {
             int elapsed = now - fireZone.startTick;
             if (elapsed > fireZone.lifeTicks) {
@@ -1129,37 +1133,50 @@ public final class GrenadeManager {
             if (elapsed % 2 == 0) {
                 emitFireParticles(fireZone, radius, elapsed);
             }
-            if (elapsed > 0 && elapsed % 10 == 0) {
-                float dmg = Math.min(4.0f, (float)stage);
-                for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 8.0, radius + 1.0))) {
-                    double dz;
-                    double dx;
-                    Player p;
-                    if (e instanceof Player && (p = (Player)e).isSpectator()) continue;
-                    if ((dx = e.getX() - fireZone.center.x) * dx + (dz = e.getZ() - fireZone.center.z) * dz > radius * radius) continue;
-                    if (!inFire(fireZone, e)) continue;
-                    Float prev = (Float)pending.get(e.getUUID());
-                    if (prev != null && !(dmg > prev.floatValue())) continue;
-                    pending.put(e.getUUID(), Float.valueOf(dmg));
-                    fireSources.put(e.getUUID(), fireZone.thrower);
-                    victims.put(e.getUUID(), e);
-                }
+            // 收集本 tick 处在火里的实体；伤害在循环外按每个人自己的停留节奏结算，
+            // 这样后进火区的人不会直接吃到后面阶段的伤害，多火区也只算一跳
+            for (LivingEntity e : fireZone.level.getEntitiesOfClass(LivingEntity.class, new AABB(fireZone.center, fireZone.center).inflate(radius + 1.0, 8.0, radius + 1.0))) {
+                Player p;
+                if (e instanceof Player && (p = (Player)e).isSpectator()) continue;
+                double dx = e.getX() - fireZone.center.x;
+                double dz = e.getZ() - fireZone.center.z;
+                if (dx * dx + dz * dz > radius * radius) continue;
+                if (!inFire(fireZone, e)) continue;
+                inFireNow.putIfAbsent(e.getUUID(), e);
+                Player source = fireZone.thrower;
+                if (source != null) fireSources.putIfAbsent(e.getUUID(), source);
             }
             if (elapsed >= fireZone.lifeTicks) {
                 GrenadeManager.extinguish(fireZone);
                 dead.add(fireZone);
             }
         }
-        for (Map.Entry entry : pending.entrySet()) {
-            LivingEntity e2 = (LivingEntity)victims.get(entry.getKey());
-            if (e2 == null || e2.isRemoved() || e2.isDeadOrDying()) continue;
-            e2.invulnerableTime = 0;
-            Player thrower = fireSources.get(entry.getKey());
-            float fireDamage = ((Float)entry.getValue()).floatValue();
-            if (e2.hurt(e2.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), fireDamage) && isEnemy(thrower, e2)) {
-                GrenadeManager.addDamageScore(thrower, "cs2_fire_dmg", fireDamage);
+        // 火区伤害：从每个人自己进火区那 tick 起，每 FIRE_HIT_INTERVAL tick 结算一跳，
+        // 伤害按停留时间 1 -> 2 -> 3 -> 4 封顶，与火区已经烧了多久无关
+        for (Map.Entry<UUID, LivingEntity> entry : inFireNow.entrySet()) {
+            LivingEntity victim = entry.getValue();
+            if (victim.isRemoved() || victim.isDeadOrDying()) {
+                FIRE_VICTIMS.remove(entry.getKey());
+                continue;
             }
+            FireVictim rec = FIRE_VICTIMS.get(entry.getKey());
+            if (rec == null) {
+                rec = new FireVictim(now);
+                FIRE_VICTIMS.put(entry.getKey(), rec);
+            }
+            rec.lastSeenTick = now;
+            Player source = fireSources.get(entry.getKey());
+            if (source != null) rec.thrower = source;
+            if (now < rec.nextHitTick) continue;
+            float fireDamage = Math.min(4.0f, (float)(rec.stage + 1));
+            victim.invulnerableTime = 0;
+            if (victim.hurt(victim.level().damageSources().source(FIRE_DAMAGE_TYPE, rec.thrower), fireDamage) && isEnemy(rec.thrower, victim)) {
+                GrenadeManager.addDamageScore(rec.thrower, "cs2_fire_dmg", fireDamage);
+            }
+            ++rec.stage;
+            rec.nextHitTick = now + FIRE_HIT_INTERVAL;
         }
+        FIRE_VICTIMS.entrySet().removeIf(entry -> now - entry.getValue().lastSeenTick > FIRE_STAY_GRACE);
         FIRE_ZONES.removeAll(dead);
     }
 
@@ -1622,6 +1639,19 @@ public final class GrenadeManager {
             this.lifeTicks = lifeTicks;
             this.thrower = thrower;
             this.lastPlaceTick = startTick - 20;
+        }
+    }
+
+    /** 单个受害者的火区叠层：stage = 已经吃了几跳，nextHitTick = 下一跳的 tick。 */
+    private static final class FireVictim {
+        Player thrower;
+        int stage;
+        int nextHitTick;
+        int lastSeenTick;
+
+        FireVictim(int now) {
+            this.nextHitTick = now + FIRE_HIT_INTERVAL;
+            this.lastSeenTick = now;
         }
     }
 }
