@@ -2,6 +2,9 @@
 # 等候开赛的玩家保留阵营和选边时保存的背包。
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_t] run return 0
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_ct] run return 0
+# 错过开场的玩家可在正常准备阶段补进场。开打后继续等下一次开场。
+execute if score #state cs2_state matches 2 unless score #round_replayed cs2_counts matches 1 if score @s cs2_queued_team matches 1..2 unless score @s cs2_queue_round = #checkpoint cs2_health_round run function cs2:join/apply_queue
+execute if score #state cs2_state matches 1..6 unless score @s cs2_inmatch matches 1 if score @s cs2_queued_team matches 1..2 run return 0
 # 赛后离线玩家先按退队流程清理状态，再返还背包。
 execute unless score @s cs2_inmatch matches 1 if function cs2:player/has_saved_inventory run return run function cs2:join/to_lobby
 # 升级清理：旧版商店木棍已废弃，参赛者重连时移除。

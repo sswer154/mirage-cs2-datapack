@@ -1,4 +1,5 @@
 execute unless function cs2:player/save_inventory run return fail
+function cs2:join/clear_queue
 team join cs2_ct @s
 scoreboard players set @s cs2_team 2
 scoreboard players operation @s cs2_side_epoch = #swap cs2_side_epoch
