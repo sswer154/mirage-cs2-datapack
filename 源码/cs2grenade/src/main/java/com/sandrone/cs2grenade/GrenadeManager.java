@@ -477,6 +477,7 @@ public final class GrenadeManager {
         HashSet<String> active = new HashSet<String>();
         HashSet<UUID> activeCanisters = new HashSet<UUID>();
         for (SmokeZone z : SMOKE_ZONES) {
+            if (z.level != level) continue;
             active.add("cs2_smoke_" + z.volumeId);
             if (z.display == null || z.display.isRemoved()) continue;
             activeCanisters.add(z.display.getUUID());
@@ -489,13 +490,7 @@ public final class GrenadeManager {
                 continue;
             }
             if (!e.getTags().contains("cs2_smoke_card")) continue;
-            String owner = null;
-            for (String tag : e.getTags()) {
-                if (!tag.startsWith("cs2_smoke_")) continue;
-                owner = tag;
-                break;
-            }
-            if (owner != null && active.contains(owner)) continue;
+            if (!java.util.Collections.disjoint(e.getTags(), active)) continue;
             doomed.add(e);
         }
         for (Entity e : doomed) {
