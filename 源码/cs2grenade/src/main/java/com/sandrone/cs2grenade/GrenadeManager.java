@@ -378,7 +378,7 @@ public final class GrenadeManager {
         GrenadeManager.tickSmoke();
         GrenadeManager.tickSmokeCards();
         GrenadeManager.tickFires();
-        if (++sweepTimer >= 20) {
+        if (++sweepTimer >= 40) {
             sweepTimer = 0;
             GrenadeManager.sweepOrphans();
         }
@@ -473,34 +473,6 @@ public final class GrenadeManager {
         SMOKE_CARDS.clear();
     }
 
-    private static void sweepOrphanSmokeCards(ServerLevel level) {
-        HashSet<String> active = new HashSet<String>();
-        HashSet<UUID> activeCanisters = new HashSet<UUID>();
-        for (SmokeZone z : SMOKE_ZONES) {
-            if (z.level != level) continue;
-            active.add("cs2_smoke_" + z.volumeId);
-            if (z.display == null || z.display.isRemoved()) continue;
-            activeCanisters.add(z.display.getUUID());
-        }
-        ArrayList<Entity> doomed = new ArrayList<Entity>();
-        for (Entity e : level.getAllEntities()) {
-            if (e.getTags().contains("cs2_smoke_canister")) {
-                if (activeCanisters.contains(e.getUUID())) continue;
-                doomed.add(e);
-                continue;
-            }
-            if (!e.getTags().contains("cs2_smoke_card")) continue;
-            if (!java.util.Collections.disjoint(e.getTags(), active)) continue;
-            doomed.add(e);
-        }
-        for (Entity e : doomed) {
-            e.discard();
-        }
-        if (!doomed.isEmpty()) {
-            Cs2Grenade.debug("\u6e05\u7406\u65e0\u4e3b\u70df\u7247/\u7f50\u4f53 {} \u4e2a", doomed.size());
-        }
-    }
-
     private static void sweepOrphans() {
         HashSet<UUID> alive = new HashSet<UUID>();
         for (Grenade g : ACTIVE) {
@@ -509,17 +481,34 @@ public final class GrenadeManager {
         }
         alive.addAll(PERSIST_DISPLAYS);
         for (ServerLevel level : serverRef.getAllLevels()) {
+            HashSet<String> activeSmoke = new HashSet<String>();
+            HashSet<UUID> activeCanisters = new HashSet<UUID>();
+            for (SmokeZone z : SMOKE_ZONES) {
+                if (z.level != level) continue;
+                activeSmoke.add("cs2_smoke_" + z.volumeId);
+                if (z.display != null && !z.display.isRemoved()) {
+                    activeCanisters.add(z.display.getUUID());
+                }
+            }
             ArrayList<Entity> doomed = new ArrayList<Entity>();
             for (Entity e : level.getAllEntities()) {
-                if (e.isRemoved() || alive.contains(e.getUUID()) || !GrenadeManager.isGrenadeVisual(e)) continue;
+                if (e.isRemoved()) continue;
+                if (e.getTags().contains("cs2_smoke_canister")) {
+                    if (!activeCanisters.contains(e.getUUID())) doomed.add(e);
+                    continue;
+                }
+                if (e.getTags().contains("cs2_smoke_card")) {
+                    if (java.util.Collections.disjoint(e.getTags(), activeSmoke)) doomed.add(e);
+                    continue;
+                }
+                if (alive.contains(e.getUUID()) || !GrenadeManager.isGrenadeVisual(e)) continue;
                 doomed.add(e);
             }
-            GrenadeManager.sweepOrphanSmokeCards(level);
             for (Entity e : doomed) {
                 e.discard();
             }
             if (!doomed.isEmpty()) {
-                Cs2Grenade.debug("清理无主手雷 {} 个", doomed.size());
+                Cs2Grenade.debug("清理无主手雷/烟片/罐体 {} 个", doomed.size());
             }
         }
     }
@@ -790,7 +779,7 @@ public final class GrenadeManager {
                 done.add(c);
                 continue;
             }
-            if (elapsed % 4 != 0) continue;
+            if (elapsed % 10 != 0) continue;
             double p = Math.min(1.0, (double)elapsed / (double)Math.max(1, c.growTicks));
             double ease = 1.0 - Math.pow(1.0 - p, 2.2);
             Vec3 cur = c.from.add(c.to.subtract(c.from).scale(ease));
@@ -835,7 +824,7 @@ public final class GrenadeManager {
                 float scale = (float)((double)baseScale * (1.0 - 0.45 * ringRadii[ring]) * (double)ringScaleBoost[ring]);
                 int modelCmd = 723001 + index % 4;
                 String cardTag = String.format(Locale.ROOT, "cs2_card_%d_%d", id, index);
-                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\"}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35);
+                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\",teleport_duration:10,interpolation_duration:10}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35);
                 level.getServer().getCommands().performPrefixedCommand(src, cmd);
                 SMOKE_CARDS.add(new SmokeCard(level, cardTag, center, new Vec3(x, y, z), scale, (serverRef == null ? 0 : serverRef.getTickCount()) + 2, 20));
                 ++index;
