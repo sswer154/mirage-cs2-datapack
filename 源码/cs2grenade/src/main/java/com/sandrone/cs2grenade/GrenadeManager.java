@@ -1034,6 +1034,8 @@ public final class GrenadeManager {
             double radius = 4.0 + Math.min(5.0, (double)(stage - 1));
             boolean smoked = false;
             for (SmokeZone s : SMOKE_ZONES) {
+                // 只比较同一维度，避免别的维度同坐标的烟区把火区浇灭
+                if (s.level != fireZone.level) continue;
                 if (!(s.pos.distanceTo(fireZone.center) < s.maxRadius + radius * 0.6)) continue;
                 smoked = true;
                 break;
