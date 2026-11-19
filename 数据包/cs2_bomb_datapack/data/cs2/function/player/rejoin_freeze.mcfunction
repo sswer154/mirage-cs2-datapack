@@ -1,10 +1,11 @@
 # 准备阶段重连：已参赛且已有装备的玩家保留背包/效果，只回出生点
+execute if score @s cs2_inmatch matches 1 if score @s cs2_health_round = #epoch cs2_health_round unless score @s cs2_alive matches 1 run return run function cs2:player/make_spec
 execute unless score @s cs2_inmatch matches 1 run function cs2:join/freeze_join
 execute unless score @s cs2_inmatch matches 1 run return 0
 execute unless score @s cs2_needs_default matches 0 run function cs2:join/freeze_join
 execute unless score @s cs2_needs_default matches 0 run return 0
 
-function cs2:player/restore_health
+execute if score @s cs2_alive matches 1 run function cs2:player/restore_health_if_due
 gamemode adventure @s
 function cs2:util/speed
 # 准备阶段的移动锁是 slowness 255 + resistance 255，重连的人也要补上，

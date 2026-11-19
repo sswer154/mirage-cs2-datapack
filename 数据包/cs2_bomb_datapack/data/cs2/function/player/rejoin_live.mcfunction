@@ -8,7 +8,7 @@ execute unless score @s cs2_team matches 1..2 run return 0
 execute unless score @s cs2_alive matches 1 run function cs2:player/make_spec
 execute unless score @s cs2_alive matches 1 run return 0
 
-function cs2:player/restore_health
+function cs2:player/restore_health_if_due
 gamemode survival @s
 function cs2:util/speed
 function cs2:player/tag
