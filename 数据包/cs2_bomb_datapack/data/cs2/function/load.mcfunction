@@ -4,6 +4,7 @@
 scoreboard objectives add cs2_const dummy
 scoreboard objectives add cs2_health_round dummy
 scoreboard objectives add cs2_side_epoch dummy
+scoreboard objectives add cs2_formal_epoch dummy
 scoreboard objectives add cs2_empty dummy
 scoreboard objectives add cs2_voted_restart dummy
 scoreboard objectives add cs2_voted_end dummy
