@@ -49,6 +49,7 @@ public class Cs2Grenade {
         MatchInventory.register(modBus);
         MapChunkTickets.register(modBus);
         RoundCheckpoint.register(modBus);
+        RoundRewards.register();
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::onLivingTick);

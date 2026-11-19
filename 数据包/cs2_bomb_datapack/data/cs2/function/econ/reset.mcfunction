@@ -1,4 +1,5 @@
 # 整场经济重置（在 match/reset 中调用）
+scoreboard players reset * cs2_pending_pay
 scoreboard players set #loss_t cs2_econ 1900
 scoreboard players set #loss_ct cs2_econ 1900
 scoreboard players set #ct_kills cs2_econ 0
