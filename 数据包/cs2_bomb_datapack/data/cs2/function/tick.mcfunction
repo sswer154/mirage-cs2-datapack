@@ -5,13 +5,14 @@ scoreboard players add #tick cs2_const 1
 # 这样击杀 advancement 的标签一定已经写入，避免把击杀死亡误报成环境死亡。
 
 # 实验性投掷物：烟雾弹 / 高爆手雷
-# 死亡掉落物品规则
-function cs2:util/item_tick
+# 死亡掉落物品规则：每 5 tick 扫描一次，避免每 tick 全实体查询
+scoreboard players add #item_tick cs2_counts 1
+execute if score #item_tick cs2_counts matches 5.. run function cs2:util/item_tick
+execute if score #item_tick cs2_counts matches 5.. run scoreboard players set #item_tick cs2_counts 0
 # 准备阶段持续维持冻结：医疗用品会清掉 slowness，这里每 tick 补回（跳跃锁走属性，不受影响）
 execute if score #state cs2_state matches 2 as @a[scores={cs2_inmatch=1}] run function cs2:util/freeze_lock
 # 准备阶段每 tick 幂等兜底：商店钻石 + 默认手枪，卡顿/重连后自动补发
 execute if score #state cs2_state matches 2 as @a[scores={cs2_inmatch=1}] run function cs2:shop/ensure_ready
-execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_shop_item run kill @s
 
 # 新玩家初始化
 execute as @a unless score @s cs2_init matches 1 run function cs2:player/init

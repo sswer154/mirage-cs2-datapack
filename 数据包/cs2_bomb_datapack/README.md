@@ -584,7 +584,7 @@ scoreboard players set #music_preset cs2_cfg 3
 - **死亡不掉落模式（已回滚）**：`load`、`round/freeze`、`round/live`、`round/end`、`match/start`、`match/end`、`match/stop` 都保持 `gamerule keepInventory true`；对局内不再强制改成 false。
 - **T 携带 C4 阵亡**：C4 从尸体背包回收，5 秒后补给仍存活的 T；不会掉在地上。
 - **CT 携带拆弹器阵亡**：拆弹器回收；若炸弹已安放且地面没有拆弹器，会补发给存活 CT。
-- **护甲/副武器/弹药盒/零时大剑/主武器**：正常死亡不会掉落；`util/item_tick` 与主武器拾取限制保留，用于处理手动丢弃/特殊情况，不会影响 normal death。
+- **护甲/副武器/弹药盒/零时大剑/主武器**：正常死亡不会掉落；`util/item_tick` 与主武器拾取限制保留，用于处理手动丢弃/特殊情况，不会影响 normal death。清理只针对比赛发放、带 `cs2_drop_clean` 标记的装备（护甲/弹药盒），以及商店道具、副武器、零时大剑；场外普通下界合金甲/普通弹药盒不再按物品 ID 误清。`util/item_tick` 每 5 tick 执行一次，空闲时不再每 tick 做 8 次全实体查询。
 - **准备阶段开始清地面物品**：`round/freeze` 开头 `kill @e[type=item]`，在任何人购买前清掉上一局残留。
 
 ### 商店与配装
