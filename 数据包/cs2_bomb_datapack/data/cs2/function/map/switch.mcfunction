@@ -1,7 +1,7 @@
 # 一键切换到指定地图：/function cs2:map/switch {map:"dust"}
-# 只能在空闲状态（state 0）切换，避免比赛中把包点/出生点换掉。
-execute unless score #state cs2_state matches 0 run tellraw @s {"text":"请先结束/停止比赛再切换地图。","color":"red"}
-execute unless score #state cs2_state matches 0 run return 0
+# 空闲（0）或正常结束（7）时可以切换地图。
+execute unless score #state cs2_state matches 0 unless score #state cs2_state matches 7 run tellraw @s {"text":"请先结束/停止比赛再切换地图。","color":"red"}
+execute unless score #state cs2_state matches 0 unless score #state cs2_state matches 7 run return 0
 
 # 先给当前已加载的地图点补 forceload，避免旧地图点区块卸载后检查不到 marker。
 function cs2:map/forceload_all
