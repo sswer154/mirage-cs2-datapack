@@ -14,8 +14,14 @@ function cs2:map/doors/reset
 function cs2:panel/reset_votes
 
 scoreboard players add #epoch cs2_health_round 1
+execute unless score #round_restarting cs2_counts matches 1 run scoreboard players operation #checkpoint cs2_health_round = #epoch cs2_health_round
+scoreboard players set #round_replayed cs2_counts 0
+execute if score #round_restarting cs2_counts matches 1 run scoreboard players set #round_replayed cs2_counts 1
 function cs2:player/round_all
 tp @a[scores={cs2_inmatch=1,cs2_team=1}] @e[type=marker,tag=cs2_spawn_t,limit=1]
 tp @a[scores={cs2_inmatch=1,cs2_team=2}] @e[type=marker,tag=cs2_spawn_ct,limit=1]
 tp @a[scores={cs2_inmatch=1,cs2_team=0}] @e[type=marker,tag=cs2_lobby,limit=1]
 function cs2:round/freeze
+execute if score #round_replayed cs2_counts matches 1 as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run function cs2:round/restore_checkpoint
+execute as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run cs2roundstate save
+scoreboard players set #round_restarting cs2_counts 0
