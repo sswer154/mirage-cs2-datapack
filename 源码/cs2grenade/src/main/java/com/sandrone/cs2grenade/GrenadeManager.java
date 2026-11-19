@@ -842,6 +842,13 @@ public final class GrenadeManager {
         }
     }
 
+    /** 烟幕从起烟到铺满的时间（tick）：0.6 秒，期间烟片连续外扩。 */
+    private static final int SMOKE_SPREAD_TICKS = 12;
+    /** 烟片扩散的关键帧间隔（tick），和 teleport_duration 对齐，客户端插值刚好接上。 */
+    private static final int SMOKE_KEYFRAME_TICKS = 3;
+    /** 起烟瞬间烟区就已覆盖的比例：烟片一开始是一团贴在一起的大烟球，覆盖范围不能从 0 起。 */
+    private static final double SMOKE_INITIAL_COVER = 0.45;
+
     private static void tickSmokeCards() {
         if (SMOKE_CARDS.isEmpty() || serverRef == null) {
             return;
@@ -851,11 +858,13 @@ public final class GrenadeManager {
         for (SmokeCard c : SMOKE_CARDS) {
             int elapsed = now - c.startTick;
             if (elapsed < 0) continue;
-            if (elapsed > c.growTicks + 40) {
+            if (elapsed > c.growTicks + SMOKE_KEYFRAME_TICKS) {
+                // 最后一帧已经发出，剩下的交给客户端插值，不用再发空帧
                 done.add(c);
                 continue;
             }
-            if (elapsed % 10 != 0) continue;
+            // 0 帧是召唤时的原地姿态，跳过；之后每 3 tick 一帧，正好接上上一帧的插值
+            if (elapsed == 0 || elapsed % SMOKE_KEYFRAME_TICKS != 0) continue;
             double p = Math.min(1.0, (double)elapsed / (double)Math.max(1, c.growTicks));
             double ease = 1.0 - Math.pow(1.0 - p, 2.2);
             Vec3 cur = c.from.add(c.to.subtract(c.from).scale(ease));
@@ -900,9 +909,10 @@ public final class GrenadeManager {
                 float scale = (float)((double)baseScale * (1.0 - 0.45 * ringRadii[ring]) * (double)ringScaleBoost[ring]);
                 int modelCmd = 723001 + index % 4;
                 String cardTag = String.format(Locale.ROOT, "cs2_card_%d_%d", id, index);
-                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\",teleport_duration:10,interpolation_duration:10}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35);
+                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\",teleport_duration:%d,interpolation_duration:%d}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35,
+                        SMOKE_KEYFRAME_TICKS, SMOKE_KEYFRAME_TICKS);
                 level.getServer().getCommands().performPrefixedCommand(src, cmd);
-                SMOKE_CARDS.add(new SmokeCard(level, cardTag, center, new Vec3(x, y, z), scale, (serverRef == null ? 0 : serverRef.getTickCount()) + 2, 20));
+                SMOKE_CARDS.add(new SmokeCard(level, cardTag, center, new Vec3(x, y, z), scale, (serverRef == null ? 0 : serverRef.getTickCount()) + 2, SMOKE_SPREAD_TICKS));
                 ++index;
             }
         }
@@ -1132,12 +1142,13 @@ public final class GrenadeManager {
         return false;
     }
 
-    /** 该位置是否在某个烟区的有效范围内（同维度、高度差 3 格内、水平在烟半径内）。 */
+    /** 该位置是否在某个烟区的有效范围内（同维度、水平在烟区当前覆盖半径内）。 */
     private static boolean smokeCovers(ServerLevel level, Vec3 pos) {
+        int now = serverRef == null ? 0 : serverRef.getTickCount();
         for (SmokeZone s : SMOKE_ZONES) {
             if (s.level != level) continue;
-            // 烟大致是个球：离烟心 6 格以内（含高度）都算被盖住
-            if (s.pos.distanceTo(pos) > s.maxRadius) continue;
+            // 覆盖半径跟着烟片扩散一起长大，避免烟还在小烟球阶段就把 6 格外的火按掉
+            if (s.pos.distanceTo(pos) > s.coverRadius(now)) continue;
             return true;
         }
         return false;
@@ -1327,9 +1338,10 @@ public final class GrenadeManager {
                 }
                 z.hissTicks.clear();
                 GrenadeManager.playCs2(z.level, z.pos, "smoke.end", 0.8f, 1.0f);
+                // 扩散阶段每 3 tick 一帧，淡出是每 10 tick 一帧；切回较长插值，收缩才不会一顿一顿
+                String slowCmd = String.format(Locale.ROOT, "execute as @e[tag=cs2_smoke_%d] run data modify entity @s interpolation_duration set value 10", z.volumeId);
+                z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), slowCmd);
             }
-            double progress = (double)elapsed / (double)z.lifeTicks;
-            double spread = z.maxRadius * (0.4 + 0.6 * progress);
             int remaining = z.lifeTicks - elapsed;
             if (remaining >= 60 || now < z.nextCore) continue;
             double f = Math.max(0.05, (double)remaining / 60.0);
@@ -1669,6 +1681,13 @@ public final class GrenadeManager {
             this.nextPuff = nextPuff;
             this.volumeId = volumeId;
             this.display = display;
+        }
+
+        /** 当前 tick 的有效覆盖半径：跟烟片扩散同步变大，视觉铺满时正好到 maxRadius。 */
+        double coverRadius(int now) {
+            double p = Math.min(1.0, Math.max(0.0, (double)(now - this.startTick) / (double)SMOKE_SPREAD_TICKS));
+            double ease = 1.0 - Math.pow(1.0 - p, 2.2);
+            return this.maxRadius * (SMOKE_INITIAL_COVER + (1.0 - SMOKE_INITIAL_COVER) * ease);
         }
     }
 
