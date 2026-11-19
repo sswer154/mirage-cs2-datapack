@@ -9,6 +9,7 @@ scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0
 scoreboard players set @s cs2_money 800
+execute if score #transition cs2_formal_epoch matches 1.. run scoreboard players operation @s cs2_formal_epoch = #transition cs2_formal_epoch
 scoreboard players set @s cs2_primary 0
 scoreboard players set @s cs2_secondary 0
 scoreboard players set @s cs2_armor 0

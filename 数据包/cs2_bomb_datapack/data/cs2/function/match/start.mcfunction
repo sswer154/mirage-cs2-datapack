@@ -37,6 +37,7 @@ scoreboard players reset * cs2_side_epoch
 scoreboard players set #swap cs2_side_epoch 0
 scoreboard players set #halftime cs2_side_epoch 0
 scoreboard players set #side_mod cs2_side_epoch 2
+scoreboard players set #transition cs2_formal_epoch 0
 execute unless entity @a[scores={cs2_inmatch=1}] run return fail
 function cs2:match/reset
 function cs2:stats/reset
