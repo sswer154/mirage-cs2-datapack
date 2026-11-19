@@ -1,8 +1,8 @@
 scoreboard players set #state cs2_state 3
 # 倒计时结束，强制关闭还开着的商店界面
 execute as @a run cs2shop close
-clear @a minecraft:diamond[minecraft:custom_data~{cs2_shop_item:1b}]
-clear @a minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
+clear @a[scores={cs2_inmatch=1}] minecraft:diamond[minecraft:custom_data~{cs2_shop_item:1b}]
+clear @a[scores={cs2_inmatch=1}] minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 # 回合进行阶段恢复 PvP
 function cs2:pvp/round_live
 # 回滚：对局内保持死亡不掉落
@@ -42,4 +42,4 @@ playsound minecraft:entity.ender_dragon.growl master @a[scores={cs2_inmatch=1}]
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"[战术菜单]","color":"aqua","clickEvent":{"action":"run_command","value":"/trigger cs2_panel set 1"},"hoverEvent":{"action":"show_text","value":{"text":"暂停 / 重开 / 结束投票"}}}]
 
 # 变成正式战局：回收测试商店并封锁
-execute if score #solo cs2_counts matches 0 run clear @a minecraft:emerald[minecraft:custom_data~{cs2_shop_item:1b}]
+execute if score #solo cs2_counts matches 0 run clear @a[scores={cs2_inmatch=1}] minecraft:emerald[minecraft:custom_data~{cs2_shop_item:1b}]

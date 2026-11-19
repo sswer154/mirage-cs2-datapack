@@ -153,7 +153,7 @@ execute if entity @a run scoreboard players enable @a cs2_train_spawn
 execute if entity @a run scoreboard players enable @a cs2_match_pause
 execute if entity @a run scoreboard players enable @a cs2_match_resume
 # 升级清理：旧版商店木棍不再使用，移除在线玩家背包里的旧道具
-clear @a minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
+clear @a[scores={cs2_inmatch=1}] minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 # 多地图系统：记录当前地图名；老存档首次 reload 时初始化为未选择
 execute unless data storage cs2:map active run data modify storage cs2:map active set value "未选择"
 function cs2:load/config

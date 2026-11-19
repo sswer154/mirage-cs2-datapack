@@ -43,4 +43,4 @@ playsound minecraft:block.note_block.pling master @a[scores={cs2_inmatch=1}]
 
 # 单人测试局：额外发一个测试商店
 execute if score #solo cs2_counts matches 1..2 as @a[scores={cs2_inmatch=1}] run function cs2:util/give_test_shop
-execute unless score #solo cs2_counts matches 1..2 run clear @a minecraft:emerald[minecraft:custom_data~{cs2_shop_item:1b}]
+execute unless score #solo cs2_counts matches 1..2 run clear @a[scores={cs2_inmatch=1}] minecraft:emerald[minecraft:custom_data~{cs2_shop_item:1b}]
