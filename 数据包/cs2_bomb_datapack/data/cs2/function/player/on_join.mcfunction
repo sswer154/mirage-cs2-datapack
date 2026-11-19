@@ -6,6 +6,8 @@ execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_t] run team leav
 execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_ct] run team leave @s
 execute if score @s cs2_inmatch matches 0 run return 0
 execute if score #state cs2_state matches 1 run function cs2:player/rejoin_intermission
+# 补做错过的回合初始化，再按当前回合状态处理重连。
+execute if score #state cs2_state matches 2..4 if score @s cs2_inmatch matches 1 if score @s cs2_team matches 1..2 if score #epoch cs2_health_round matches 1.. unless score @s cs2_health_round = #epoch cs2_health_round run function cs2:player/rejoin_round_reset
 execute if score #state cs2_state matches 2 run function cs2:player/rejoin_freeze
 execute if score #state cs2_state matches 3 run function cs2:player/rejoin_live
 execute if score #state cs2_state matches 4 run function cs2:player/rejoin_live
