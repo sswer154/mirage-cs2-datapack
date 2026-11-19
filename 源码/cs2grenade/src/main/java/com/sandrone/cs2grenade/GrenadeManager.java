@@ -49,7 +49,10 @@
  */
 package com.sandrone.cs2grenade;
 
+import com.mojang.math.Transformation;
 import com.sandrone.cs2grenade.Cs2Grenade;
+import net.minecraft.util.Brightness;
+import org.joml.Vector3f;
 import com.sandrone.cs2grenade.GrenadeLoader;
 import com.sandrone.cs2grenade.GrenadeType;
 import java.util.Comparator;
@@ -875,22 +878,29 @@ public final class GrenadeManager {
                 done.add(c);
                 continue;
             }
-            // 0 帧是召唤时的原地姿态，跳过；之后每 3 tick 一帧，正好接上上一帧的插值
-            if (elapsed == 0 || elapsed % SMOKE_KEYFRAME_TICKS != 0) continue;
-            double p = Math.min(1.0, (double)elapsed / (double)Math.max(1, c.growTicks));
+            // 从起烟后的第 1 tick 开始，每帧发送接下来 3 tick 的插值终点。
+            if (elapsed <= 0 || (elapsed - 1) % SMOKE_KEYFRAME_TICKS != 0 || elapsed > c.growTicks) continue;
+            double p = Math.min(1.0, (double)(elapsed - 1 + SMOKE_KEYFRAME_TICKS) / c.growTicks);
             double ease = 1.0 - Math.pow(1.0 - p, 2.2);
             Vec3 cur = c.from.add(c.to.subtract(c.from).scale(ease));
             float scale = (float)((double)c.scale * (0.35 + 0.65 * ease));
-            CommandSourceStack src = c.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
-            c.level.getServer().getCommands().performPrefixedCommand(src, String.format(Locale.ROOT, "execute as @e[tag=%s] run tp @s %.3f %.3f %.3f", c.tag, cur.x, cur.y, cur.z));
-            c.level.getServer().getCommands().performPrefixedCommand(src, String.format(Locale.ROOT, "execute as @e[tag=%s] run data modify entity @s transformation.scale set value [%.3ff,%.3ff,%.3ff]", c.tag, Float.valueOf(scale), Float.valueOf(scale), Float.valueOf(scale)));
+            moveSmokeCard(c, cur, scale);
         }
         SMOKE_CARDS.removeAll(done);
     }
 
-    private static void spawnSmokeCards(ServerLevel level, Vec3 pos, double radius, int id) {
-        RandomSource random = level.random;
-        CommandSourceStack src = level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput();
+    private static void moveSmokeCard(SmokeCard card, Vec3 pos, float scale) {
+        if (!(card.level.getEntity(card.entityId) instanceof Display.ItemDisplay display)) return;
+        display.teleportTo(pos.x, pos.y, pos.z);
+        scaleSmokeCard(display, scale);
+    }
+
+    private static void scaleSmokeCard(Display.ItemDisplay display, float scale) {
+        display.setTransformation(new Transformation(null, null, new Vector3f(scale), null));
+        display.setTransformationInterpolationDelay(0);
+    }
+
+    private static List<SmokeCard> spawnSmokeCards(ServerLevel level, Vec3 pos, double radius, int id) {
         Vec3 center = pos.add(0.0, 0.6, 0.0);
         // 确保烟片生成的区块已加载；远距离投掷时落点区块可能还没到手
         level.getChunkAt(BlockPos.containing(center));
@@ -898,6 +908,7 @@ public final class GrenadeManager {
         double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
         float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};
         float baseScale = 7.6f;
+        List<SmokeCard> cards = new ArrayList<>();
         int index = 0;
         for (int ring = 0; ring < ringCounts.length; ++ring) {
             int n = ringCounts[ring];
@@ -920,14 +931,27 @@ public final class GrenadeManager {
                 }
                 float scale = (float)((double)baseScale * (1.0 - 0.45 * ringRadii[ring]) * (double)ringScaleBoost[ring]);
                 int modelCmd = 723001 + index % 4;
-                String cardTag = String.format(Locale.ROOT, "cs2_card_%d_%d", id, index);
-                String cmd = String.format(Locale.ROOT, "summon minecraft:item_display " + center.x + " " + center.y + " " + center.z + " {Tags:[\"cs2_smoke_card\",\"cs2_smoke_%d\",\"%s\"],item:{id:\"minecraft:paper\",count:1,components:{\"minecraft:custom_model_data\":%d}},brightness:{block:15,sky:15},transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],scale:[%.3ff,%.3ff,%.3ff],right_rotation:[0f,0f,0f,1f]},billboard:\"center\",teleport_duration:%d,interpolation_duration:%d}", id, cardTag, modelCmd, (double)scale * 0.35, (double)scale * 0.35, (double)scale * 0.35,
-                        SMOKE_KEYFRAME_TICKS, SMOKE_KEYFRAME_TICKS);
-                level.getServer().getCommands().performPrefixedCommand(src, cmd);
-                SMOKE_CARDS.add(new SmokeCard(level, cardTag, center, new Vec3(x, y, z), scale, (serverRef == null ? 0 : serverRef.getTickCount()) + 2, SMOKE_SPREAD_TICKS));
+                var display = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, level);
+                ItemStack model = new ItemStack(Items.PAPER);
+                model.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(modelCmd));
+                display.setItemStack(model);
+                display.addTag("cs2_smoke_card");
+                display.addTag("cs2_smoke_" + id);
+                display.setBrightnessOverride(new Brightness(15, 15));
+                display.setBillboardConstraints(Display.BillboardConstraints.CENTER);
+                display.teleportTo(center.x, center.y, center.z);
+                display.setPosRotInterpolationDuration(SMOKE_KEYFRAME_TICKS);
+                display.setTransformationInterpolationDuration(SMOKE_KEYFRAME_TICKS);
+                scaleSmokeCard(display, scale * 0.35f);
+                if (level.addFreshEntity(display)) {
+                    cards.add(new SmokeCard(level, display.getUUID(), center, new Vec3(x, y, z),
+                            scale, level.getServer().getTickCount(), SMOKE_SPREAD_TICKS));
+                }
                 ++index;
             }
         }
+        SMOKE_CARDS.addAll(cards);
+        return cards;
     }
 
     /** 落点是否在已铺开的火区里（燃烧瓶自己铺的火也算）。 */
@@ -985,7 +1009,7 @@ public final class GrenadeManager {
         }
         if (centerGround == null) {
             // 实在找不到支撑面也要留一个火节点：宁可火悬在落点，也不能静默空掉
-            zone.nodes.add(new FireNode(zone.center, (float)FIRE_NODE_RADIUS));
+            addFireNodeAt(zone, zone.center);
             return;
         }
         int centerY = centerGround.getY();
@@ -1114,7 +1138,13 @@ public final class GrenadeManager {
 
     private static void addFireNode(FireZone zone, BlockPos cell) {
         Vec3 at = new Vec3((double)cell.getX() + 0.5, fireSurfaceY(zone.level, cell) + 0.05, (double)cell.getZ() + 0.5);
+        addFireNodeAt(zone, at);
+    }
+
+    private static void addFireNodeAt(FireZone zone, Vec3 at) {
+        if (zone.extinguished.contains(at)) return;
         if (GrenadeManager.smokeCovers(zone.level, at)) {
+            zone.extinguished.add(at);
             return;
         }
         zone.nodes.add(new FireNode(at, (float)FIRE_NODE_RADIUS));
@@ -1160,13 +1190,63 @@ public final class GrenadeManager {
         return false;
     }
 
-    /** 该位置是否在某个烟区的有效范围内（同维度、水平在烟区当前覆盖半径内）。 */
+    private static final int SMOKE_CLEAR_TICKS = 20;
+    private static final int SMOKE_RECOVERY_TICKS = 50;
+    private static final int SMOKE_RECOVERY_FRAME_TICKS = 10;
+
+    private static void disperseSmoke(ServerLevel level, Vec3 blast, double shockRadius) {
+        if (shockRadius <= 0.0) return;
+        int now = level.getServer().getTickCount();
+        for (SmokeZone zone : SMOKE_ZONES) {
+            if (zone.level != level || now - zone.startTick >= zone.lifeTicks) continue;
+            double cover = zone.coverRadius(now);
+            if (cover <= 0.0) continue;
+            double reach = shockRadius + cover;
+            if (blast.distanceToSqr(zone.pos) >= reach * reach) continue;
+
+            zone.dispersedAt = now;
+            SMOKE_CARDS.removeAll(zone.cards);
+            for (SmokeCard card : zone.cards) {
+                if (!(level.getEntity(card.entityId) instanceof Display.ItemDisplay display)) continue;
+                display.setPosRotInterpolationDuration(0);
+                display.setTransformationInterpolationDuration(0);
+                moveSmokeCard(card, card.from, 0.0f);
+            }
+            level.sendParticles(ParticleTypes.CLOUD, zone.pos.x, zone.pos.y + 0.5, zone.pos.z,
+                    12, 0.6, 0.3, 0.6, 0.12);
+        }
+    }
+
+    private static void tickSmokeRecovery(SmokeZone zone, int now, int remaining) {
+        int recoveryAge = now - zone.dispersedAt - SMOKE_CLEAR_TICKS;
+        if (recoveryAge < 0 || recoveryAge % SMOKE_RECOVERY_FRAME_TICKS != 0) return;
+        int frameEnd = now + SMOKE_RECOVERY_FRAME_TICKS;
+        double factor = smokeRecoveryFactor(zone.dispersedAt, frameEnd);
+        double normalFade = Math.min(1.0, Math.max(0, remaining - SMOKE_RECOVERY_FRAME_TICKS) / 60.0);
+        for (SmokeCard card : zone.cards) {
+            Vec3 pos = card.from.add(card.to.subtract(card.from).scale(factor));
+            double baseScale = normalFade < 1.0 ? 3.4 * normalFade : card.scale;
+            if (zone.level.getEntity(card.entityId) instanceof Display.ItemDisplay display) {
+                display.setPosRotInterpolationDuration(SMOKE_RECOVERY_FRAME_TICKS);
+                display.setTransformationInterpolationDuration(SMOKE_RECOVERY_FRAME_TICKS);
+                moveSmokeCard(card, pos, (float)(baseScale * factor));
+            }
+        }
+    }
+
+    private static double smokeRecoveryFactor(int dispersedAt, int now) {
+        if (dispersedAt < 0) return 1.0;
+        int recoveryAge = now - dispersedAt - SMOKE_CLEAR_TICKS;
+        return Math.clamp(recoveryAge / (double)SMOKE_RECOVERY_TICKS, 0.0, 1.0);
+    }
+
+    /** 烟幕按当前扩散和恢复半径生效。 */
     private static boolean smokeCovers(ServerLevel level, Vec3 pos) {
         int now = serverRef == null ? 0 : serverRef.getTickCount();
         for (SmokeZone s : SMOKE_ZONES) {
             if (s.level != level) continue;
-            // 覆盖半径跟着烟片扩散一起长大，避免烟还在小烟球阶段就把 6 格外的火按掉
-            if (s.pos.distanceTo(pos) > s.coverRadius(now)) continue;
+            double radius = s.coverRadius(now);
+            if (radius <= 0.0 || s.pos.distanceTo(pos) > radius) continue;
             return true;
         }
         return false;
@@ -1223,7 +1303,11 @@ public final class GrenadeManager {
             int stage = Math.max(1, (elapsed + 10) / 20);
             double radius = 4.0 + Math.min(5.0, (double)(stage - 1));
             // 只熄灭落在烟范围内的火格，烟外的火继续烧
-            fireZone.nodes.removeIf(node -> GrenadeManager.smokeCovers(fireZone.level, node.pos));
+            fireZone.nodes.removeIf(node -> {
+                if (!GrenadeManager.smokeCovers(fireZone.level, node.pos)) return false;
+                fireZone.extinguished.add(node.pos);
+                return true;
+            });
             if (fireZone.nodes.isEmpty() && now - fireZone.startTick > 20) {
                 GrenadeManager.extinguish(fireZone);
                 dead.add(fireZone);
@@ -1287,9 +1371,9 @@ public final class GrenadeManager {
         ServerLevel level = g.level;
         int life = Math.max(60, g.type.cloudSeconds() * 20);
         int volumeId = ++smokeVolumeId;
-        GrenadeManager.spawnSmokeCards(level, pos, g.type.cloudRadius(), volumeId);
+        List<SmokeCard> cards = spawnSmokeCards(level, pos, g.type.cloudRadius(), volumeId);
         int born = serverRef == null ? 0 : serverRef.getTickCount();
-        SmokeZone zone = new SmokeZone(level, pos, born, life, g.type.cloudRadius(), 0, volumeId, g.display);
+        SmokeZone zone = new SmokeZone(level, pos, born, life, g.type.cloudRadius(), 0, volumeId, g.display, cards);
         zone.nextHiss = born + 140;
         SMOKE_ZONES.add(zone);
         GrenadeManager.playCs2(level, pos, "smoke.hiss", 0.8f, 1.0f);
@@ -1308,7 +1392,8 @@ public final class GrenadeManager {
         ArrayList<SmokeZone> expired = new ArrayList<SmokeZone>();
         for (SmokeZone z : SMOKE_ZONES) {
             int elapsed = now - z.startTick;
-            if (elapsed >= z.lifeTicks) {
+            int remaining = z.lifeTicks - elapsed;
+            if (remaining <= 0) {
                 for (java.util.UUID id : z.hissTicks.keySet()) {
                     net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
                     if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
@@ -1348,7 +1433,7 @@ public final class GrenadeManager {
                 it.remove();
             }
             }
-            if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
+            if (!z.fadedOut && remaining <= 60) {
                 z.fadedOut = true;
                 for (java.util.UUID id : z.hissTicks.keySet()) {
                     net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
@@ -1360,9 +1445,12 @@ public final class GrenadeManager {
                 String slowCmd = String.format(Locale.ROOT, "execute as @e[tag=cs2_smoke_%d] run data modify entity @s interpolation_duration set value 10", z.volumeId);
                 z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), slowCmd);
             }
-            int remaining = z.lifeTicks - elapsed;
+            if (smokeRecoveryFactor(z.dispersedAt, now) < 1.0) {
+                tickSmokeRecovery(z, now, remaining);
+                continue;
+            }
             if (remaining >= 60 || now < z.nextCore) continue;
-            double f = Math.max(0.05, (double)remaining / 60.0);
+            double f = Math.max(0.05, remaining / 60.0);
             String scaleCmd = String.format(Locale.ROOT, "execute as @e[tag=cs2_smoke_%d] run data modify entity @s transformation.scale set value [%.3ff,%.3ff,%.3ff]", z.volumeId, 3.4 * f, 3.4 * f, 3.4 * f);
             z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), scaleCmd);
             z.nextCore = now + 10;
@@ -1551,6 +1639,9 @@ public final class GrenadeManager {
         double pierceInner = g.type.pierceInner();
         double pierceOuter = g.type.pierceOuter();
         float pierceDamage = g.type.pierceDamage();
+        if (pierceDamage > 0.0f && ("he".equals(g.type.effect()) || "impact".equals(g.type.effect()))) {
+            disperseSmoke(level, pos, pierceOuter);
+        }
         AABB pierceBox = new AABB(pos, pos).inflate(pierceOuter);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, pierceBox)) {
             double dist;
@@ -1689,10 +1780,12 @@ public final class GrenadeManager {
         int nextCore;
         int nextHiss;
         boolean fadedOut;
+        int dispersedAt = -1;
+        final List<SmokeCard> cards;
         /** 每个玩家最近一次听到放烟声的 tick，用来进出烟区时续播。 */
         final java.util.HashMap<java.util.UUID, Integer> hissTicks = new java.util.HashMap<>();
 
-        SmokeZone(ServerLevel level, Vec3 pos, int startTick, int lifeTicks, double maxRadius, int nextPuff, int volumeId, Display.ItemDisplay display) {
+        SmokeZone(ServerLevel level, Vec3 pos, int startTick, int lifeTicks, double maxRadius, int nextPuff, int volumeId, Display.ItemDisplay display, List<SmokeCard> cards) {
             this.level = level;
             this.pos = pos;
             this.startTick = startTick;
@@ -1700,29 +1793,31 @@ public final class GrenadeManager {
             this.maxRadius = maxRadius;
             this.nextPuff = nextPuff;
             this.volumeId = volumeId;
+            this.cards = cards;
             this.display = display;
         }
 
         /** 当前 tick 的有效覆盖半径：跟烟片扩散同步变大，视觉铺满时正好到 maxRadius。 */
         double coverRadius(int now) {
-            double p = Math.min(1.0, Math.max(0.0, (double)(now - this.startTick) / (double)SMOKE_SPREAD_TICKS));
+            double p = Math.min(1.0, Math.max(0.0, (double)(now - this.startTick - 1) / (double)SMOKE_SPREAD_TICKS));
             double ease = 1.0 - Math.pow(1.0 - p, 2.2);
-            return this.maxRadius * (SMOKE_INITIAL_COVER + (1.0 - SMOKE_INITIAL_COVER) * ease);
+            return this.maxRadius * (SMOKE_INITIAL_COVER + (1.0 - SMOKE_INITIAL_COVER) * ease)
+                    * smokeRecoveryFactor(this.dispersedAt, now);
         }
     }
 
     private static final class SmokeCard {
         final ServerLevel level;
-        final String tag;
+        final UUID entityId;
         final Vec3 from;
         final Vec3 to;
         final float scale;
         final int startTick;
         final int growTicks;
 
-        SmokeCard(ServerLevel level, String tag, Vec3 from, Vec3 to, float scale, int startTick, int growTicks) {
+        SmokeCard(ServerLevel level, UUID entityId, Vec3 from, Vec3 to, float scale, int startTick, int growTicks) {
             this.level = level;
-            this.tag = tag;
+            this.entityId = entityId;
             this.from = from;
             this.to = to;
             this.scale = scale;
@@ -1743,6 +1838,7 @@ public final class GrenadeManager {
         int lastDamageTick;
         int lastPlaceTick;
         final List<FireNode> nodes = new ArrayList<FireNode>();
+        final Set<Vec3> extinguished = new HashSet<>();
         final Map<UUID, Integer> burnSteps = new HashMap<UUID, Integer>();
 
         FireZone(ServerLevel level, Vec3 center, int startTick, int lifeTicks, Player thrower) {
