@@ -47,6 +47,7 @@ public class Cs2Grenade {
     public Cs2Grenade(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.COMMON, SPEC);
         MatchInventory.register(modBus);
+        MapChunkTickets.register(modBus);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::onLivingTick);

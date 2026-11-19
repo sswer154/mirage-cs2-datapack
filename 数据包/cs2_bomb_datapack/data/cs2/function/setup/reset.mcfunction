@@ -11,6 +11,8 @@ kill @e[type=text_display,tag=cs2_site_b_text]
 kill @e[type=marker,tag=cs2_map_marker]
 kill @e[type=text_display,tag=cs2_map_text]
 data modify storage cs2:map active set value "未选择"
+data remove storage cs2:map points
+cs2chunks release_all
 kill @e[tag=cs2_bomb]
 kill @e[type=item_display,tag=cs2_c4_display]
 kill @e[type=armor_stand,tag=cs2_c4_hit]

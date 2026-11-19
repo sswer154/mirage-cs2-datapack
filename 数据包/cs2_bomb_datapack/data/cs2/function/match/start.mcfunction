@@ -16,11 +16,11 @@ execute unless entity @a[team=cs2_t] unless entity @a[team=cs2_ct] run return 0
 
 # 开赛时把五个关键点所在区块全部强加载，避免比赛途中区块卸载导致
 # match/end 找不到大厅 marker、或 round/start 找不到出生点而把玩家留在原地。
-execute at @e[type=marker,tag=cs2_spawn_t,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_spawn_ct,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_site_a,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_site_b,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_lobby,limit=1] run forceload add ~ ~
+execute at @e[type=marker,tag=cs2_spawn_t,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_spawn_ct,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_site_a,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_site_b,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_lobby,limit=1] run cs2chunks retain ~ ~
 
 # 以队伍成员关系为准同步 cs2_team，避免旧存档/手动 /team join 造成队伍与分数不一致
 # 未加入任何队伍的玩家不再属于旁观队伍；开始时只标记 T/CT 参赛者
