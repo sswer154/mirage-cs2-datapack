@@ -13,6 +13,7 @@ function cs2:econ/round_start
 function cs2:map/doors/reset
 function cs2:panel/reset_votes
 
+scoreboard players add #epoch cs2_health_round 1
 function cs2:player/round_all
 tp @a[scores={cs2_inmatch=1,cs2_team=1}] @e[type=marker,tag=cs2_spawn_t,limit=1]
 tp @a[scores={cs2_inmatch=1,cs2_team=2}] @e[type=marker,tag=cs2_spawn_ct,limit=1]

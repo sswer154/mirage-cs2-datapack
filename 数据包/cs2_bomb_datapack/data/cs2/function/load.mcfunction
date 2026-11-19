@@ -2,6 +2,7 @@
 # 说明：cs2_const 在每次 reload 时会报一次“already exists”，这是正常的；
 # 它只是为了在首次安装时创建一次基础内容。
 scoreboard objectives add cs2_const dummy
+scoreboard objectives add cs2_health_round dummy
 # 新版本新增的触发项；老存档首次 reload 时补建，之后用 #hud_ready 跳过。
 execute unless score #hud_ready cs2_const matches 1 run scoreboard objectives add cs2_hud_toggle trigger
 execute unless score #hud_ready cs2_const matches 1 run scoreboard players set #hud_ready cs2_const 1
