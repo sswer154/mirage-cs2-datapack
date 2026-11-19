@@ -103,6 +103,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -704,7 +706,9 @@ public final class GrenadeManager {
             g.vel = previousVel;
             return;
         }
-        BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)g.thrower));
+        // 燃烧弹把水也当成碰撞面：落水时在水面爆开，而不是一路沉到水底才炸
+        ClipContext.Fluid fluidClip = "fire".equals(g.type.effect()) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
+        BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, fluidClip, (Entity)g.thrower));
         if (hit.getType() == HitResult.Type.BLOCK) {
             int nowTick;
             Vec3 normal = Vec3.atLowerCornerOf((Vec3i)hit.getDirection().getNormal());
@@ -712,6 +716,16 @@ public final class GrenadeManager {
             g.vel = g.vel.subtract(normal.scale(2.0 * g.vel.dot(normal))).scale(g.type.bounce());
             to = hit.getLocation().add(normal.scale(0.02));
             ++g.bounces;
+            if ("fire".equals(g.type.effect()) && isWater(g.level, hit.getBlockPos())) {
+                // 水面（或从侧面扎进水里）也算引爆面：爆点抬到水柱顶面，火焰就贴着水面烧
+                double surfaceY = waterSurfaceY(g.level, hit.getBlockPos());
+                Vec3 at = new Vec3(hit.getLocation().x, surfaceY, hit.getLocation().z);
+                g.level.sendParticles((ParticleOptions)ParticleTypes.SPLASH, at.x, at.y, at.z, 24, 0.45, 0.1, 0.45, 0.08);
+                g.level.sendParticles((ParticleOptions)ParticleTypes.CLOUD, at.x, at.y + 0.2, at.z, 8, 0.35, 0.15, 0.35, 0.02);
+                g.fuse = 0;
+                GrenadeManager.explode(g, at);
+                return;
+            }
             if ("fire".equals(g.type.effect()) && normal.y > 0.7) {
                 g.fuse = 0;
                 GrenadeManager.explode(g, hit.getLocation());
@@ -999,15 +1013,37 @@ public final class GrenadeManager {
             return false;
         }
         BlockPos below = pos.below();
+        if (isWater(level, below)) {
+            // 水没有碰撞形状，但水面上的空气格也要能放火，否则整片水面都找不到火格
+            return true;
+        }
         VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
         return !support.isEmpty() && support.max(Direction.Axis.Y) >= FIRE_SUPPORT_MIN_TOP;
     }
 
-    /** 火节点所在格子的支撑面世界高度；没有碰撞形状时退回格子底面。 */
+    /** 火节点所在格子的支撑面世界高度；水面取水方块顶面，没有碰撞形状时退回格子底面。 */
     private static double fireSurfaceY(ServerLevel level, BlockPos cell) {
         BlockPos below = cell.below();
+        if (isWater(level, below)) {
+            return (double)below.getY() + 1.0;
+        }
         VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
         return (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
+    }
+
+    /** 该格是不是水（含水源、流动水和含水方块）。 */
+    private static boolean isWater(ServerLevel level, BlockPos pos) {
+        FluidState fluid = level.getFluidState(pos);
+        return !fluid.isEmpty() && fluid.getType() == Fluids.WATER;
+    }
+
+    /** 从某格的水面往上找到水柱顶面（最多 32 格），用于把水面当引爆面。 */
+    private static double waterSurfaceY(ServerLevel level, BlockPos pos) {
+        BlockPos top = pos;
+        for (int i = 0; i < 32 && isWater(level, top.above()); ++i) {
+            top = top.above();
+        }
+        return (double)top.getY() + 1.0;
     }
 
     private static void addFireNode(FireZone zone, BlockPos cell) {
