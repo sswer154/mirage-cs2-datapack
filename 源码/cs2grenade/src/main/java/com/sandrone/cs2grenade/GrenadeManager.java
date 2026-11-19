@@ -119,7 +119,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 
 public final class GrenadeManager {
-    private static final ResourceKey<DamageType> FIRE_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("cs2", "fire"));
+    static final ResourceKey<DamageType> FIRE_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("cs2", "fire"));
     private static final List<Grenade> ACTIVE = new ArrayList<Grenade>();
     private static final String GRENADE_TAG = "cs2_grenade_visual";
     private static MinecraftServer serverRef;
