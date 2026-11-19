@@ -49,6 +49,9 @@ public class Cs2Shop {
     }
 
     private void onContainerClose(net.neoforged.neoforge.event.entity.player.PlayerContainerEvent.Close event) {
+        if (!(event.getContainer() instanceof ShopMenu)) {
+            return;
+        }
         debug("容器关闭: {} ({})", event.getContainer().getClass().getSimpleName(), event.getEntity().getScoreboardName());
     }
 
