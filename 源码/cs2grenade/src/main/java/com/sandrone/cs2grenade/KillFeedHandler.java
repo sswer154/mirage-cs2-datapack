@@ -70,11 +70,12 @@ public final class KillFeedHandler {
     private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam, ServerPlayer killer, int killerTeam, boolean selfKill) {
         if (selfKill) {
             Component weapon = weaponLabel(source);
+            String deathVerb = source.is(GrenadeManager.FIRE_DAMAGE_TYPE) ? "烧死了" : "炸死了";
             MutableComponent result = Component.empty();
             result.append(victim.getDisplayName())
                     .append(Component.literal(" 被自己的").withStyle(ChatFormatting.GRAY))
                     .append(weapon != null ? weapon : Component.literal("投掷物").withStyle(ChatFormatting.GOLD))
-                    .append(Component.literal(" 炸死了").withStyle(ChatFormatting.GRAY));
+                    .append(Component.literal(deathVerb).withStyle(ChatFormatting.GRAY));
             return result;
         }
         if (killer == null) {

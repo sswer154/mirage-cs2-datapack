@@ -12,7 +12,7 @@ function cs2:player/restore_health_if_due
 gamemode survival @s
 function cs2:util/speed
 function cs2:player/tag
-tellraw @s {"text":"已重新连接：保留当前装备与效果。","color":"green"}
+tellraw @s {"text":"已重新连接，比赛继续。","color":"green"}
 # 正式回合重连：只保留一把 C4，有就从“发 C4”流程走一遍
 scoreboard players set @s cs2_carrier 0
 execute store result score #c4 cs2_counts run clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}] 0
