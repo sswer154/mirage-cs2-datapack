@@ -2,6 +2,9 @@
 scoreboard players set #state cs2_state 0
 scoreboard players set #timer cs2_timer 0
 scoreboard players set #round cs2_round 0
+scoreboard players set #round_restarting cs2_counts 0
+scoreboard players set #round_replayed cs2_counts 0
+scoreboard players reset #checkpoint cs2_health_round
 scoreboard players set #t cs2_score_t 0
 scoreboard players set #ct cs2_score_ct 0
 scoreboard players set #target cs2_score_t 13

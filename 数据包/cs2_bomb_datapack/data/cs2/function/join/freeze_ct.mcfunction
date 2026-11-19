@@ -33,6 +33,7 @@ title @s title {"text":"已加入 CT","color":"blue"}
 # 中途加入/重连：重置本回合购买计数，并按当前背包快照计入上限
 scoreboard players set @s cs2_item_count 0
 function cs2:shop/snapshot_carry
+cs2roundstate save
 
 # 单人测试局：额外发一个测试商店
 execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 1..2 run function cs2:util/give_test_shop
