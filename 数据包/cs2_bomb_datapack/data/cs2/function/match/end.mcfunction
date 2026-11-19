@@ -34,3 +34,5 @@ function cs2:stats/match_end
 # 参赛者先回大厅，再解除队伍；未参赛人员保持原地
 execute if entity @e[type=marker,tag=cs2_lobby,limit=1] run tp @a[scores={cs2_inmatch=1}] @e[type=marker,tag=cs2_lobby,limit=1]
 execute as @a[scores={cs2_inmatch=1}] run function cs2:join/to_lobby
+# 计分板仍保存离线参赛者的分数，比赛结束后也要撤销。
+scoreboard players set * cs2_inmatch 0
