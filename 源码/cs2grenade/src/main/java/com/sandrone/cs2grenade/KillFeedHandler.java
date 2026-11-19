@@ -1,7 +1,10 @@
 package com.sandrone.cs2grenade;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,6 +13,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
@@ -20,6 +25,10 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
  * “最近击杀者”全局标签，因此同 tick 连杀、同归于尽和投掷物击杀都不会错配。
  */
 public final class KillFeedHandler {
+    private static final ResourceLocation TACZ_BULLET = ResourceLocation.fromNamespaceAndPath("tacz", "bullet");
+    private static final ResourceLocation TACZ_GUN = ResourceLocation.fromNamespaceAndPath("tacz", "modern_kinetic_gun");
+    private static final ResourceLocation KILL_REWARD = ResourceLocation.fromNamespaceAndPath("cs2", "kill_reward");
+
     private KillFeedHandler() {
     }
 
@@ -69,6 +78,9 @@ public final class KillFeedHandler {
                 String enemyTeam = victimTeam == 1 ? "cs2_ct" : "cs2_t";
                 rewardCommand = "execute if entity @s[team=" + enemyTeam + "] run function cs2:econ/kill/reward_grenade";
             } else {
+                CompoundTag reward = new CompoundTag();
+                reward.putString("gun", rewardGunId(source));
+                server.getCommandStorage().set(KILL_REWARD, reward);
                 rewardCommand = "function cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
             }
             server.getCommands().performPrefixedCommand(
@@ -111,6 +123,29 @@ public final class KillFeedHandler {
                 .append(teamTag(victimTeam))
                 .append(victim.getDisplayName());
         return result;
+    }
+
+    private static String rewardGunId(DamageSource source) {
+        Entity direct = source.getDirectEntity();
+        if (direct != null && TACZ_BULLET.equals(BuiltInRegistries.ENTITY_TYPE.getKey(direct.getType()))) {
+            // TACZ stores the firing gun on the projectile. Keep TACZ optional for standalone builds.
+            try {
+                if (direct.getClass().getMethod("getGunId").invoke(direct) instanceof ResourceLocation gunId) {
+                    return gunId.toString();
+                }
+            } catch (ReflectiveOperationException ignored) {
+                // Unknown TACZ versions fall back to the default reward.
+            }
+            return "";
+        }
+        ItemStack weapon = source.getWeaponItem();
+        if (weapon != null && TACZ_GUN.equals(BuiltInRegistries.ITEM.getKey(weapon.getItem()))) {
+            CustomData data = weapon.get(DataComponents.CUSTOM_DATA);
+            if (data != null) {
+                return data.copyTag().getString("GunId");
+            }
+        }
+        return "";
     }
 
     private static boolean isGrenadeDamage(DamageSource source) {
