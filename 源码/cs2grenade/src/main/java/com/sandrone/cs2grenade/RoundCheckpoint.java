@@ -76,6 +76,19 @@ final class RoundCheckpoint {
         return 1;
     }
 
+    static void creditBaseline(ServerPlayer player, int amount) {
+        Scoreboard board = player.getScoreboard();
+        ScoreHolder holder = ScoreHolder.forNameOnly(player.getScoreboardName());
+        CompoundTag snapshot = checkpoint(player, score(board, BASELINE, "cs2_health_round"),
+                score(board, holder, "cs2_team"));
+        if (snapshot != null && snapshot.get("Scores") instanceof CompoundTag values
+                && values.contains("cs2_money")) {
+            // A settlement award belongs to the opening balance, even if it was claimed after the save.
+            values.putInt("cs2_money", values.getInt("cs2_money") + amount);
+            player.setData(CHECKPOINT, snapshot);
+        }
+    }
+
     private static CompoundTag checkpoint(ServerPlayer player, int baseline, int side) {
         if (!player.hasData(CHECKPOINT) || baseline <= 0) {
             return null;

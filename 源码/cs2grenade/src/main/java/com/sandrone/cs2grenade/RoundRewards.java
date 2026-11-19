@@ -93,6 +93,7 @@ final class RoundRewards {
         }
         int amount = accrued.value();
         board.getOrCreatePlayerScore(holder, money).add(amount);
+        RoundCheckpoint.creditBaseline(player, amount);
         board.resetSinglePlayerScore(holder, pending);
         return amount;
     }
