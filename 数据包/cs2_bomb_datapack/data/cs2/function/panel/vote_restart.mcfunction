@@ -11,7 +11,5 @@ execute unless score @s cs2_inmatch matches 1 run return 0
 execute if score @s cs2_voted_restart matches 1 run tellraw @s {"text":"你已经同意重开本小局了。","color":"yellow"}
 execute if score @s cs2_voted_restart matches 1 run return 0
 scoreboard players set @s cs2_voted_restart 1
-execute store result score #vote_restart_yes cs2_counts if entity @a[scores={cs2_inmatch=1,cs2_voted_restart=1}]
-execute store result score #vote_restart_total cs2_counts if entity @a[scores={cs2_inmatch=1}]
-tellraw @a[scores={cs2_inmatch=1}] [{"text":"重开投票：","color":"green"},{"text":"已同意 ","color":"gray"},{"score":{"name":"#vote_restart_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_restart_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
-execute if score #vote_restart_total cs2_counts matches 1.. if score #vote_restart_yes cs2_counts >= #vote_restart_total cs2_counts run function cs2:panel/restart
+function cs2:panel/recount_votes
+tellraw @a[scores={cs2_inmatch=1}] [{"text":"重开投票：","color":"green"},{"text":"已同意 ","color":"gray"},{"score":{"name":"#vote_restart_yes","objective":"cs2_counts"}},{"text":"/","color":"gray"},{"score":{"name":"#vote_total","objective":"cs2_counts"}},{"text":" 人","color":"gray"}]
