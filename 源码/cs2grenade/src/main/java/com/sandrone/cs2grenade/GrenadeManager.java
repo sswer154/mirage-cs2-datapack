@@ -108,7 +108,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -738,7 +738,7 @@ public final class GrenadeManager {
         }
         g.chunkWaitTicks = 0;
         // 燃烧弹把水也当成碰撞面：落水时在水面爆开，而不是一路沉到水底才炸
-        ClipContext.Fluid fluidClip = "fire".equals(g.type.effect()) ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE;
+        ClipContext.Fluid fluidClip = "fire".equals(g.type.effect()) ? ClipContext.Fluid.WATER : ClipContext.Fluid.NONE;
         BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, fluidClip, (Entity)g.thrower));
         if (hit.getType() == HitResult.Type.BLOCK) {
             int nowTick;
@@ -1122,20 +1122,20 @@ public final class GrenadeManager {
         return !support.isEmpty() && support.max(Direction.Axis.Y) >= FIRE_SUPPORT_MIN_TOP;
     }
 
-    /** 火节点所在格子的支撑面世界高度；水面取水方块顶面，没有碰撞形状时退回格子底面。 */
+    /** 火节点的支撑高度取实际碰撞面和实际水面中的较高者。 */
     private static double fireSurfaceY(ServerLevel level, BlockPos cell) {
         BlockPos below = cell.below();
-        if (isWater(level, below)) {
-            return (double)below.getY() + 1.0;
-        }
         VoxelShape support = level.getBlockState(below).getCollisionShape(level, below);
-        return (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
+        double solidHeight = support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y);
+        FluidState fluid = level.getFluidState(below);
+        double waterHeight = fluid.is(FluidTags.WATER) ? fluid.getHeight(level, below) : 0.0;
+        return below.getY() + Math.max(solidHeight, waterHeight);
     }
 
     /** 该格是不是水（含水源、流动水和含水方块）。 */
     private static boolean isWater(ServerLevel level, BlockPos pos) {
         FluidState fluid = level.getFluidState(pos);
-        return !fluid.isEmpty() && fluid.getType() == Fluids.WATER;
+        return fluid.is(FluidTags.WATER);
     }
 
     /** 从某格的水面往上找到水柱顶面（最多 32 格），用于把水面当引爆面。 */
@@ -1144,7 +1144,7 @@ public final class GrenadeManager {
         for (int i = 0; i < 32 && isWater(level, top.above()); ++i) {
             top = top.above();
         }
-        return (double)top.getY() + 1.0;
+        return top.getY() + level.getFluidState(top).getHeight(level, top);
     }
 
     private static void addFireNode(FireZone zone, BlockPos cell) {
