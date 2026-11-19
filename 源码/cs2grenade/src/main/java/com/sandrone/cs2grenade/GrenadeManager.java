@@ -598,6 +598,20 @@ public final class GrenadeManager {
         }
     }
 
+    /** 只给单个玩家停某条自定义音效。 */
+    static void stopSoundFor(ServerPlayer p, String id) {
+        if (p.connection == null) return;
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
+        p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
+    }
+
+    /** 只给单个玩家播自定义音效。 */
+    static void playCs2For(ServerPlayer p, ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
+        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
+        SoundEvent sound = SoundEvent.createVariableRangeEvent(loc);
+        GrenadeManager.sendSoundPacket(p, sound, pos, volume, pitch, level.getRandom().nextLong());
+    }
+
     private static void stopSound(ServerLevel level, Vec3 pos, String id) {
         ResourceLocation loc = ResourceLocation.fromNamespaceAndPath((String)"cs2", (String)id);
         for (ServerPlayer p : level.players()) {
@@ -1126,6 +1140,11 @@ public final class GrenadeManager {
         for (SmokeZone z : SMOKE_ZONES) {
             int elapsed = now - z.startTick;
             if (elapsed >= z.lifeTicks) {
+                for (java.util.UUID id : z.hissTicks.keySet()) {
+                    net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
+                    if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                }
+                z.hissTicks.clear();
                 z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), "kill @e[tag=cs2_smoke_" + z.volumeId + "]");
                 if (z.display != null) {
                     PERSIST_DISPLAYS.remove(z.display.getUUID());
@@ -1134,7 +1153,31 @@ public final class GrenadeManager {
                 expired.add(z);
                 continue;
             }
-            // 放烟声只在起烟时播一次；这里不再周期重放，避免走动时同一段声音被反复重入而丢音
+            // 放烟声按玩家维护：进烟区补一次，留在里面每 5 秒续一次，走远了停掉
+            java.util.HashSet<java.util.UUID> seen = new java.util.HashSet<>();
+            for (net.minecraft.server.level.ServerPlayer p : z.level.players()) {
+                double ddx = p.getX() - z.pos.x;
+                double ddz = p.getZ() - z.pos.z;
+                double horiz2 = ddx * ddx + ddz * ddz;
+                double limit = z.maxRadius + 1.5;
+                if (horiz2 <= limit * limit && Math.abs(p.getY() - z.pos.y) <= 4.0) {
+                    seen.add(p.getUUID());
+                    Integer last = z.hissTicks.get(p.getUUID());
+                    if (last == null || now - last >= 100) {
+                        GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                        GrenadeManager.playCs2For(p, z.level, z.pos, "smoke.hiss", 0.8f, 1.0f);
+                        z.hissTicks.put(p.getUUID(), now);
+                    }
+                }
+            }
+            java.util.Iterator<java.util.Map.Entry<java.util.UUID, Integer>> it = z.hissTicks.entrySet().iterator();
+            while (it.hasNext()) {
+                java.util.Map.Entry<java.util.UUID, Integer> e = it.next();
+                if (seen.contains(e.getKey())) continue;
+                net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(e.getKey());
+                if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                it.remove();
+            }
             if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
                 z.fadedOut = true;
                 GrenadeManager.stopSound(z.level, z.pos, "smoke.hiss");
@@ -1462,6 +1505,8 @@ public final class GrenadeManager {
         int nextCore;
         int nextHiss;
         boolean fadedOut;
+        /** 每个玩家最近一次听到放烟声的 tick，用来进出烟区时续播。 */
+        final java.util.HashMap<java.util.UUID, Integer> hissTicks = new java.util.HashMap<>();
 
         SmokeZone(ServerLevel level, Vec3 pos, int startTick, int lifeTicks, double maxRadius, int nextPuff, int volumeId, Display.ItemDisplay display) {
             this.level = level;
