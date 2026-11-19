@@ -35,6 +35,12 @@ execute as @a[scores={cs2_train_spawn=1..}] run function cs2:practice/spawn_enem
 execute as @a[scores={cs2_match_pause=1..}] run function cs2:panel/match_pause
 execute as @a[scores={cs2_match_resume=1..}] run function cs2:panel/match_resume
 
+# 兜底：比赛进行中但场上一个参赛者都没有，持续 10 秒就自动结束
+execute if score #state cs2_state matches 1..6 unless entity @a[scores={cs2_inmatch=1}] run scoreboard players add #empty cs2_empty 1
+execute if score #state cs2_state matches 1..6 if entity @a[scores={cs2_inmatch=1}] run scoreboard players set #empty cs2_empty 0
+execute if score #state cs2_state matches 1..6 if score #empty cs2_empty matches 200.. run function cs2:match/end
+execute unless score #state cs2_state matches 1..6 run scoreboard players set #empty cs2_empty 0
+
 # 战术暂停：停住回合计时/炸弹倒计时/胜负检查，只更新暂停倒计时
 execute if score #paused cs2_counts matches 1 run function cs2:panel/pause_tick
 execute if score #paused cs2_counts matches 1 run return 0
@@ -61,9 +67,3 @@ function cs2:hud/tick
 
 # 测试商店按钮的条件检查始终通过；训练商店只会在单人测试局由 give_test_shop 发放
 scoreboard players set #testshop cs2_testshop 1
-
-# 兜底：比赛进行中但场上一个参赛者都没有，持续 10 秒就自动结束
-execute if score #state cs2_state matches 1..6 unless entity @a[scores={cs2_inmatch=1}] run scoreboard players add #empty cs2_empty 1
-execute if score #state cs2_state matches 1..6 if entity @a[scores={cs2_inmatch=1}] run scoreboard players set #empty cs2_empty 0
-execute if score #state cs2_state matches 1..6 if score #empty cs2_empty matches 200.. run function cs2:match/end
-execute unless score #state cs2_state matches 1..6 run scoreboard players set #empty cs2_empty 0
