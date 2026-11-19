@@ -44,11 +44,11 @@ $execute as @e[type=text_display,tag=cs2_map_$(map)_site_a_text,limit=1] run dat
 $execute as @e[type=text_display,tag=cs2_map_$(map)_site_b_text,limit=1] run data merge entity @s {text:"{\"text\":\"B 包点\",\"color\":\"red\",\"bold\":true}"}
 
 # 保证当前地图关键区块已加载
-execute at @e[type=marker,tag=cs2_spawn_t,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_spawn_ct,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_site_a,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_site_b,limit=1] run forceload add ~ ~
-execute at @e[type=marker,tag=cs2_lobby,limit=1] run forceload add ~ ~
+execute at @e[type=marker,tag=cs2_spawn_t,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_spawn_ct,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_site_a,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_site_b,limit=1] run cs2chunks retain ~ ~
+execute at @e[type=marker,tag=cs2_lobby,limit=1] run cs2chunks retain ~ ~
 
 $data modify storage cs2:map active set value "$(map)"
 $tellraw @s {"text":"已切换到地图 $(map)。","color":"green"}
