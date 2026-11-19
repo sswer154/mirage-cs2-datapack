@@ -17,7 +17,7 @@ function cs2:player/tag
 execute if score @s cs2_team matches 1 if entity @e[type=marker,tag=cs2_spawn_t,limit=1] run tp @s @e[type=marker,tag=cs2_spawn_t,limit=1]
 execute if score @s cs2_team matches 2 if entity @e[type=marker,tag=cs2_spawn_ct,limit=1] run tp @s @e[type=marker,tag=cs2_spawn_ct,limit=1]
 function cs2:shop/ensure_ready
-tellraw @s {"text":"已重新连接：保留当前装备与效果，准备阶段继续。","color":"green"}
+tellraw @s {"text":"已重新连接，准备阶段继续。","color":"green"}
 # 准备阶段重连：清掉背包里的 C4，交给下一回合随机发放
 clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
 scoreboard players set @s cs2_carrier 0
