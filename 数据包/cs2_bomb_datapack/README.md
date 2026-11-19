@@ -264,6 +264,7 @@ execute as @p run function cs2:join/leave
 - 投掷物都是自定义雪球物品，**右键投掷**。
 - 物理（速度/重力/反弹）、引信、爆炸/燃烧/烟雾/闪光效果，全部由 `cs2grenade` 模组处理；数据包只负责商店物品、发放函数和购买上限。
 - 当前参数：投掷物初速 2.0、重力 0.04；烟雾云半径 6、持续 20 秒、烟卡 137 张；燃烧弹每 0.5 秒一跳，总伤 40，火区半径 4→9 格；高爆穿透 6、破片 2、破片范围 10。
+- 火区扩散时相邻火格做水平遮挡检查：命中实心方块后，若其上方不是空气或高差超过 1 格则阻断；1 格高台阶/矮掩体可越过，2 格高墙/封闭房间阻断。
 - 远距离投掷时，若落点区块尚未加载，弹体会暂停等待；烟雾弹兜底引信 120 tick，避免落点区块未加载或卡在水面时永不起烟。
 - 闪光弹引信 1.5 秒，最大闪黑 5 秒；视线检测/黑屏由模组 `flash.json` 负责，不再依赖数据包射线函数。
 - 需要资源包才有自定义物品模型。
@@ -492,16 +493,22 @@ Bob 阵亡
 
 比赛正常结束后，`match/end` 会调用 `cs2:music/play`。预设编号存放在 `cs2_cfg` 的 `#music_preset`：
 
-- `0`：关闭，默认值；
-- `1..`：留给自定义曲目。
+- `0`：关闭；
+- `1`：束光似水，默认；
+- `2`：inhuman_mvp；
+- `3`：invasion_mvp；
+- `4`：umri_15s；
+- `5`：on_and_on_60s；
+- `6`：reimei_10s；
+- `7`：know_my_name_15s。
 
-当前没有配置任何曲目，函数只保留接口。添加曲目时在 `data/cs2/function/music/play.mcfunction` 里按编号加入 `playsound`，例如：
+旧存档首次加载时会一次性从 `0` 迁到 `1`；之后手动设为 `0` 不会再被覆盖。修改当前比赛使用的曲目：
 
 ```mcfunction
-execute if score #music_preset cs2_cfg matches 1 run playsound cs2:music.victory master @a
+scoreboard players set #music_preset cs2_cfg 3
 ```
 
-如果要只让参赛者听到，把 `@a` 改成 `@a[scores={cs2_inmatch=1}]`。
+曲目资源在资源包 `assets/cs2/sounds/music/`，事件在 `assets/cs2/sounds.json`；播放目标为 `@a[scores={cs2_inmatch=1}]`，只给本局参赛者。替换曲目时保持文件名/事件名不变，或同步修改 `data/cs2/function/music/play.mcfunction`。
 
 - 死亡数使用原版 `deathCount`，所以坠落、爆炸、友伤等所有死亡都会计入。
 - 击杀者由 `cs2grenade` 的 `LivingDeathEvent` 读取 `DamageSource` 得到；没有玩家击杀者时显示原版死亡信息。不再使用 `player_killed_entity` 或 `cs2_recent_killer` 标签配对。
