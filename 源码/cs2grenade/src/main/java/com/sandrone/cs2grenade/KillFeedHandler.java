@@ -115,10 +115,11 @@ public final class KillFeedHandler {
             return Component.literal("燃烧弹").withStyle(ChatFormatting.GOLD);
         }
         ItemStack weapon = source.getWeaponItem();
-        if (weapon.isEmpty()) {
+        // 子弹/间接伤害的 DamageSource 可能没有武器字段，getWeaponItem() 会返回 null
+        if (weapon == null || weapon.isEmpty()) {
             weapon = killer.getMainHandItem();
         }
-        if (weapon.isEmpty()) {
+        if (weapon == null || weapon.isEmpty()) {
             return null;
         }
         return weapon.getHoverName().copy().withStyle(ChatFormatting.YELLOW);
