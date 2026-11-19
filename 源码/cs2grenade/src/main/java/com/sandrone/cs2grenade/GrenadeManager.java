@@ -1036,6 +1036,8 @@ public final class GrenadeManager {
             for (SmokeZone s : SMOKE_ZONES) {
                 // 只比较同一维度，避免别的维度同坐标的烟区把火区浇灭
                 if (s.level != fireZone.level) continue;
+                // 烟只影响自身高度附近，避免灭掉楼上楼下的火
+                if (Math.abs(s.pos.y - fireZone.center.y) > 3.0) continue;
                 if (!(s.pos.distanceTo(fireZone.center) < s.maxRadius + radius * 0.6)) continue;
                 smoked = true;
                 break;
