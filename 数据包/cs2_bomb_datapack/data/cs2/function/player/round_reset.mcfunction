@@ -23,8 +23,7 @@ clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
 execute if score @s cs2_team matches 0 run function cs2:player/round_reset_clear
 execute if score @s cs2_team matches 1..2 unless score @s cs2_was_alive matches 1 run function cs2:player/round_reset_clear
 
-# 存活者：保留装备与购买状态，只需重新允许移动和清负面效果
-execute if score @s cs2_team matches 1..2 if score @s cs2_was_alive matches 1 run scoreboard players set @s cs2_needs_default 0
+# 存活者保留装备，但换边设置的补发标记要保留到发装时。
 execute if score @s cs2_team matches 0 run scoreboard players set @s cs2_needs_default 0
 # 只清除准备阶段的限制效果，保留玩家自己的其他 buff
 effect clear @s minecraft:slowness

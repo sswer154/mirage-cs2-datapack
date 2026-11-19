@@ -1,5 +1,6 @@
 team join cs2_t @s
 scoreboard players set @s cs2_team 1
+scoreboard players operation @s cs2_side_epoch = #swap cs2_side_epoch
 scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0

@@ -31,6 +31,11 @@ execute as @a[team=cs2_ct] run scoreboard players set @s cs2_team 2
 execute as @a[team=cs2_t] run scoreboard players set @s cs2_inmatch 1
 execute as @a[team=cs2_ct] run scoreboard players set @s cs2_inmatch 1
 
+# 新比赛从当前阵营开始重新计算换边次数。
+scoreboard players reset * cs2_side_epoch
+scoreboard players set #swap cs2_side_epoch 0
+scoreboard players set #halftime cs2_side_epoch 0
+scoreboard players set #side_mod cs2_side_epoch 2
 function cs2:match/reset
 function cs2:stats/reset
 function cs2:econ/start

@@ -5,6 +5,8 @@ clear @s minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_t] run team leave @s
 execute if score @s cs2_inmatch matches 0 if entity @s[team=cs2_ct] run team leave @s
 execute if score @s cs2_inmatch matches 0 run return 0
+# 先补阵营和经济，再按当前阵营初始化回合状态。
+execute if score #state cs2_state matches 1..6 if score @s cs2_inmatch matches 1 if score @s cs2_team matches 1..2 run function cs2:join/sync_side
 execute if score #state cs2_state matches 1 run function cs2:player/rejoin_intermission
 # 补做错过的回合初始化，再按当前回合状态处理重连。
 execute if score #state cs2_state matches 2..4 if score @s cs2_inmatch matches 1 if score @s cs2_team matches 1..2 if score #epoch cs2_health_round matches 1.. unless score @s cs2_health_round = #epoch cs2_health_round run function cs2:player/rejoin_round_reset

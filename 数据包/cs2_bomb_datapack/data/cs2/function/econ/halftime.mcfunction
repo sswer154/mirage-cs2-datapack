@@ -1,6 +1,4 @@
-# 下半场换边后回到手枪局：金钱 $800、连败奖励 1900，清空装备与购买状态
-function cs2:econ/start
-execute as @a[scores={cs2_inmatch=1}] run function cs2:player/round_reset_clear
-execute as @a[scores={cs2_inmatch=1}] run scoreboard players set @s cs2_alive 0
-execute as @a[scores={cs2_inmatch=1}] run scoreboard players set @s cs2_was_alive 0
-execute as @a[scores={cs2_inmatch=1}] run function cs2:util/speed
+# 下半场换边后，重置经济并记录离线玩家需要补做的中场重置。
+scoreboard players operation #halftime cs2_side_epoch = #swap cs2_side_epoch
+function cs2:econ/reset
+execute as @a[scores={cs2_inmatch=1}] run function cs2:econ/halftime_player
