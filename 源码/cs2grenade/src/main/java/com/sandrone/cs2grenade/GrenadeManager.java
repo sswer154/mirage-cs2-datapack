@@ -348,6 +348,16 @@ public final class GrenadeManager {
         }
     }
 
+    /** 停掉该玩家身上可能残留的所有耳鸣声实例，避免多颗闪光叠成一条噪音。 */
+    private static void stopRingSounds(ServerPlayer player) {
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
+                ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_long"), SoundSource.PLAYERS));
+        for (int sec = 1; sec <= 5; sec++) {
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
+                    ResourceLocation.fromNamespaceAndPath("cs2", "flash.ring_fade_" + sec), SoundSource.PLAYERS));
+        }
+    }
+
     private static void player4Stop(MinecraftServer server, java.util.UUID uuid, String id) {
         var pl = server.getPlayerList().getPlayer(uuid);
         if (pl == null || pl.connection == null) {
@@ -1330,12 +1340,19 @@ public final class GrenadeManager {
             if (blocked || (intensity = Math.min(1.0, (distFactor = (dist = p.position().distanceTo(pos)) <= 5.0 ? 1.0 : Math.max(0.2, 1.0 - 0.8 * (dist - 5.0) / (range - 5.0))) * (angleFactor = (dot = (toFlash = pos.subtract(p.getEyePosition()).normalize()).dot(p.getLookAngle())) <= 0.0 ? 0.03 : dot * dot))) < 0.005) continue;
             int alpha = 255;
             int ticks = Math.max(6, (int)Math.round((double)(g.type.maskSeconds() * 20) * intensity));
-            int ringExpire = (serverRef == null ? 0 : serverRef.getTickCount()) + ticks;
             int fadeTicks = Math.max(6, (int)Math.round(100.0 * intensity));
-            Cs2Grenade.debug("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
-                    p.getScoreboardName(), String.format(Locale.ROOT, "%.2f", intensity), ticks, fadeTicks);
-            RING_STATE.put(p.getUUID(), new Ring(ringExpire, fadeTicks, 0,
-                    (float) (0.35 + 0.85 * intensity), 0));
+            // 同一玩家同一时刻只保留一条耳鸣声：先停掉上一颗闪光留下的实例，再登记新的。
+            // 与黑屏遮罩一致——更弱/更短的一颗不覆盖当前这条，免得把长耳鸣截短。
+            int ringNow = serverRef == null ? 0 : serverRef.getTickCount();
+            Ring prevRing = RING_STATE.get(p.getUUID());
+            int prevRemaining = prevRing == null ? 0 : prevRing.holdEnd() + prevRing.fadeTicks() - ringNow;
+            if (prevRemaining <= 0 || ticks + fadeTicks > prevRemaining) {
+                Cs2Grenade.debug("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
+                        p.getScoreboardName(), String.format(Locale.ROOT, "%.2f", intensity), ticks, fadeTicks);
+                stopRingSounds(p);
+                RING_STATE.put(p.getUUID(), new Ring(ringNow + ticks, fadeTicks, 0,
+                        (float) (0.35 + 0.85 * intensity), 0));
+            }
             String who = p.getGameProfile().getName();
             PendingMask current = PENDING_MASKS.get(who);
             if (current != null) {
