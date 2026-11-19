@@ -888,21 +888,26 @@ public final class GrenadeManager {
             return;
         }
         int centerY = centerGround.getY();
+        // 以“沿地面走过的格数”限制蔓延，而不是两点直线距离
+        int maxSteps = Math.max(2, (int)Math.ceil(radius));
         ArrayDeque<BlockPos> queue = new ArrayDeque<BlockPos>();
+        HashMap<BlockPos, Integer> depth = new HashMap<BlockPos, Integer>();
         HashSet<BlockPos> visited = new HashSet<BlockPos>();
         visited.add(centerGround);
+        depth.put(centerGround, 0);
         queue.add(centerGround);
         while (!queue.isEmpty()) {
             BlockPos cur = queue.poll();
+            int d = depth.getOrDefault(cur, 0);
             addFireNode(zone, cur);
+            if (d >= maxSteps) {
+                continue;
+            }
             BlockPos[] neighbors = new BlockPos[]{
                 cur.offset(1, 0, 0), cur.offset(-1, 0, 0),
                 cur.offset(0, 0, 1), cur.offset(0, 0, -1)
             };
             for (BlockPos n : neighbors) {
-                int dx = n.getX() - cx;
-                int dz = n.getZ() - cz;
-                if (dx * dx + dz * dz > radius * radius) continue;
                 BlockPos next = findFireGround(zone.level, n.getX(), n.getZ(), cur.getY());
                 if (next == null) continue;
                 int dy = next.getY() - cur.getY();
@@ -911,6 +916,7 @@ public final class GrenadeManager {
                 if (!fireHasHeadroom(zone.level, next)) continue;
                 if (!fireSpreadPathAllowed(zone.level, cur, next)) continue;
                 if (visited.add(next)) {
+                    depth.put(next, d + 1);
                     queue.add(next);
                 }
             }
@@ -974,19 +980,17 @@ public final class GrenadeManager {
     }
 
     private static boolean fireSpreadPathAllowed(ServerLevel level, BlockPos cur, BlockPos next) {
-        // Horizontal probe at the current fire layer: a two-block wall hits its lower block,
-        // whose upper neighbor is solid, so it stops; a one-block ledge exposes air above and can be crossed.
-        Vec3 from = new Vec3((double)cur.getX() + 0.5, (double)cur.getY() + 0.5, (double)cur.getZ() + 0.5);
-        Vec3 to = new Vec3((double)next.getX() + 0.5, (double)cur.getY() + 0.5, (double)next.getZ() + 0.5);
-        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
-        if (hit.getType() == HitResult.Type.MISS) {
-            return true;
-        }
-        BlockPos hitPos = hit.getBlockPos();
-        if (!level.getBlockState(hitPos.above()).isAir()) {
+        // 只允许相邻格高度差 1 以内；上坡时在较高那层打射线（可越过 1 格台阶），平走/下坡在当前层挡住墙体
+        int dy = next.getY() - cur.getY();
+        if (dy > 1 || dy < -1) {
             return false;
         }
-        return Math.abs(next.getY() - hitPos.getY()) <= 1;
+        double rayY = (double)Math.max(cur.getY(), next.getY()) + 0.5;
+        Vec3 from = new Vec3(cur.getX() + 0.5, rayY, cur.getZ() + 0.5);
+        Vec3 to = new Vec3(next.getX() + 0.5, rayY, next.getZ() + 0.5);
+        BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, CollisionContext.empty()));
+        return hit.getType() == HitResult.Type.MISS;
     }
 
     private static boolean inFire(FireZone zone, LivingEntity e) {
@@ -1023,7 +1027,7 @@ public final class GrenadeManager {
             return;
         }
         int remaining = Math.max(0, zone.lifeTicks - elapsed);
-        int maxSamples = Math.min(24, Math.max(12, (int)Math.round(10.0 + radius * 1.5)));
+        int maxSamples = Math.min(16, Math.max(9, (int)Math.round(7.0 + radius)));
         if (remaining < 60) {
             maxSamples = Math.max(4, maxSamples * remaining / 60);
         }
@@ -1034,7 +1038,9 @@ public final class GrenadeManager {
             double x = node.pos.x + (random.nextDouble() - 0.5) * 0.45;
             double y = node.pos.y;
             double z = node.pos.z + (random.nextDouble() - 0.5) * 0.45;
-            zone.level.sendParticles(ParticleTypes.LAVA, x, y + 0.02, z, 1, 0.02, 0.02, 0.02, 0.0);
+            if ((i & 7) == 0) {
+                zone.level.sendParticles(ParticleTypes.LAVA, x, y + 0.02, z, 1, 0.02, 0.02, 0.02, 0.0);
+            }
             zone.level.sendParticles(ParticleTypes.FLAME, x, y + 0.08, z, 1, 0.04, 0.02, 0.04, 0.0);
             if ((i & 1) == 0) {
                 zone.level.sendParticles(ParticleTypes.SMALL_FLAME, x, y + 0.18, z, 1, 0.04, 0.03, 0.04, 0.0);
