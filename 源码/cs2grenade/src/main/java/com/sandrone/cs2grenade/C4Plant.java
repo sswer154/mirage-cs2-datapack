@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -109,6 +109,9 @@ public final class C4Plant {
         }
         // 失效条件：死了、手里没 C4、走开、离开包点
         boolean invalid = !player.isAlive()
+                || fake("#state", "cs2_state", player) != 3
+                || score(player, "cs2_inmatch") != 1 || score(player, "cs2_alive") != 1
+                || score(player, "cs2_carrier") != 1
                 || !isCarryingC4(player)
                 || player.position().distanceToSqr(ch.start) > 0.8 * 0.8
                 || !nearBombSite(player, 10.0);
@@ -159,12 +162,8 @@ public final class C4Plant {
     private static boolean nearBombSite(ServerPlayer player, double range) {
         ServerLevel level = (ServerLevel) player.level();
         AABB box = player.getBoundingBox().inflate(range);
-        for (Entity e : level.getEntitiesOfClass(Entity.class, box, ent ->
-                ent.getTags().contains("cs2_site_a") || ent.getTags().contains("cs2_site_b"))) {
-            if (e.getTags().contains("cs2_site_a") || e.getTags().contains("cs2_site_b")) {
-                return true;
-            }
-        }
-        return false;
+        return !level.getEntitiesOfClass(Marker.class, box, marker ->
+                player.distanceToSqr(marker) <= range * range
+                        && (marker.getTags().contains("cs2_site_a") || marker.getTags().contains("cs2_site_b"))).isEmpty();
     }
 }
