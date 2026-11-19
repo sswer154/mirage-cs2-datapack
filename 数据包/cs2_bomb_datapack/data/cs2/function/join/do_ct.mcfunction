@@ -3,6 +3,7 @@ execute if score @s cs2_carrier matches 1 run function cs2:bomb/carrier_lost
 clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
 team join cs2_ct @s
 scoreboard players set @s cs2_team 2
+scoreboard players operation @s cs2_side_epoch = #swap cs2_side_epoch
 scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0
