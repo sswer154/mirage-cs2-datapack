@@ -1,0 +1,244 @@
+{
+  "aa12": {
+    "name": "AA12",
+    "price": 2250,
+    "function": "aa12"
+  },
+  "ak": {
+    "name": "AK-47",
+    "price": 2500,
+    "function": "ak"
+  },
+  "ak_full": {
+    "name": "满改 AKM",
+    "price": 2700,
+    "function": "ak_full"
+  },
+  "armor_full": {
+    "name": "全甲（全套下界合金）",
+    "price": 1000,
+    "function": "armor_full",
+    "upgrade_price": 350
+  },
+  "armor_half": {
+    "name": "半甲（头盔 + 胸甲）",
+    "price": 650,
+    "function": "armor_half"
+  },
+  "aug": {
+    "name": "AUG突击步枪",
+    "price": 2400,
+    "function": "aug"
+  },
+  "awm": {
+    "name": "AWM",
+    "price": 4750,
+    "function": "awm"
+  },
+  "cz75": {
+    "name": "CZ75",
+    "price": 300,
+    "function": "cz75"
+  },
+  "db4": {
+    "name": "DB-4",
+    "price": 1400,
+    "function": "db4"
+  },
+  "deagle": {
+    "name": "沙漠之鹰",
+    "price": 700,
+    "function": "deagle"
+  },
+  "ef46": {
+    "name": "M2火焰喷射器",
+    "price": 4800,
+    "function": "ef46"
+  },
+  "fnfal": {
+    "name": "FN FAL",
+    "price": 3900,
+    "function": "fnfal"
+  },
+  "g36k": {
+    "name": "G36K突击步枪",
+    "price": 2200,
+    "function": "g36k"
+  },
+  "handgun": {
+    "name": "手枪",
+    "price": 100,
+    "function": "handgun"
+  },
+  "kit": {
+    "name": "拆弹器",
+    "price": 400,
+    "function": "kit"
+  },
+  "lewis": {
+    "name": "刘易斯轻机枪",
+    "price": 4500,
+    "function": "lewis"
+  },
+  "m16": {
+    "name": "M16A4（全息）",
+    "price": 2800,
+    "function": "m16"
+  },
+  "m16_full": {
+    "name": "满改 M16A4",
+    "price": 3200,
+    "function": "m16_full"
+  },
+  "m1895": {
+    "name": "M1895",
+    "price": 2550,
+    "function": "m1895"
+  },
+  "m1911": {
+    "name": "M1911",
+    "price": 500,
+    "function": "m1911"
+  },
+  "m249": {
+    "name": "M249",
+    "price": 5000,
+    "function": "m249"
+  },
+  "m4a1": {
+    "name": "M4A1",
+    "price": 3000,
+    "function": "m4a1"
+  },
+  "m4a1_full": {
+    "name": "满改 M4A1",
+    "price": 3400,
+    "function": "m4a1_full"
+  },
+  "m870": {
+    "name": "M870",
+    "price": 1700,
+    "function": "m870"
+  },
+  "mp5": {
+    "name": "MP5A5",
+    "price": 1150,
+    "function": "mp5"
+  },
+  "obrez": {
+    "name": "截断莫辛纳甘",
+    "price": 800,
+    "function": "obrez"
+  },
+  "p90": {
+    "name": "P90",
+    "price": 2900,
+    "function": "p90"
+  },
+  "p90_hp": {
+    "name": "P90（空尖弹）",
+    "price": 1500,
+    "function": "p90_hp"
+  },
+  "qbz191": {
+    "name": "191式突击步枪",
+    "price": 3100,
+    "function": "qbz191"
+  },
+  "qbz95": {
+    "name": "95式班用机枪",
+    "price": 4800,
+    "function": "qbz95"
+  },
+  "scar": {
+    "name": "SCAR-L",
+    "price": 2800,
+    "function": "scar"
+  },
+  "scar_full": {
+    "name": "满改 SCAR-L",
+    "price": 3200,
+    "function": "scar_full"
+  },
+  "sks": {
+    "name": "SKS",
+    "price": 4800,
+    "function": "sks"
+  },
+  "spr15": {
+    "name": "SPR-15 HB",
+    "price": 4800,
+    "function": "spr15"
+  },
+  "springfield": {
+    "name": "春田 1873",
+    "price": 2050,
+    "function": "springfield"
+  },
+  "sw_model3": {
+    "name": "3 号左轮手枪",
+    "price": 600,
+    "function": "sw_model3"
+  },
+  "ump45": {
+    "name": "UMP45",
+    "price": 1050,
+    "function": "ump45"
+  },
+  "util_fire": {
+    "name": "燃烧弹",
+    "price": 400,
+    "function": "util_fire",
+    "ct_price": 500
+  },
+  "util_flash": {
+    "name": "闪光弹",
+    "price": 200,
+    "function": "util_flash"
+  },
+  "util_golden": {
+    "name": "金星万金油",
+    "price": 850,
+    "function": "util_golden"
+  },
+  "util_he": {
+    "name": "高爆手雷",
+    "price": 300,
+    "function": "util_he"
+  },
+  "util_he_fast": {
+    "name": "高爆手雷（短引线）",
+    "price": 300,
+    "function": "util_he_fast"
+  },
+  "util_impact": {
+    "name": "碰炸手雷",
+    "price": 600,
+    "function": "util_impact"
+  },
+  "util_smoke": {
+    "name": "烟雾弹",
+    "price": 300,
+    "function": "util_smoke"
+  },
+  "util_surgery": {
+    "name": "野战手术包",
+    "price": 500,
+    "function": "util_surgery"
+  },
+  "vp1915": {
+    "name": "维拉佩罗萨",
+    "price": 2000,
+    "function": "vp1915"
+  },
+  "xm1014": {
+    "name": "M1014",
+    "price": 2950,
+    "function": "xm1014"
+  },
+  "xm1014_full": {
+    "name": "满改 M1014",
+    "price": 3750,
+    "function": "xm1014_full"
+  }
+}

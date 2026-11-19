@@ -267,7 +267,7 @@ execute as @p run function cs2:join/leave
 - 火区扩散时相邻火格做水平遮挡检查：命中实心方块后，若其上方不是空气或高差超过 1 格则阻断；1 格高台阶/矮掩体可越过，2 格高墙/封闭房间阻断。
 - 远距离投掷时，若落点区块尚未加载，弹体会暂停等待；烟雾弹兜底引信 120 tick，避免落点区块未加载或卡在水面时永不起烟。
 - 无主实体清扫每 40 tick 执行一次，烟片/烟罐/手雷展示实体合并为单次维度实体扫描。
-- 闪光弹引信 1.5 秒，最大闪黑 5 秒；视线检测/黑屏由模组 `flash.json` 负责，不再依赖数据包射线函数。
+- 闪光弹引信 1.6 秒，最大闪黑 5 秒；视线检测/黑屏由模组 `flash.json` 负责，不再依赖数据包射线函数。
 - 需要资源包才有自定义物品模型。
 - 服务端与客户端需安装 `cs2grenade`；使用闪光功能时按整合包说明安装幻幕展映。
 
@@ -598,13 +598,14 @@ scoreboard players set #music_preset cs2_cfg 3
 - 默认装备：`shop/default_t.mcfunction`、`shop/default_ct.mcfunction`。
 - 经济结算：`econ/**.mcfunction`（初始 800、连败奖励、回合/击杀奖金）。
 
-要换枪或改价格，直接改 `F:\DSH-Workspace\gen_shop.py` 里的 `ITEMS` 列表，然后运行：
+价格唯一来源是 `data/cs2/shop_prices.json`。每件商品记录 `name`、`price`、`function`；全甲另有 `upgrade_price`，燃烧弹另有 `ct_price`。改价后运行：
 
 ```powershell
-python F:\DSH-Workspace\gen_shop.py
+python 工具/generate_shop_prices.py --datapack 数据包/cs2_bomb_datapack --write
+python 工具/generate_shop_prices.py --datapack 数据包/cs2_bomb_datapack --check
 ```
 
-它会重新生成整个 `shop/` 目录，避免手改几十个文件时漏掉分类/触发编号。
+它同时更新正式/测试商店的“价格”lore，以及 `shop/items/*.mcfunction` 的余额上限、提示和实际扣款；`--check` 可检查是否有人手改了价格数值。
 
 ---
 
