@@ -6,5 +6,6 @@ execute if score #bomb cs2_bomb_state matches 1 as @a[scores={cs2_carrier=1}] un
 execute if score #bomb cs2_bomb_state matches 2 run function cs2:bomb/drop_tick
 
 # 携带者离线：@a 里找不到 cs2_carrier=1 的人，按已丢失处理，5 秒后补发
-execute if score #bomb cs2_bomb_state matches 1 unless entity @a[scores={cs2_carrier=1}] run scoreboard players set #bomb cs2_bomb_state 2
 execute if score #bomb cs2_bomb_state matches 1 unless entity @a[scores={cs2_carrier=1}] run scoreboard players set #drop_timer cs2_counts 100
+execute if score #bomb cs2_bomb_state matches 1 unless entity @a[scores={cs2_carrier=1}] run scoreboard players reset * cs2_carrier
+execute if score #bomb cs2_bomb_state matches 1 unless entity @a[scores={cs2_carrier=1}] run scoreboard players set #bomb cs2_bomb_state 2

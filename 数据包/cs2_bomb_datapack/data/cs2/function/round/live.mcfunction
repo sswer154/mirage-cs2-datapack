@@ -31,6 +31,8 @@ execute as @a[scores={cs2_inmatch=1}] run function cs2:util/jump_unlock
 gamemode survival @a[team=cs2_t,scores={cs2_inmatch=1,cs2_alive=1}]
 gamemode survival @a[team=cs2_ct,scores={cs2_inmatch=1,cs2_alive=1}]
 
+# 清理离线玩家留在计分板上的上回合携带状态，再发本回合 C4。
+scoreboard players reset * cs2_carrier
 function cs2:loadout/give_bomb
 
 title @a[scores={cs2_inmatch=1}] times 10 30 10
