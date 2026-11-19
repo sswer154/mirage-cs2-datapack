@@ -149,13 +149,11 @@ public final class KillFeedHandler {
     }
 
     private static boolean isGrenadeDamage(DamageSource source) {
-        String damageId = source.getMsgId();
-        return damageId.startsWith("explosion") || source.is(GrenadeManager.FIRE_DAMAGE_TYPE);
+        return source instanceof GrenadeExplosionDamageSource || source.is(GrenadeManager.FIRE_DAMAGE_TYPE);
     }
 
     private static Component weaponLabel(DamageSource source) {
-        String damageId = source.getMsgId();
-        if (damageId.startsWith("explosion")) {
+        if (source instanceof GrenadeExplosionDamageSource) {
             return Component.literal("高爆手雷").withStyle(ChatFormatting.GOLD);
         }
         if (source.is(GrenadeManager.FIRE_DAMAGE_TYPE)) {
