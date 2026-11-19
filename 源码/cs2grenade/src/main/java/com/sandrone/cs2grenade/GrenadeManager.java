@@ -1367,8 +1367,7 @@ public final class GrenadeManager {
             if (source != null) rec.thrower = source;
             if (now < rec.nextHitTick) continue;
             float fireDamage = Math.min(4.0f, (float)(rec.stage + 1));
-            victim.invulnerableTime = 0;
-            if (victim.hurt(victim.level().damageSources().source(FIRE_DAMAGE_TYPE, rec.thrower), fireDamage) && isEnemy(rec.thrower, victim)) {
+            if (hurtFromFire(victim, rec.thrower, fireDamage) && isEnemy(rec.thrower, victim)) {
                 GrenadeManager.addDamageScore(rec.thrower, "cs2_fire_dmg", fireDamage);
             }
             ++rec.stage;
@@ -1376,6 +1375,19 @@ public final class GrenadeManager {
         }
         FIRE_VICTIMS.entrySet().removeIf(entry -> now - entry.getValue().lastSeenTick > FIRE_STAY_GRACE);
         FIRE_ZONES.removeAll(dead);
+    }
+
+    private static boolean hurtFromFire(LivingEntity victim, Player thrower, float amount) {
+        int previousCooldown = victim.invulnerableTime;
+        float previousDamage = victim.lastHurt;
+        try {
+            // 火区有自己的结算间隔，且不能改写普通攻击的受伤冷却。
+            victim.invulnerableTime = 0;
+            return victim.hurt(victim.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), amount);
+        } finally {
+            victim.invulnerableTime = previousCooldown;
+            victim.lastHurt = previousDamage;
+        }
     }
 
     private static void smokeExplode(Grenade g, Vec3 pos) {
@@ -1601,12 +1613,12 @@ public final class GrenadeManager {
             int ringNow = serverRef == null ? 0 : serverRef.getTickCount();
             Ring prevRing = RING_STATE.get(p.getUUID());
             int prevRemaining = prevRing == null ? 0 : prevRing.holdEnd() + prevRing.fadeTicks() - ringNow;
-            if (prevRemaining <= 0 || ticks + fadeTicks > prevRemaining) {
+            float ringVolume = (float)(0.35 + 0.85 * intensity);
+            if (prevRemaining <= 0 || (ringVolume >= prevRing.volume() && ticks + fadeTicks > prevRemaining)) {
                 Cs2Grenade.debug("耳鸣登记 {} 强度={} 保持={}t 淡出={}t",
                         p.getScoreboardName(), String.format(Locale.ROOT, "%.2f", intensity), ticks, fadeTicks);
                 stopRingSounds(p);
-                RING_STATE.put(p.getUUID(), new Ring(ringNow + ticks, fadeTicks, 0,
-                        (float) (0.35 + 0.85 * intensity), 0));
+                RING_STATE.put(p.getUUID(), new Ring(ringNow + ticks, fadeTicks, 0, ringVolume, 0));
             }
             String who = p.getGameProfile().getName();
             PendingMask current = PENDING_MASKS.get(who);
