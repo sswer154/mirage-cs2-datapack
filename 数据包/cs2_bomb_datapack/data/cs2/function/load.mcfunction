@@ -4,6 +4,13 @@
 scoreboard objectives add cs2_const dummy
 scoreboard objectives add cs2_health_round dummy
 scoreboard objectives add cs2_side_epoch dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_item_count dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_carry_start dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_util_he_fast dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_util_impact dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_util_surgery dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_util_golden dummy
+execute unless score #purchase_ready cs2_const matches 1 run scoreboard players set #purchase_ready cs2_const 1
 scoreboard players add #swap cs2_side_epoch 0
 scoreboard players add #halftime cs2_side_epoch 0
 scoreboard players set #side_mod cs2_side_epoch 2
