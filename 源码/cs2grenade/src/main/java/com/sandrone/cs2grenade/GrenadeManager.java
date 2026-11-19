@@ -1007,10 +1007,8 @@ public final class GrenadeManager {
     private static boolean smokeCovers(ServerLevel level, Vec3 pos) {
         for (SmokeZone s : SMOKE_ZONES) {
             if (s.level != level) continue;
-            if (Math.abs(s.pos.y - pos.y) > 3.0) continue;
-            double dx = s.pos.x - pos.x;
-            double dz = s.pos.z - pos.z;
-            if (dx * dx + dz * dz > s.maxRadius * s.maxRadius) continue;
+            // 烟大致是个球：离烟心 6 格以内（含高度）都算被盖住
+            if (s.pos.distanceTo(pos) > s.maxRadius) continue;
             return true;
         }
         return false;
@@ -1163,8 +1161,8 @@ public final class GrenadeManager {
                 if (horiz2 <= limit * limit && Math.abs(p.getY() - z.pos.y) <= 4.0) {
                     seen.add(p.getUUID());
                     Integer last = z.hissTicks.get(p.getUUID());
-                    if (last == null || now - last >= 100) {
-                        GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                    // hiss 样本 8 秒：在 152 tick（7.6 秒）后续播，接得上又不明显
+                    if (last == null || now - last >= 152) {
                         GrenadeManager.playCs2For(p, z.level, z.pos, "smoke.hiss", 0.8f, 1.0f);
                         z.hissTicks.put(p.getUUID(), now);
                     }
@@ -1174,8 +1172,7 @@ public final class GrenadeManager {
             while (it.hasNext()) {
                 java.util.Map.Entry<java.util.UUID, Integer> e = it.next();
                 if (seen.contains(e.getKey())) continue;
-                net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(e.getKey());
-                if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
+                // 走远不掐声，也不清记录：8 秒内回来听到的还是同一段，超过就由上面的续播补
                 it.remove();
             }
             if (!z.fadedOut && elapsed >= z.lifeTicks - 60) {
