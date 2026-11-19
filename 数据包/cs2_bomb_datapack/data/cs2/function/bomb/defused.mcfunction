@@ -1,4 +1,5 @@
 execute unless score #state cs2_state matches 4 run return 0
+execute unless score #bomb_timer cs2_bomb_timer matches 1.. run return 0
 scoreboard players set #reason cs2_counts 4
 scoreboard players set #winner cs2_counts 2
 kill @e[tag=cs2_bomb]

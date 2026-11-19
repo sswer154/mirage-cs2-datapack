@@ -126,7 +126,8 @@ public final class C4Defuse {
         if (score(player, "cs2_team") != 2 || score(player, "cs2_alive") != 1) {
             return false;
         }
-        if (fake("#state", "cs2_state", player) != 4) {
+        if (fake("#state", "cs2_state", player) != 4
+                || fake("#bomb_timer", "cs2_bomb_timer", player) <= 0) {
             return false;
         }
         return nearBomb(player, 3.5);
