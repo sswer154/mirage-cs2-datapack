@@ -933,6 +933,13 @@ public final class GrenadeManager {
     }
 
     private static void addFireNode(FireZone zone, BlockPos cell) {
+        BlockPos below0 = cell.below();
+        VoxelShape support0 = zone.level.getBlockState(below0).getCollisionShape(zone.level, below0);
+        double surfaceY0 = (double)below0.getY() + (support0.isEmpty() ? 0.0 : support0.max(Direction.Axis.Y));
+        Vec3 at = new Vec3((double)cell.getX() + 0.5, surfaceY0 + 0.05, (double)cell.getZ() + 0.5);
+        if (GrenadeManager.smokeCovers(zone.level, at)) {
+            return;
+        }
         BlockPos below = cell.below();
         VoxelShape support = zone.level.getBlockState(below).getCollisionShape(zone.level, below);
         double surfaceY = (double)below.getY() + (support.isEmpty() ? 0.0 : support.max(Direction.Axis.Y));
@@ -977,6 +984,19 @@ public final class GrenadeManager {
             double dz = ez - node.pos.z;
             if (dx * dx + dz * dz > (double)node.radius * (double)node.radius) continue;
             if (Math.abs(ey - node.pos.y) > FIRE_VERTICAL_TOLERANCE) continue;
+            return true;
+        }
+        return false;
+    }
+
+    /** 该位置是否在某个烟区的有效范围内（同维度、高度差 3 格内、水平在烟半径内）。 */
+    private static boolean smokeCovers(ServerLevel level, Vec3 pos) {
+        for (SmokeZone s : SMOKE_ZONES) {
+            if (s.level != level) continue;
+            if (Math.abs(s.pos.y - pos.y) > 3.0) continue;
+            double dx = s.pos.x - pos.x;
+            double dz = s.pos.z - pos.z;
+            if (dx * dx + dz * dz > s.maxRadius * s.maxRadius) continue;
             return true;
         }
         return false;
@@ -1032,17 +1052,9 @@ public final class GrenadeManager {
             }
             int stage = Math.max(1, (elapsed + 10) / 20);
             double radius = 4.0 + Math.min(5.0, (double)(stage - 1));
-            boolean smoked = false;
-            for (SmokeZone s : SMOKE_ZONES) {
-                // 只比较同一维度，避免别的维度同坐标的烟区把火区浇灭
-                if (s.level != fireZone.level) continue;
-                // 烟只影响自身高度附近，避免灭掉楼上楼下的火
-                if (Math.abs(s.pos.y - fireZone.center.y) > 3.0) continue;
-                if (!(s.pos.distanceTo(fireZone.center) < s.maxRadius + radius * 0.6)) continue;
-                smoked = true;
-                break;
-            }
-            if (smoked) {
+            // 只熄灭落在烟范围内的火格，烟外的火继续烧
+            fireZone.nodes.removeIf(node -> GrenadeManager.smokeCovers(fireZone.level, node.pos));
+            if (fireZone.nodes.isEmpty() && now - fireZone.startTick > 20) {
                 GrenadeManager.extinguish(fireZone);
                 dead.add(fireZone);
                 continue;
