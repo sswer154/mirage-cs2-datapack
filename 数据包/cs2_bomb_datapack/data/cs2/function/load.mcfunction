@@ -8,6 +8,9 @@ scoreboard objectives add cs2_formal_epoch dummy
 scoreboard objectives add cs2_empty dummy
 scoreboard objectives add cs2_pending_pay dummy
 scoreboard objectives add cs2_ready_team dummy
+scoreboard objectives add cs2_queued_team dummy
+scoreboard objectives add cs2_queue_round dummy
+scoreboard objectives add cs2_cancel_queue trigger
 scoreboard objectives add cs2_voted_restart dummy
 scoreboard objectives add cs2_voted_end dummy
 execute unless score #purchase_ready cs2_const matches 1 run scoreboard objectives add cs2_item_count dummy

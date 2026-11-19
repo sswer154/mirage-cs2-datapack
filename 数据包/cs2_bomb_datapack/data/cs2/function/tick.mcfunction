@@ -23,6 +23,7 @@ execute as @a[scores={cs2_join_t=1..}] run function cs2:join/t
 execute as @a[scores={cs2_join_ct=1..}] run function cs2:join/ct
 execute as @a[scores={cs2_join_cast=1..}] run function cs2:join/cast
 execute as @a[scores={cs2_leave=1..}] run function cs2:join/leave
+execute as @a[scores={cs2_cancel_queue=1..}] run function cs2:join/cancel_queue
 execute as @a[scores={cs2_hud_toggle=1..}] run function cs2:hud/trigger_toggle
 execute as @a[scores={cs2_stats=1..}] run function cs2:stats/trigger
 execute as @a[scores={cs2_panel=1..}] run function cs2:panel/trigger

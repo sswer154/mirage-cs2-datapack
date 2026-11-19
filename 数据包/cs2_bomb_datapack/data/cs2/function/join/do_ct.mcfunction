@@ -1,4 +1,5 @@
 execute unless function cs2:player/save_inventory run return fail
+function cs2:join/clear_queue
 # 如果身上有炸弹，先按掉落处理
 execute if score @s cs2_carrier matches 1 run function cs2:bomb/carrier_lost
 clear @s minecraft:nautilus_shell[minecraft:custom_data={cs2_bomb:1b}]
