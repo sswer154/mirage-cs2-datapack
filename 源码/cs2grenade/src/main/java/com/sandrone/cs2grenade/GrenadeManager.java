@@ -981,7 +981,7 @@ public final class GrenadeManager {
         BlockPos centerGround = findFireCenter(zone.level, cx, cz, baseY);
         if (centerGround == null) {
             // 落点正下方没有能直接放火的格（薄片方块、碰撞体内部等），先在附近找最近的支撑面
-            centerGround = findFireCenterNearby(zone.level, cx, cz, baseY);
+            centerGround = findFireCenterNearby(zone.level, zone.center, cx, cz, baseY);
         }
         if (centerGround == null) {
             // 实在找不到支撑面也要留一个火节点：宁可火悬在落点，也不能静默空掉
@@ -1041,7 +1041,7 @@ public final class GrenadeManager {
     }
 
     /** 落点这一列放不下火时，在水平方向最多 FIRE_NEARBY_RADIUS 格内找最近的可用火格。 */
-    private static BlockPos findFireCenterNearby(ServerLevel level, int cx, int cz, int baseY) {
+    private static BlockPos findFireCenterNearby(ServerLevel level, Vec3 origin, int cx, int cz, int baseY) {
         BlockPos best = null;
         double bestDist = Double.MAX_VALUE;
         for (int dx = -FIRE_NEARBY_RADIUS; dx <= FIRE_NEARBY_RADIUS; ++dx) {
@@ -1050,7 +1050,12 @@ public final class GrenadeManager {
                 double dist = (double)(dx * dx + dz * dz);
                 if (dist >= bestDist) continue;
                 BlockPos candidate = findFireCenter(level, cx + dx, cz + dz, baseY);
-                if (candidate != null) {
+                if (candidate != null && fireHasHeadroom(level, candidate)) {
+                    Vec3 target = new Vec3(candidate.getX() + 0.5, fireSurfaceY(level, candidate) + 0.1,
+                            candidate.getZ() + 0.5);
+                    Vec3 start = origin.add(0.0, 0.1, 0.0);
+                    if (level.clip(new ClipContext(start, target, ClipContext.Block.COLLIDER,
+                            ClipContext.Fluid.NONE, CollisionContext.empty())).getType() == HitResult.Type.BLOCK) continue;
                     best = candidate;
                     bestDist = dist;
                 }
