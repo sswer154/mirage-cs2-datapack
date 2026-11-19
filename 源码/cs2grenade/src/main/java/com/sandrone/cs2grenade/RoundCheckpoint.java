@@ -26,7 +26,8 @@ final class RoundCheckpoint {
                     .serialize(CompoundTag.CODEC).copyOnDeath().build());
     private static final ScoreHolder BASELINE = ScoreHolder.forNameOnly("#checkpoint");
     private static final List<String> SCORES = List.of(
-            "cs2_money", "cs2_primary", "cs2_secondary", "cs2_armor", "cs2_kit", "cs2_wclass");
+            "cs2_money", "cs2_primary", "cs2_secondary", "cs2_armor", "cs2_kit", "cs2_wclass",
+            "cs2_kills", "cs2_deaths");
 
     private RoundCheckpoint() {
     }
@@ -92,7 +93,8 @@ final class RoundCheckpoint {
         CompoundTag snapshot = checkpoint(player, score(board, BASELINE, "cs2_health_round"),
                 score(board, holder, "cs2_team"));
         if (snapshot == null || !(snapshot.get("Items") instanceof ListTag items)
-                || !(snapshot.get("Scores") instanceof CompoundTag values)) {
+                || !(snapshot.get("Scores") instanceof CompoundTag values)
+                || !values.contains("cs2_kills") || !values.contains("cs2_deaths")) {
             return null;
         }
         Inventory restored = new Inventory(player);
@@ -125,6 +127,10 @@ final class RoundCheckpoint {
             if (objective != null) {
                 board.getOrCreatePlayerScore(holder, objective).set(checkpoint.scores().getInt(name));
             }
+        }
+        var previousDeaths = board.getObjective("cs2_prev_deaths");
+        if (previousDeaths != null) {
+            board.getOrCreatePlayerScore(holder, previousDeaths).set(checkpoint.scores().getInt("cs2_deaths"));
         }
         player.inventoryMenu.broadcastFullState();
         player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
