@@ -27,7 +27,7 @@ function cs2:util/speed
 function cs2:util/freeze_lock
 gamemode adventure @s
 function cs2:player/tag
-execute if entity @e[type=marker,tag=cs2_spawn_t] run tp @s @e[type=marker,tag=cs2_spawn_t,limit=1]
+function cs2:player/teleport_round_spawn
 function cs2:shop/default_t
 title @s title {"text":"已加入 T","color":"red"}
 
