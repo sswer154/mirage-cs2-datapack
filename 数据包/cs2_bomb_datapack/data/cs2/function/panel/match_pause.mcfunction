@@ -1,4 +1,4 @@
-# 比赛暂停：准备阶段双方各至少一人同意；无时间限制，任意参赛者随时解除
+# 比赛暂停：正式准备阶段，解说直接开启，参赛者由双方投票开启
 scoreboard players reset @s cs2_match_pause
 scoreboard players enable @s cs2_match_pause
 execute if score #paused cs2_counts matches 1 run tellraw @s {"text":"当前已经在暂停中。","color":"red"}
@@ -7,6 +7,7 @@ execute unless score #state cs2_state matches 2 run tellraw @s {"text":"比赛�
 execute unless score #state cs2_state matches 2 run return 0
 execute unless score #solo cs2_counts matches 0 run tellraw @s {"text":"比赛暂停需要双方都有玩家，练习模式不能使用。","color":"red"}
 execute unless score #solo cs2_counts matches 0 run return 0
+execute if entity @s[team=cs2_cast] run return run function cs2:panel/match_pause_start
 execute unless score @s cs2_inmatch matches 1 run tellraw @s {"text":"你不是本场参赛者。","color":"red"}
 execute unless score @s cs2_inmatch matches 1 run return 0
 execute if score @s cs2_team matches 1 run scoreboard players set #mpause_t cs2_counts 1

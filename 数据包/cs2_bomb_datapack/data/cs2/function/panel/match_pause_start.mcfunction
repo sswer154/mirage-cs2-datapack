@@ -13,6 +13,9 @@ effect give @a[scores={cs2_inmatch=1}] minecraft:resistance infinite 255 true
 bossbar set cs2:round visible false
 title @a[scores={cs2_inmatch=1}] times 10 70 10
 title @a[scores={cs2_inmatch=1,cs2_hud=1}] title {"text":"比赛暂停","color":"aqua","bold":true}
-title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"双方同意 · 无时间限制 · 任意参赛者可解除","color":"gray"}
+execute if entity @s[team=cs2_cast] run title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"解说发起 · 无时间限制 · 任意参赛者可解除","color":"gray"}
+execute unless entity @s[team=cs2_cast] run title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"双方同意 · 无时间限制 · 任意参赛者可解除","color":"gray"}
 playsound minecraft:block.note_block.pling master @a[scores={cs2_inmatch=1}]
-tellraw @a[scores={cs2_inmatch=1}] [{"text":"比赛暂停已生效。","color":"aqua","bold":true},{"text":" 打开战术菜单可随时解除。","color":"gray"}]
+execute if entity @s[team=cs2_cast] run tellraw @a[scores={cs2_inmatch=1}] [{"text":"解说已开启比赛暂停。","color":"aqua","bold":true},{"text":" 任意参赛者可用战术菜单解除。","color":"gray"}]
+execute if entity @s[team=cs2_cast] run tellraw @s {"text":"已开启无时限比赛暂停。","color":"aqua"}
+execute unless entity @s[team=cs2_cast] run tellraw @a[scores={cs2_inmatch=1}] [{"text":"比赛暂停已生效。","color":"aqua","bold":true},{"text":" 打开战术菜单可随时解除。","color":"gray"}]
