@@ -38,6 +38,8 @@ final class MatchInventory {
                         save(context.getSource().getPlayerOrException())))
                 .then(Commands.literal("has_saved").executes(context ->
                         context.getSource().getPlayerOrException().hasData(SAVED) ? 1 : 0))
+                .then(Commands.literal("sync").executes(context ->
+                        sync(context.getSource().getPlayerOrException())))
                 .then(Commands.literal("restore").executes(context ->
                         restore(context.getSource().getPlayerOrException()))));
     }
@@ -85,9 +87,17 @@ final class MatchInventory {
         inventory.setChanged();
         player.removeData(SAVED);
 
-        player.inventoryMenu.broadcastFullState();
-        player.connection.send(new ClientboundSetCarriedItemPacket(inventory.selected));
+        sync(player);
         player.sendSystemMessage(Component.literal("已返还入队前的背包物品。"));
+        return 1;
+    }
+
+    private static int sync(ServerPlayer player) {
+        player.inventoryMenu.broadcastFullState();
+        if (player.containerMenu != player.inventoryMenu) {
+            player.containerMenu.broadcastFullState();
+        }
+        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
         return 1;
     }
 
