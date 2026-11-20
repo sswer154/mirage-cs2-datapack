@@ -30,10 +30,10 @@ playsound minecraft:ui.toast.challenge_complete master @a[scores={cs2_inmatch=1}
 # 结束前再发一次本场 K/D 与击杀王
 function cs2:stats/match_end
 
-# 赛后音乐已改为每回合由 round/end 播放，这里不再重复调用
-
 # 参赛者先回大厅，再解除队伍；未参赛人员保持原地
 execute if entity @e[type=marker,tag=cs2_lobby,limit=1] run tp @a[scores={cs2_inmatch=1}] @e[type=marker,tag=cs2_lobby,limit=1]
+# 在大厅位置播放结算音乐，再清除参赛身份。
+function cs2:music/play
 execute as @a[scores={cs2_inmatch=1}] run function cs2:join/to_lobby
 function cs2:join/end_queue
 # 计分板仍保存离线参赛者的分数，比赛结束后也要撤销。
