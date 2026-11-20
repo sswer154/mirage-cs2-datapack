@@ -25,4 +25,6 @@ tp @a[scores={cs2_inmatch=1,cs2_team=0}] @e[type=marker,tag=cs2_lobby,limit=1]
 function cs2:round/freeze
 execute if score #round_replayed cs2_counts matches 1 as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run function cs2:round/restore_checkpoint
 execute as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run cs2roundstate save
+# 默认装备、商店与重开背包都结算后，再同步客户端显示。
+execute as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run cs2inventory sync
 scoreboard players set #round_restarting cs2_counts 0

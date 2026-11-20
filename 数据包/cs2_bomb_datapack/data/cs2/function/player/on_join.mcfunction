@@ -31,3 +31,5 @@ execute if score #state cs2_state matches 0 if score @s cs2_inmatch matches 1 ru
 execute if score #state cs2_state matches 1..6 if score @s cs2_inmatch matches 1 run cs2econ claim
 # 拆弹器改为纯标记：清理旧版遗留物品
 execute as @s run clear @s minecraft:shears[minecraft:custom_data={cs2_kit:1b}]
+# 回合状态与装备补初始化完成后，推送服务端背包快照。
+execute if score #state cs2_state matches 2..4 if score @s cs2_inmatch matches 1 if score @s cs2_team matches 1..2 run cs2inventory sync
