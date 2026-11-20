@@ -443,21 +443,25 @@ public final class GrenadeManager {
             player.getCooldowns().addCooldown(player.getMainHandItem().getItem(), 10);
             GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.draw", 0.6f, 1.0f);
         }
-        if (!isGrenade) {
-            PENDING_THROW.remove(player.getUUID());
-        }
         LAST_HELD.put(player.getUUID(), held == null ? "" : held);
         PendingThrow pt = PENDING_THROW.get(player.getUUID());
-        if (pt == null || now < pt.endTick()) {
+        if (pt == null) {
+            return;
+        }
+        if (!isGrenade || player.getInventory().selected != pt.slot() || !pt.util().equals(held)) {
+            PENDING_THROW.remove(player.getUUID());
+            MatchInventory.syncContents(player);
+            return;
+        }
+        if (now < pt.endTick()) {
             return;
         }
         PENDING_THROW.remove(player.getUUID());
-        if (player.getInventory().selected != pt.slot() || !pt.util().equals(GrenadeManager.utilOf(player.getMainHandItem()))) {
-            return;
-        }
         if (GrenadeManager.throwGrenade((Player)player, player.getMainHandItem(), 0)) {
             int pick = 1 + ThreadLocalRandom.current().nextInt(3);
             GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.fuze_" + pick, 0.55f, 1.0f);
+        } else {
+            MatchInventory.syncContents(player);
         }
     }
 
