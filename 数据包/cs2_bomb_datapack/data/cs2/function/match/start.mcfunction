@@ -44,8 +44,8 @@ function cs2:join/end_queue
 function cs2:match/reset
 function cs2:stats/reset
 function cs2:econ/start
-execute unless entity @a[team=cs2_t] run scoreboard players set #solo cs2_counts 2
-execute unless entity @a[team=cs2_ct] run scoreboard players set #solo cs2_counts 1
+execute unless entity @a[team=cs2_t,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 2
+execute unless entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 1
 scoreboard players set #round cs2_round 1
 scoreboard players set #target cs2_score_t 13
 scoreboard players set #state cs2_state 1
