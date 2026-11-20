@@ -50,6 +50,7 @@ public class Cs2Grenade {
         MapChunkTickets.register(modBus);
         RoundCheckpoint.register(modBus);
         RoundRewards.register();
+        TaczHitAttribution.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(this::onLivingTick);
