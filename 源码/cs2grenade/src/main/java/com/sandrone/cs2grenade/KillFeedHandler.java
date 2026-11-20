@@ -39,6 +39,8 @@ public final class KillFeedHandler {
         if (!(victimEntity instanceof ServerPlayer victim)) {
             return;
         }
+        DamageSource source = event.getSource();
+        TaczHitAttribution.Hit gunHit = TaczHitAttribution.consume(victim, source);
         MinecraftServer server = victim.getServer();
         if (server == null || !isInMatch(server, victim)) {
             return;
@@ -49,17 +51,19 @@ public final class KillFeedHandler {
             return;
         }
 
-        DamageSource source = event.getSource();
         // 爆炸伤害把伤害者放在 directEntity（explosion(exploder, cause)），
         // getEntity() 取的是 causingEntity，这里两者都兼容
         Entity attackerEntity = source.getEntity() != null ? source.getEntity() : source.getDirectEntity();
+        if (gunHit != null) {
+            attackerEntity = gunHit.attacker();
+        }
         boolean selfKill = attackerEntity == victim && isGrenadeDamage(source);
         ServerPlayer killer = attackerEntity instanceof ServerPlayer p && p != victim ? p : null;
         int victimTeam = team(server, victim);
         int killerTeam = killer == null ? 0 : team(server, killer);
 
         ItemStack weapon = source.getWeaponItem();
-        ResourceLocation gunId = lethalGunId(source, weapon);
+        ResourceLocation gunId = gunHit != null ? gunHit.gunId() : lethalGunId(source, weapon);
         Component message = buildMessage(source, victim, victimTeam, killer, killerTeam, selfKill,
                 weaponLabel(source, weapon, gunId));
         for (ServerPlayer receiver : server.getPlayerList().getPlayers()) {
