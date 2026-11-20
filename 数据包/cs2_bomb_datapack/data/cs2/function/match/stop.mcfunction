@@ -15,6 +15,7 @@ function cs2:pvp/on
 title @a[scores={cs2_inmatch=1,cs2_hud=1}] title {"text":"比赛已停止","color":"yellow"}
 tellraw @a[scores={cs2_inmatch=1}] {"text":"比赛已停止，参赛者已离开队伍。","color":"yellow"}
 playsound minecraft:block.note_block.bass master @a[scores={cs2_inmatch=1}]
+execute as @a[scores={cs2_inmatch=1}] run function cs2:music/stop
 execute as @a[scores={cs2_inmatch=1}] run function cs2:join/to_lobby
 function cs2:join/end_queue
 # 计分板仍保存离线参赛者的分数，比赛结束后也要撤销。

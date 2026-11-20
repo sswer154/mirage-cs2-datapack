@@ -1,5 +1,6 @@
 # 回合开始：冻结阶段
 scoreboard players set #state cs2_state 2
+execute as @a[scores={cs2_inmatch=1}] run function cs2:music/stop
 function cs2:pvp/off
 scoreboard players set #bomb cs2_bomb_state 0
 scoreboard players set #bomb_timer cs2_bomb_timer 0

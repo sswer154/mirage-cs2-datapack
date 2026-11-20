@@ -31,6 +31,7 @@ public class Cs2Grenade {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG;
     public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
+    private final C4Sfx c4Sfx = new C4Sfx();
     private boolean roundWasLive;
 
     static {
@@ -82,6 +83,7 @@ public class Cs2Grenade {
 
     private void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         roundWasLive = false;
+        c4Sfx.stopCountdown(event.getServer());
         GrenadeManager.cleanupOrphans(event.getServer());
         GrenadeManager.purgeTransientVisuals(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer());
     }
@@ -98,7 +100,17 @@ public class Cs2Grenade {
         if (event.getEntity() instanceof ServerPlayer player) {
             C4Plant.cancel(player, false);
             C4Defuse.cancel(player);
+            c4Sfx.playerLoggedOut(player);
+            GrenadeManager.clearSmokeListener(player);
         }
+    }
+
+    static boolean isMatchAudioListener(ServerPlayer player) {
+        var scoreboard = player.getScoreboard();
+        var objective = scoreboard.getObjective("cs2_inmatch");
+        var score = objective == null ? null : scoreboard.getPlayerScoreInfo(player, objective);
+        return (score != null && score.value() == 1)
+                || (player.getTeam() != null && "cs2_cast".equals(player.getTeam().getName()));
     }
 
     private void onServerTick(ServerTickEvent.Post event) {
@@ -112,9 +124,12 @@ public class Cs2Grenade {
             GrenadeManager.clearRoundGrenades(server);
         }
         roundWasLive = roundIsLive;
-        GrenadeManager.tick();
+        var counts = scoreboard.getObjective("cs2_counts");
+        var pause = counts == null ? null : scoreboard.getPlayerScoreInfo(ScoreHolder.forNameOnly("#paused"), counts);
+        boolean paused = pause != null && pause.value() == 1;
+        GrenadeManager.tick(paused);
         if (event.getServer() != null) {
-            C4Sfx.tick(event.getServer());
+            c4Sfx.tick(server, state != null && state.value() == 4, paused);
             int now = event.getServer().getTickCount();
             for (net.minecraft.server.level.ServerPlayer p : event.getServer().getPlayerList().getPlayers()) {
                 GrenadeManager.playerTick(p, now);
