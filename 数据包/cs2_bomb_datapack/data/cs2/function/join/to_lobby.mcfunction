@@ -6,6 +6,8 @@ scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0
 scoreboard players set @s cs2_inmatch 0
+scoreboard players reset @s cs2_voted_restart
+scoreboard players reset @s cs2_voted_end
 scoreboard players reset @s cs2_ready_team
 function cs2:join/clear_queue
 scoreboard players reset @s cs2_pending_pay
