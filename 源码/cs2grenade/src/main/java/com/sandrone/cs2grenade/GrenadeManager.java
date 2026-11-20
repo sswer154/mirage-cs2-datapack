@@ -1710,15 +1710,17 @@ public final class GrenadeManager {
             if (d > 80.0) {
                 continue;
             }
+            // 碰炸手雷用自己的四档素材，其余（高爆/燃烧）沿用通用层
+            String prefix = "impact".equals(g.type.effect()) ? "grenade.impact_explosion_" : "grenade.explosion_";
             String layer;
             if (d < 20.0) {
-                layer = fire ? "grenade.explosion_fire_close" : "grenade.explosion_close";
+                layer = fire ? "grenade.explosion_fire_close" : prefix + "close";
             } else if (d < 40.0) {
-                layer = "grenade.explosion_far";
+                layer = prefix + "far";
             } else if (d < 60.0) {
-                layer = "grenade.explosion_distant";
+                layer = prefix + "distant";
             } else {
-                layer = "grenade.explosion_far3";
+                layer = prefix + "far3";
             }
             float loud = 5.0f;
             SoundEvent sound = SoundEvent.createVariableRangeEvent(
