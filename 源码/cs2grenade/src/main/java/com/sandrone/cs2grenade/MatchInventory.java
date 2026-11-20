@@ -93,12 +93,16 @@ final class MatchInventory {
     }
 
     private static int sync(ServerPlayer player) {
+        syncContents(player);
+        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
+        return 1;
+    }
+
+    static void syncContents(ServerPlayer player) {
         player.inventoryMenu.broadcastFullState();
         if (player.containerMenu != player.inventoryMenu) {
             player.containerMenu.broadcastFullState();
         }
-        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
-        return 1;
     }
 
     private static int invalidSnapshot(ServerPlayer player) {
