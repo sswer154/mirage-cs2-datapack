@@ -1,5 +1,7 @@
 package com.sandrone.cs2grenade;
 
+import java.util.Optional;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -56,7 +58,10 @@ public final class KillFeedHandler {
         int victimTeam = team(server, victim);
         int killerTeam = killer == null ? 0 : team(server, killer);
 
-        Component message = buildMessage(source, victim, victimTeam, killer, killerTeam, selfKill);
+        ItemStack weapon = source.getWeaponItem();
+        ResourceLocation gunId = lethalGunId(source, weapon);
+        Component message = buildMessage(source, victim, victimTeam, killer, killerTeam, selfKill,
+                weaponLabel(source, weapon, gunId));
         for (ServerPlayer receiver : server.getPlayerList().getPlayers()) {
             if (isInMatch(server, receiver) || "cs2_cast".equals(teamName(receiver))) {
                 receiver.sendSystemMessage(message);
@@ -76,7 +81,7 @@ public final class KillFeedHandler {
                 rewardCommand = "execute if entity @s[team=" + enemyTeam + "] run function cs2:econ/kill/reward_grenade";
             } else {
                 CompoundTag reward = new CompoundTag();
-                reward.putString("gun", rewardGunId(source));
+                reward.putString("gun", gunId == null ? "" : gunId.toString());
                 server.getCommandStorage().set(KILL_REWARD, reward);
                 rewardCommand = "function cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
             }
@@ -87,9 +92,9 @@ public final class KillFeedHandler {
         }
     }
 
-    private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam, ServerPlayer killer, int killerTeam, boolean selfKill) {
+    private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam,
+                                          ServerPlayer killer, int killerTeam, boolean selfKill, Component weapon) {
         if (selfKill) {
-            Component weapon = weaponLabel(source);
             String deathVerb = source.is(GrenadeManager.FIRE_DAMAGE_TYPE) ? "烧死了" : "炸死了";
             MutableComponent result = Component.empty();
             result.append(victim.getDisplayName())
@@ -108,7 +113,6 @@ public final class KillFeedHandler {
         }
         result.append(teamTag(killerTeam))
                 .append(killer.getDisplayName());
-        Component weapon = weaponLabel(source);
         if (weapon != null) {
             result.append(Component.literal(" [").withStyle(ChatFormatting.GRAY))
                     .append(weapon)
@@ -122,41 +126,63 @@ public final class KillFeedHandler {
         return result;
     }
 
-    private static String rewardGunId(DamageSource source) {
+    private static ResourceLocation lethalGunId(DamageSource source, ItemStack weapon) {
         Entity direct = source.getDirectEntity();
         if (direct != null && TACZ_BULLET.equals(BuiltInRegistries.ENTITY_TYPE.getKey(direct.getType()))) {
             // TACZ stores the firing gun on the projectile. Keep TACZ optional for standalone builds.
             try {
                 if (direct.getClass().getMethod("getGunId").invoke(direct) instanceof ResourceLocation gunId) {
-                    return gunId.toString();
+                    return gunId;
                 }
             } catch (ReflectiveOperationException ignored) {
                 // Unknown TACZ versions fall back to the default reward.
             }
-            return "";
+            return null;
         }
-        ItemStack weapon = source.getWeaponItem();
         if (weapon != null && TACZ_GUN.equals(BuiltInRegistries.ITEM.getKey(weapon.getItem()))) {
             CustomData data = weapon.get(DataComponents.CUSTOM_DATA);
             if (data != null) {
-                return data.copyTag().getString("GunId");
+                String gunId = data.copyTag().getString("GunId");
+                return gunId.isEmpty() ? null : ResourceLocation.tryParse(gunId);
             }
         }
-        return "";
+        return null;
+    }
+
+    private static MutableComponent gunName(ResourceLocation gunId) {
+        // The common index carries the translation key on a dedicated server.
+        // Keep TaCZ optional and show the known ID when its index cannot supply a name.
+        try {
+            Class<?> api = Class.forName("com.tacz.guns.api.TimelessAPI");
+            if (api.getMethod("getCommonGunIndex", ResourceLocation.class).invoke(null, gunId)
+                    instanceof Optional<?> entry && entry.isPresent()) {
+                Object index = entry.get();
+                Object config = index.getClass().getMethod("getPojo").invoke(index);
+                if (config != null && config.getClass().getMethod("getName").invoke(config)
+                        instanceof String name && !name.isBlank()) {
+                    return Component.translatableWithFallback(name, gunId.toString());
+                }
+            }
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            // A different TaCZ build can still have a usable projectile ID.
+        }
+        return Component.literal(gunId.toString());
     }
 
     private static boolean isGrenadeDamage(DamageSource source) {
         return source instanceof GrenadeExplosionDamageSource || source.is(GrenadeManager.FIRE_DAMAGE_TYPE);
     }
 
-    private static Component weaponLabel(DamageSource source) {
+    private static Component weaponLabel(DamageSource source, ItemStack weapon, ResourceLocation gunId) {
         if (source instanceof GrenadeExplosionDamageSource) {
             return Component.literal("高爆手雷").withStyle(ChatFormatting.GOLD);
         }
         if (source.is(GrenadeManager.FIRE_DAMAGE_TYPE)) {
             return Component.literal("燃烧弹").withStyle(ChatFormatting.GOLD);
         }
-        ItemStack weapon = source.getWeaponItem();
+        if (gunId != null) {
+            return gunName(gunId).withStyle(ChatFormatting.YELLOW);
+        }
         // 伤害源未记录武器时省略名称，避免把命中前换到手上的物品当成凶器。
         if (weapon == null || weapon.isEmpty()) {
             return null;
