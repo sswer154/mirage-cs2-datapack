@@ -9,10 +9,9 @@ function cs2:pvp/round_live
 # 回滚：对局内保持死亡不掉落
 gamerule keepInventory true
 # 准备阶段已在商店购买装备；这里只切换状态、计时与炸弹
-# 每回合开始时根据实际人数识别测试模式：1=仅 T，2=仅 CT，0=双方都有
-scoreboard players set #solo cs2_counts 0
-execute unless entity @a[team=cs2_t,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 2
-execute unless entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 1
+# 开赛时确定是否为练习局。正式赛保留模式，练习局跟随当前阵营。
+execute if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] unless entity @a[team=cs2_t,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 2
+execute if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] unless entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run scoreboard players set #solo cs2_counts 1
 scoreboard players operation #timer cs2_timer = round cs2_cfg
 scoreboard players operation #timer cs2_timer *= #20 cs2_const
 scoreboard players set #bomb cs2_bomb_state 0
