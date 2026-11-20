@@ -37,12 +37,10 @@ execute store result bossbar cs2:bomb max run scoreboard players get #bomb_timer
 execute store result bossbar cs2:bomb value run scoreboard players get #bomb_timer cs2_bomb_timer
 
 function cs2:util/feed_target
-title @a[tag=cs2_feed_target] times 10 40 10
-title @a[scores={cs2_hud=1}] title {"text":"炸弹已安放","color":"red","bold":true}
-execute if score #site cs2_site matches 1 run title @a[scores={cs2_hud=1}] subtitle {"text":"A 包点","color":"red"}
-execute if score #site cs2_site matches 2 run title @a[scores={cs2_hud=1}] subtitle {"text":"B 包点","color":"red"}
-execute if score #site cs2_site matches 1 run tellraw @a[tag=cs2_feed_target] [{"text":"炸弹已安放在 ","color":"red"},{"text":"A","color":"red","bold":true},{"text":" 包点，","color":"gray"},{"score":{"name":"bomb","objective":"cs2_cfg"},"color":"yellow"},{"text":" 秒后爆炸。","color":"gray"}]
-execute if score #site cs2_site matches 2 run tellraw @a[tag=cs2_feed_target] [{"text":"炸弹已安放在 ","color":"red"},{"text":"B","color":"red","bold":true},{"text":" 包点，","color":"gray"},{"score":{"name":"bomb","objective":"cs2_cfg"},"color":"yellow"},{"text":" 秒后爆炸。","color":"gray"}]
+title @a[tag=cs2_feed_target,scores={cs2_hud=1}] times 10 40 10
+title @a[tag=cs2_feed_target,scores={cs2_hud=1}] subtitle {"text":""}
+title @a[tag=cs2_feed_target,scores={cs2_hud=1}] title {"text":"炸弹已安放","color":"red","bold":true}
+tellraw @a[tag=cs2_feed_target] [{"text":"炸弹已安放","color":"red"},{"text":"，","color":"gray"},{"score":{"name":"bomb","objective":"cs2_cfg"},"color":"yellow"},{"text":" 秒后爆炸。","color":"gray"}]
 playsound minecraft:block.respawn_anchor.set_spawn master @a
 # 安包提示音：只给参赛者与解说
 scoreboard players set #c4_sfx cs2_sfx 1
