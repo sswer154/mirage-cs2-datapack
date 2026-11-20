@@ -72,4 +72,4 @@ title @a[tag=cs2_feed_target,scores={cs2_hud=1}] subtitle {"text":"热身阶段"
 tellraw @a[tag=cs2_feed_target] {"text":"比赛开始：热身结束后自动进入第 1 回合。","color":"gold"}
 execute if score #solo cs2_counts matches 1 run tellraw @a[tag=cs2_feed_target] {"text":"测试模式：仅 T 队有玩家，CT 空位不会自动判负。","color":"yellow"}
 execute if score #solo cs2_counts matches 2 run tellraw @a[tag=cs2_feed_target] {"text":"测试模式：仅 CT 队有玩家，T 空位不会自动判负。","color":"yellow"}
-function cs2:match/status
+function cs2:match/status_broadcast
