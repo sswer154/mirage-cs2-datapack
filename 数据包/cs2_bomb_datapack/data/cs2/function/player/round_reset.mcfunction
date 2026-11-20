@@ -36,10 +36,5 @@ scoreboard players operation @s cs2_prev_deaths = @s cs2_deaths
 execute if score @s cs2_team matches 1..2 run gamemode adventure @s
 execute if score @s cs2_team matches 0 run gamemode spectator @s
 
-# 按 cs2_team 回到出生点；不依赖当前 team 选择器，阵亡后也能回位
-execute if score @s cs2_team matches 1 if entity @e[type=marker,tag=cs2_spawn_t,limit=1] run tp @s @e[type=marker,tag=cs2_spawn_t,limit=1]
-execute if score @s cs2_team matches 2 if entity @e[type=marker,tag=cs2_spawn_ct,limit=1] run tp @s @e[type=marker,tag=cs2_spawn_ct,limit=1]
-execute if score @s cs2_team matches 0 if entity @e[type=marker,tag=cs2_lobby,limit=1] run tp @s @e[type=marker,tag=cs2_lobby,limit=1]
-
 # 装备清点/补发之后再快照，避免把马上要被清掉的东西算进本回合名额
 function cs2:shop/snapshot_carry

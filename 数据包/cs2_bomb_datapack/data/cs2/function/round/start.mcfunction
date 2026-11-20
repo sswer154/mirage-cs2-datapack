@@ -20,9 +20,8 @@ execute if score #round_restarting cs2_counts matches 1 run scoreboard players s
 execute unless score #round_restarting cs2_counts matches 1 as @a[scores={cs2_queued_team=1..2}] run function cs2:join/apply_queue
 function cs2:econ/round_start
 function cs2:player/round_all
-tp @a[scores={cs2_inmatch=1,cs2_team=1}] @e[type=marker,tag=cs2_spawn_t,limit=1]
-tp @a[scores={cs2_inmatch=1,cs2_team=2}] @e[type=marker,tag=cs2_spawn_ct,limit=1]
-tp @a[scores={cs2_inmatch=1,cs2_team=0}] @e[type=marker,tag=cs2_lobby,limit=1]
+# 阵营和回合状态结算后，只发送一次出生点传送。
+execute as @a[scores={cs2_inmatch=1}] run function cs2:player/teleport_round_spawn
 function cs2:round/freeze
 execute if score #round_replayed cs2_counts matches 1 as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run function cs2:round/restore_checkpoint
 execute as @a[scores={cs2_inmatch=1,cs2_team=1..2}] run cs2roundstate save
