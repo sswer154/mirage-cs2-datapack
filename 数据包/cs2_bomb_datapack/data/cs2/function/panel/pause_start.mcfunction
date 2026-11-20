@@ -1,4 +1,5 @@
 scoreboard players set #paused cs2_counts 1
+execute as @a[scores={cs2_inmatch=1}] run function cs2:music/stop
 scoreboard players set #pause_kind cs2_counts 1
 scoreboard players operation #pause_state cs2_counts = #state cs2_state
 scoreboard players set #pause_timer cs2_counts 600

@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -131,6 +132,12 @@ public final class GrenadeManager {
     private static final Map<UUID, String> LAST_HELD;
     private static final Set<UUID> PERSIST_DISPLAYS;
     private static final List<SmokeZone> SMOKE_ZONES;
+    private static final String SMOKE_HISS_SOUND = "smoke.hiss";
+    private static final float SMOKE_HISS_VOLUME = 0.8f;
+    private static final double SMOKE_HISS_RANGE = 16.0 * SMOKE_HISS_VOLUME;
+    // hiss.ogg 长 8 秒，按实际时间续播，避免同一颗烟的两段音效重叠。
+    private static final long SMOKE_HISS_DURATION_MS = 8_000;
+    private static final Map<UUID, Map<SmokeZone, Long>> SMOKE_HISS_LISTENERS = new HashMap<>();
     private static int smokeVolumeId;
     private static final List<FireZone> FIRE_ZONES;
     private static final Map<UUID, Integer> BURN_STEPS;
@@ -393,10 +400,11 @@ public final class GrenadeManager {
         done.forEach(PENDING_MASKS::remove);
     }
 
-    public static void tick() {
+    static void tick(boolean paused) {
         tickRings();
         GrenadeManager.processMasks();
         GrenadeManager.tickSmoke();
+        GrenadeManager.tickSmokeHiss(paused, Util.getMillis());
         GrenadeManager.tickFires();
         if (++sweepTimer >= 40) {
             sweepTimer = 0;
@@ -488,12 +496,6 @@ public final class GrenadeManager {
         FIRE_VICTIMS.clear();
 
         for (SmokeZone zone : SMOKE_ZONES) {
-            for (UUID playerId : zone.hissTicks.keySet()) {
-                ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-                if (player != null) {
-                    stopSoundFor(player, "smoke.hiss");
-                }
-            }
             if (zone.display != null) {
                 PERSIST_DISPLAYS.remove(zone.display.getUUID());
                 zone.display.discard();
@@ -521,6 +523,7 @@ public final class GrenadeManager {
             Cs2Grenade.debug("\u6e05\u7406\u6b8b\u7559\u70df\u7247 {} \u4e2a", before);
         }
         SMOKE_ZONES.clear();
+        stopAllSmokeHiss(server);
     }
 
     private static void sweepOrphans() {
@@ -619,22 +622,6 @@ public final class GrenadeManager {
     /** 中断时掐掉安放开始音。 */
     static void stopPlantSound(ServerLevel level, Vec3 pos) {
         GrenadeManager.stopSound(level, pos, "c4.plant_start");
-    }
-
-    /** 拆除/爆炸时掐掉还在播的倒计时。 */
-    static void stopC4Countdown(ServerLevel level, Vec3 pos) {
-        GrenadeManager.stopSound(level, pos, "c4.countdown");
-    }
-
-    /** 全服掐掉倒计时：拆除函数会先杀掉炸弹标记，不能靠坐标找。 */
-    static void stopC4CountdownAll() {
-        if (serverRef == null) {
-            return;
-        }
-        ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", "c4.countdown");
-        for (ServerPlayer p : serverRef.getPlayerList().getPlayers()) {
-            p.connection.send(new ClientboundStopSoundPacket(loc, SoundSource.PLAYERS));
-        }
     }
 
     private static void playCs2(ServerLevel level, Vec3 pos, String id, float volume, float pitch) {
@@ -1393,9 +1380,7 @@ public final class GrenadeManager {
         List<SmokeCard> cards = spawnSmokeCards(level, pos, g.type.cloudRadius(), volumeId);
         int born = serverRef == null ? 0 : serverRef.getTickCount();
         SmokeZone zone = new SmokeZone(level, pos, born, life, g.type.cloudRadius(), 0, volumeId, g.display, cards);
-        zone.nextHiss = born + 140;
         SMOKE_ZONES.add(zone);
-        GrenadeManager.playCs2(level, pos, "smoke.hiss", 0.8f, 1.0f);
         if (g.display != null && !g.display.isRemoved()) {
             PERSIST_DISPLAYS.add(g.display.getUUID());
             g.display.addTag("cs2_smoke_canister");
@@ -1413,11 +1398,6 @@ public final class GrenadeManager {
             int elapsed = now - z.startTick;
             int remaining = z.lifeTicks - elapsed;
             if (remaining <= 0) {
-                for (java.util.UUID id : z.hissTicks.keySet()) {
-                    net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
-                    if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
-                }
-                z.hissTicks.clear();
                 z.level.getServer().getCommands().performPrefixedCommand(z.level.getServer().createCommandSourceStack().withPermission(4).withSuppressedOutput(), "kill @e[tag=cs2_smoke_" + z.volumeId + "]");
                 if (z.display != null) {
                     PERSIST_DISPLAYS.remove(z.display.getUUID());
@@ -1426,45 +1406,73 @@ public final class GrenadeManager {
                 expired.add(z);
                 continue;
             }
-            // 放烟声按玩家维护：进烟区补一次，留在里面按样本续播；淡出后交给 smoke.end
-            java.util.HashSet<java.util.UUID> seen = new java.util.HashSet<>();
-            if (!z.fadedOut) {
-            for (net.minecraft.server.level.ServerPlayer p : z.level.players()) {
-                double ddx = p.getX() - z.pos.x;
-                double ddz = p.getZ() - z.pos.z;
-                double horiz2 = ddx * ddx + ddz * ddz;
-                double limit = z.maxRadius + 1.5;
-                if (horiz2 <= limit * limit && Math.abs(p.getY() - z.pos.y) <= 4.0) {
-                    seen.add(p.getUUID());
-                    Integer last = z.hissTicks.get(p.getUUID());
-                    // hiss 样本 8 秒：在 152 tick（7.6 秒）后续播，接得上又不明显
-                    if (last == null || now - last >= 152) {
-                        GrenadeManager.playCs2For(p, z.level, z.pos, "smoke.hiss", 0.8f, 1.0f);
-                        z.hissTicks.put(p.getUUID(), now);
-                    }
-                }
-            }
-            java.util.Iterator<java.util.Map.Entry<java.util.UUID, Integer>> it = z.hissTicks.entrySet().iterator();
-            while (it.hasNext()) {
-                java.util.Map.Entry<java.util.UUID, Integer> e = it.next();
-                if (seen.contains(e.getKey())) continue;
-                // 走远不掐声，也不清记录：8 秒内回来听到的还是同一段，超过就由上面的续播补
-                it.remove();
-            }
-            }
             if (!z.fadedOut && remaining <= 60) {
                 z.fadedOut = true;
                 z.nextVisualTick = now;
-                for (java.util.UUID id : z.hissTicks.keySet()) {
-                    net.minecraft.server.level.ServerPlayer p = z.level.getServer().getPlayerList().getPlayer(id);
-                    if (p != null) GrenadeManager.stopSoundFor(p, "smoke.hiss");
-                }
-                z.hissTicks.clear();
                 GrenadeManager.playCs2(z.level, z.pos, "smoke.end", 0.8f, 1.0f);
             }
             tickSmokeVisuals(z, now, remaining);
         }
         SMOKE_ZONES.removeAll(expired);
+    }
+
+    private static boolean canHearSmoke(ServerPlayer player, SmokeZone zone) {
+        return !zone.fadedOut && player.level() == zone.level
+                && player.distanceToSqr(zone.pos) <= SMOKE_HISS_RANGE * SMOKE_HISS_RANGE;
+    }
+
+    private static void tickSmokeHiss(boolean paused, long now) {
+        if (serverRef == null || (SMOKE_ZONES.isEmpty() && SMOKE_HISS_LISTENERS.isEmpty())) {
+            return;
+        }
+        if (paused) {
+            stopAllSmokeHiss(serverRef);
+            return;
+        }
+        for (ServerPlayer player : serverRef.getPlayerList().getPlayers()) {
+            UUID id = player.getUUID();
+            Map<SmokeZone, Long> sounds = SMOKE_HISS_LISTENERS.get(id);
+            if (!Cs2Grenade.isMatchAudioListener(player)) {
+                if (sounds != null) {
+                    stopSoundFor(player, SMOKE_HISS_SOUND);
+                    SMOKE_HISS_LISTENERS.remove(id);
+                }
+                continue;
+            }
+            if (sounds != null) {
+                sounds.values().removeIf(end -> now >= end);
+            }
+            for (SmokeZone zone : SMOKE_ZONES) {
+                if (!canHearSmoke(player, zone)) {
+                    continue;
+                }
+                if (sounds == null) {
+                    sounds = new HashMap<>();
+                    SMOKE_HISS_LISTENERS.put(id, sounds);
+                }
+                if (sounds.putIfAbsent(zone, now + SMOKE_HISS_DURATION_MS) == null) {
+                    playCs2For(player, zone.level, zone.pos, SMOKE_HISS_SOUND, SMOKE_HISS_VOLUME, 1.0f);
+                }
+            }
+            // 淡出的烟不再续播，让这一段自然播完，避免停掉其他烟的同名音效。
+            if (sounds != null && sounds.isEmpty()) {
+                SMOKE_HISS_LISTENERS.remove(id);
+            }
+        }
+    }
+
+    static void clearSmokeListener(ServerPlayer player) {
+        SMOKE_HISS_LISTENERS.remove(player.getUUID());
+    }
+
+    private static void stopAllSmokeHiss(MinecraftServer server) {
+        for (UUID id : SMOKE_HISS_LISTENERS.keySet()) {
+            ServerPlayer player = server.getPlayerList().getPlayer(id);
+            if (player != null) {
+                stopSoundFor(player, SMOKE_HISS_SOUND);
+            }
+        }
+        SMOKE_HISS_LISTENERS.clear();
     }
 
     private static boolean fireFragment(ServerLevel level, Vec3 origin, Vec3 dir, float fragDamage, double fragInner, double fragOuter, Player thrower) {
@@ -1702,18 +1710,23 @@ public final class GrenadeManager {
         boolean fire = "fire".equals(g.type.effect());
         for (ServerPlayer p : level.players()) {
             double d = p.position().distanceTo(pos);
-            if (d > 40.0) {
+            // 四档传播：0-20 / 20-40 / 40-60 / 60-80 格
+            if (d > 80.0) {
                 continue;
             }
+            // 碰炸手雷用自己的四档素材，其余（高爆/燃烧）沿用通用层
+            String prefix = "impact".equals(g.type.effect()) ? "grenade.impact_explosion_" : "grenade.explosion_";
             String layer;
-            if (d < 10.0) {
-                layer = fire ? "grenade.explosion_fire_close" : "grenade.explosion_close";
-            } else if (d < 25.0) {
-                layer = "grenade.explosion_far";
+            if (d < 20.0) {
+                layer = fire ? "grenade.explosion_fire_close" : prefix + "close";
+            } else if (d < 40.0) {
+                layer = prefix + "far";
+            } else if (d < 60.0) {
+                layer = prefix + "distant";
             } else {
-                layer = "grenade.explosion_distant";
+                layer = prefix + "far3";
             }
-            float loud = 2.5f;
+            float loud = 5.0f;
             SoundEvent sound = SoundEvent.createVariableRangeEvent(
                     ResourceLocation.fromNamespaceAndPath("cs2", layer));
             GrenadeManager.sendSoundPacket(p, sound, pos, loud, 1.0f, level.getRandom().nextLong());
@@ -1787,12 +1800,9 @@ public final class GrenadeManager {
         int volumeId;
         Display.ItemDisplay display;
         int nextVisualTick;
-        int nextHiss;
         boolean fadedOut;
         final List<SmokeHole> holes = new ArrayList<>();
         final List<SmokeCard> cards;
-        /** 每个玩家最近一次听到放烟声的 tick，用来进出烟区时续播。 */
-        final java.util.HashMap<java.util.UUID, Integer> hissTicks = new java.util.HashMap<>();
 
         SmokeZone(ServerLevel level, Vec3 pos, int startTick, int lifeTicks, double maxRadius, int nextPuff, int volumeId, Display.ItemDisplay display, List<SmokeCard> cards) {
             this.level = level;
