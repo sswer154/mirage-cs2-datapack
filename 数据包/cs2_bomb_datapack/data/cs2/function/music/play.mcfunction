@@ -2,13 +2,7 @@
 # 预设编号存放在 cs2_cfg 的 #music_preset：0=关闭，1..7=对应曲目。
 # 按参赛者当前位置播放，避免因距离命令执行点太远而收不到。
 # 先停掉上一回合可能还在播放的曲目，避免长曲跨回合叠音。
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.shuguang
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.inhuman_mvp
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.invasion_mvp
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.umri_15s
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.on_and_on_60s
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.reimei_10s
-stopsound @a[scores={cs2_inmatch=1}] master cs2:music.know_my_name_15s
+execute as @a[scores={cs2_inmatch=1}] run function cs2:music/stop
 
 execute if score #music_preset cs2_cfg matches 0 run return 0
 
