@@ -1,3 +1,5 @@
+# 等待者可能已在旁观状态飞离大厅。先回大厅，再恢复冒险模式和原背包。
+execute if entity @s[gamemode=spectator] unless score @s cs2_inmatch matches 1 if function cs2:player/has_saved_inventory if entity @e[type=marker,tag=cs2_lobby,limit=1] run tp @s @e[type=marker,tag=cs2_lobby,limit=1]
 execute if entity @s[team=cs2_t] run team leave @s
 execute if entity @s[team=cs2_ct] run team leave @s
 execute if entity @s[team=cs2_cast] run team leave @s
