@@ -1,22 +1,39 @@
 package com.sandrone.cs2grenade;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Marker;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.world.phys.Vec3;
 
-/**
- * 数据包用计分板 cs2_sfx / #c4_sfx 触发 C4 广播音。
- * 1=安放成功 2=拆除成功 3=倒计时。
- */
-public final class C4Sfx {
-    private C4Sfx() {
-    }
+/** 数据包用计分板 cs2_sfx / #c4_sfx 触发 C4 音效。 */
+final class C4Sfx {
+    private static final String COUNTDOWN_SOUND = "c4.countdown";
+    private final Set<UUID> countdownListeners = new HashSet<>();
+    private Marker countdownBomb;
 
-    public static void tick(MinecraftServer server) {
+    void tick(MinecraftServer server, boolean bombRound, boolean paused) {
+        if (countdownBomb != null && (!bombRound || paused || countdownBomb.isRemoved()
+                || !countdownBomb.getTags().contains("cs2_bomb"))) {
+            stopCountdown(server);
+        }
+        countdownListeners.removeIf(id -> {
+            ServerPlayer player = server.getPlayerList().getPlayer(id);
+            if (player == null) {
+                return true;
+            }
+            if (Cs2Grenade.isMatchAudioListener(player)) {
+                return false;
+            }
+            GrenadeManager.stopSoundFor(player, COUNTDOWN_SOUND);
+            return true;
+        });
+
         Scoreboard sb = server.getScoreboard();
         var obj = sb.getObjective("cs2_sfx");
         if (obj == null) {
@@ -28,53 +45,68 @@ public final class C4Sfx {
             return;
         }
         score.set(0);
-        Vec3 pos = bombPos(server);
+        if (paused) {
+            return;
+        }
+
         String id;
         float volume;
         switch (code) {
             case 1 -> { id = "c4.planted"; volume = 1.0f; }
             case 2 -> { id = "c4.defused"; volume = 1.0f; }
-            case 3 -> { id = "c4.countdown"; volume = 2.0f; }
+            case 3 -> { id = null; volume = 0.0f; }
             case 4 -> { id = "c4.plant_start"; volume = 1.0f; }
             case 5 -> { id = "c4.defuse_start"; volume = 1.0f; }
             case 6 -> { id = "c4.explosion"; volume = 4.0f; }
             case 7 -> { id = "c4.beep"; volume = 2.0f; }
             default -> { return; }
         }
-        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-            if (!shouldHear(p)) {
-                continue;
+        if (code == 2 || code == 6) {
+            stopCountdown(server);
+        }
+        if (id != null) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (Cs2Grenade.isMatchAudioListener(player)) {
+                    GrenadeManager.playC4Sfx(player, player.position(), id, volume);
+                }
             }
-            // 广播音在听者自己的位置播放，保证全场都能听到；倒计时在炸弹位置，按距离衰减
-            Vec3 at = code == 3 && pos != null ? pos : p.position();
-            GrenadeManager.playC4Sfx(p, at, id, volume);
-            // 安放成功的同时起倒计时（同一 tick 只能读一个信号，所以并在这里）
-            if (code == 1 && pos != null) {
-                GrenadeManager.playC4Sfx(p, pos, "c4.countdown", 2.0f);
-            }
-            // 拆除或引爆时掐掉倒计时
-            if (code == 2 || code == 6) {
-                GrenadeManager.stopC4CountdownAll();
+        }
+        if ((code == 1 || code == 3) && bombRound) {
+            Marker bomb = findBomb(server);
+            if (bomb != null && bomb != countdownBomb) {
+                stopCountdown(server);
+                countdownBomb = bomb;
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    if (Cs2Grenade.isMatchAudioListener(player)) {
+                        GrenadeManager.playC4Sfx(player, bomb.position(), COUNTDOWN_SOUND, 2.0f);
+                        countdownListeners.add(player.getUUID());
+                    }
+                }
             }
         }
         Cs2Grenade.debug("C4 音效 code={} 已发送", code);
     }
 
-    private static boolean shouldHear(ServerPlayer player) {
-        Scoreboard sb = player.getServer().getScoreboard();
-        var inMatch = sb.getObjective("cs2_inmatch");
-        if (inMatch != null
-                && sb.getOrCreatePlayerScore(ScoreHolder.forNameOnly(player.getScoreboardName()), inMatch).get() == 1) {
-            return true;
-        }
-        return player.getTeam() != null && "cs2_cast".equals(player.getTeam().getName());
+    void playerLoggedOut(ServerPlayer player) {
+        countdownListeners.remove(player.getUUID());
     }
 
-    private static Vec3 bombPos(MinecraftServer server) {
+    void stopCountdown(MinecraftServer server) {
+        for (UUID id : countdownListeners) {
+            ServerPlayer player = server.getPlayerList().getPlayer(id);
+            if (player != null) {
+                GrenadeManager.stopSoundFor(player, COUNTDOWN_SOUND);
+            }
+        }
+        countdownListeners.clear();
+        countdownBomb = null;
+    }
+
+    private static Marker findBomb(MinecraftServer server) {
         for (ServerLevel level : server.getAllLevels()) {
-            for (Entity e : level.getEntities().getAll()) {
-                if (e.getTags().contains("cs2_bomb")) {
-                    return e.position();
+            for (Entity entity : level.getEntities().getAll()) {
+                if (entity instanceof Marker marker && marker.getTags().contains("cs2_bomb")) {
+                    return marker;
                 }
             }
         }
