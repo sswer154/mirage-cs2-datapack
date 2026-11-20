@@ -1706,18 +1706,21 @@ public final class GrenadeManager {
         boolean fire = "fire".equals(g.type.effect());
         for (ServerPlayer p : level.players()) {
             double d = p.position().distanceTo(pos);
-            if (d > 40.0) {
+            // 四档传播：0-20 / 20-40 / 40-60 / 60-80 格
+            if (d > 80.0) {
                 continue;
             }
             String layer;
-            if (d < 10.0) {
+            if (d < 20.0) {
                 layer = fire ? "grenade.explosion_fire_close" : "grenade.explosion_close";
-            } else if (d < 25.0) {
+            } else if (d < 40.0) {
                 layer = "grenade.explosion_far";
-            } else {
+            } else if (d < 60.0) {
                 layer = "grenade.explosion_distant";
+            } else {
+                layer = "grenade.explosion_far3";
             }
-            float loud = 2.5f;
+            float loud = 5.0f;
             SoundEvent sound = SoundEvent.createVariableRangeEvent(
                     ResourceLocation.fromNamespaceAndPath("cs2", layer));
             GrenadeManager.sendSoundPacket(p, sound, pos, loud, 1.0f, level.getRandom().nextLong());
