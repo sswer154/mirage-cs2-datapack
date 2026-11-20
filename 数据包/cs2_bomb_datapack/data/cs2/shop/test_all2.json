@@ -256,8 +256,9 @@
               "id": "tacz:attachment",
               "count": 1,
               "components": {
+                "cmagic:item_volume": 0.2,
                 "minecraft:custom_data": {
-                  "AttachmentId": "tacz:scope_standard_8x"
+                  "AttachmentId": "tacz:scope_1873_6x"
                 }
               }
             }

@@ -357,7 +357,7 @@ execute as @p run function cs2:join/leave
 | 投掷物 | 闪光弹 | $200 | 通用 |
 | 投掷物 | 燃烧弹 | T $400 / CT $500 | 通用 |
 
-> 狙击枪（M1895 / 春田 1873 / AWM）统一使用 `tacz:scope_standard_8x` 可调倍率瞄准镜，价格不变。
+> M1895 和 AWM 使用 `tacz:scope_standard_8x`，春田 1873 使用 `tacz:scope_1873_6x`。
 >
 > 除手枪外，所有枪械价格已统一下调 $250；步枪在全局下调后再降 $50。本轮另对 M4A1/M16A4 降 $400、191 +$100、AUG -$100、部分霰弹/DMR/机枪再调价；以表为准。投掷物按 CS2 价格加入商店。
 >
