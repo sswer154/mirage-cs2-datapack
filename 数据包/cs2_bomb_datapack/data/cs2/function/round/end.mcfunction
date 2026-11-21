@@ -43,8 +43,10 @@ execute if score #reason cs2_counts matches 6 run title @a[scores={cs2_inmatch=1
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"回合结束  比分  T ","color":"gold"},{"score":{"name":"#t","objective":"cs2_score_t"}},{"text":" : ","color":"white"},{"score":{"name":"#ct","objective":"cs2_score_ct"}},{"text":" CT","color":"gold"}]
 execute if score #winner cs2_counts matches 1 as @a[predicate=cs2:match_audio] at @s run playsound cs2:round.t_win player @s
 execute if score #winner cs2_counts matches 1 as @a[team=cs2_cast] unless predicate cs2:match_audio at @s run playsound cs2:round.t_win player @s
-execute if score #winner cs2_counts matches 2 as @a[predicate=cs2:match_audio] at @s run playsound cs2:round.ct_win player @s
-execute if score #winner cs2_counts matches 2 as @a[team=cs2_cast] unless predicate cs2:match_audio at @s run playsound cs2:round.ct_win player @s
+# 拆弹成功先播拆弹提示；展现阶段至少保留到 40 tick 后的胜利语音播出。
+execute if score #winner cs2_counts matches 2 if score #reason cs2_counts matches 4 if score #timer cs2_timer matches ..40 run scoreboard players set #timer cs2_timer 41
+execute if score #winner cs2_counts matches 2 if score #reason cs2_counts matches 4 run schedule function cs2:round/play_ct_win 40t replace
+execute if score #winner cs2_counts matches 2 unless score #reason cs2_counts matches 4 run function cs2:round/play_ct_win
 execute if score #winner cs2_counts matches 0 as @a[predicate=cs2:match_audio] at @s run playsound minecraft:ui.toast.challenge_complete master @s
 
 # 每回合结束音乐盒接口

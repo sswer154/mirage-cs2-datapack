@@ -575,7 +575,7 @@ scoreboard players set #music_preset cs2_cfg 3
 - 存活的 CT 靠近炸弹，保持潜行并右键 C4 一次开始拆除。
 - 默认读条 10 秒，有拆弹器资格时缩短为 5 秒。时长以服务器配置为准。
 - 移动、松开潜行、视线离开 C4、切换快捷栏、离开可拆范围或阵亡会打断读条。
-- 拆除成功后 CT 赢得该回合。
+- 拆除成功后立即提示拆弹成功并结算 CT 获胜，CT 胜利语音在 2 秒（40 tick）后播放。
 
 ### 死亡掉落与 keepInventory
 
@@ -615,7 +615,7 @@ python 工具/generate_shop_prices.py --datapack 数据包/cs2_bomb_datapack --c
 | `warmup` | 10 | 赛前热身 |
 | `freeze` | 25 | 每回合准备 |
 | `round` | 115 | 回合时间 |
-| `round_end` | 5 | 回合结束展示 |
+| `round_end` | 5 | 回合结束展示（拆弹获胜时至少保留到胜利语音播出） |
 | `bomb` | 40 | 炸弹倒计时 |
 | `defuse` | 10 | 无拆弹器拆包时间 |
 | `kit_time` | 5 | 有拆弹器拆包时间 |
