@@ -1,5 +1,6 @@
 package com.sandrone.cs2grenade;
 
+import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.ChatFormatting;
@@ -72,15 +73,23 @@ public final class KillFeedHandler {
             }
         }
 
-        if (killer != null && isInMatch(server, killer) && (killerTeam == 1 || killerTeam == 2)
-                && (victimTeam == 1 || victimTeam == 2) && killerTeam != victimTeam) {
+        boolean playerKill = killer != null && isInMatch(server, killer) && (killerTeam == 1 || killerTeam == 2)
+                && (victimTeam == 1 || victimTeam == 2);
+        boolean enemyKill = playerKill && killerTeam != victimTeam;
+        if (playerKill || attackerEntity == victim) {
+            // 自伤和友伤只掉枪，敌方击杀额外掉落一件投掷物。
+            String lootCommand = enemyKill ? "drop_enemy_loot" : "drop_death_gun";
+            var commands = server.getCommands();
+            if (commands.getDispatcher().findNode(List.of("cs2shop", lootCommand)) != null) {
+                commands.performPrefixedCommand(
+                        victim.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "cs2shop " + lootCommand);
+            }
+        }
+
+        if (enemyKill) {
             // 友伤保留播报，只有击杀敌方参赛者计入击杀统计。
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_kills 1");
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
-            if (server.getCommands().getDispatcher().findNode(java.util.List.of("cs2shop", "drop_enemy_loot")) != null) {
-                server.getCommands().performPrefixedCommand(
-                        victim.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "cs2shop drop_enemy_loot");
-            }
             // 击杀奖金/CT 团队击杀仍由数据包计算；同队击杀不会获得奖金。
             String rewardCommand;
             if (isGrenadeDamage(source)) {
