@@ -86,6 +86,10 @@ public final class KillFeedHandler {
             } else {
                 CompoundTag reward = new CompoundTag();
                 reward.putString("gun", gunId == null ? "" : gunId.toString());
+                Entity bullet = gunHit != null ? gunHit.bullet() : source.getDirectEntity();
+                if (TaczHitAttribution.isP90HollowPoint(gunId, bullet)) {
+                    reward.putBoolean("p90_hollow_point", true);
+                }
                 server.getCommandStorage().set(KILL_REWARD, reward);
                 rewardCommand = "function cs2:econ/kill/" + (victimTeam == 1 ? "on_t" : "on_ct");
             }
