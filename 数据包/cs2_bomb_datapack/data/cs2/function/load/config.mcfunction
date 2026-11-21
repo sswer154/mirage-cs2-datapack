@@ -9,3 +9,7 @@ execute unless score #freeze25 cs2_const matches 1 run scoreboard players set #f
 execute unless score #music_preset cs2_cfg = #music_preset cs2_cfg run scoreboard players set #music_preset cs2_cfg 8
 execute unless score #music_rotate cs2_const matches 1 if score #music_preset cs2_cfg matches 1 run scoreboard players set #music_preset cs2_cfg 8
 scoreboard players set #music_rotate cs2_const 1
+
+# 旧存档只迁移一次原来的 5 秒默认值，保留其他时长。
+execute unless score #round_end8 cs2_const matches 1 if score round_end cs2_cfg matches 5 run scoreboard players set round_end cs2_cfg 8
+scoreboard players set #round_end8 cs2_const 1

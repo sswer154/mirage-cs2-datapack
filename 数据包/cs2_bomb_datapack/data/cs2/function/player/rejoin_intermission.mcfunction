@@ -1,11 +1,13 @@
-# 回合结束/加时休息阶段重连：保留参赛者的装备/效果，只回大厅等待
+# 热身或回合结算重连：保留装备，回大厅等待
 execute unless score @s cs2_inmatch matches 1 run function cs2:player/make_spec
 execute unless score @s cs2_inmatch matches 1 run return 0
 execute if score @s cs2_team matches 0 run function cs2:join/to_lobby
 execute if score @s cs2_team matches 0 run return 0
 
 function cs2:util/clear_match_state
-gamemode adventure @s
+execute if score #state cs2_state matches 5 if score @s cs2_alive matches 0 run gamemode spectator @s
+execute if score #state cs2_state matches 5 unless score @s cs2_alive matches 0 run gamemode adventure @s
+execute unless score #state cs2_state matches 5 run gamemode adventure @s
 function cs2:util/speed
 function cs2:player/tag
 execute if entity @e[type=marker,tag=cs2_lobby] run tp @s @e[type=marker,tag=cs2_lobby,limit=1]
