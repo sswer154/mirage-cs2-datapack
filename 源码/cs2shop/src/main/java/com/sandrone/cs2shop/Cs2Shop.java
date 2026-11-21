@@ -38,6 +38,8 @@ public class Cs2Shop {
         NeoForge.EVENT_BUS.addListener(this::onCommands);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onContainerClose);
+        NeoForge.EVENT_BUS.addListener(MatchLoot::beforePickup);
+        NeoForge.EVENT_BUS.addListener(MatchLoot::afterPickup);
         LOGGER.info("[cs2shop] CS2 Shop GUI 已加载（服务端专用）");
     }
 
