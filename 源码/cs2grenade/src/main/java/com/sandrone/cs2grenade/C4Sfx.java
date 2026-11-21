@@ -115,7 +115,7 @@ final class C4Sfx {
         return player.level() == bomb.level() && player.distanceToSqr(bomb) <= EXPLOSION_RANGE * EXPLOSION_RANGE;
     }
 
-    private static Marker findBomb(MinecraftServer server) {
+    static Marker findBomb(MinecraftServer server) {
         for (ServerLevel level : server.getAllLevels()) {
             for (Entity entity : level.getEntities().getAll()) {
                 if (entity instanceof Marker marker && marker.getTags().contains("cs2_bomb")) {

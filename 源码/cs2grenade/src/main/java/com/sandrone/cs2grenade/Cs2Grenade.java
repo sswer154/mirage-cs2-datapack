@@ -33,6 +33,7 @@ public class Cs2Grenade {
     public static final ModConfigSpec.BooleanValue DEBUG;
     public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
     private final C4Sfx c4Sfx = new C4Sfx();
+    private final C4Objective c4Objective = new C4Objective();
     private boolean roundWasLive;
 
     static {
@@ -60,6 +61,7 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(this::onEntityInteract);
         NeoForge.EVENT_BUS.addListener(this::onEntityInteractSpecific);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, KillFeedHandler::onLivingDeath);
+        c4Objective.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(this::onReload);
@@ -99,6 +101,7 @@ public class Cs2Grenade {
 
     private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            c4Objective.onLogout(player);
             C4Plant.cancel(player, false);
             C4Defuse.cancel(player);
             c4Sfx.playerLoggedOut(player);
@@ -124,6 +127,7 @@ public class Cs2Grenade {
         var state = stateObjective == null ? null : scoreboard.getPlayerScoreInfo(
                 ScoreHolder.forNameOnly("#state"), stateObjective);
         boolean roundIsLive = state != null && (state.value() == 3 || state.value() == 4);
+        c4Objective.tick(server, roundIsLive, state != null && state.value() == 4);
         if (roundWasLive && !roundIsLive) {
             GrenadeManager.clearRoundGrenades(server);
         }

@@ -65,8 +65,6 @@ execute if score #state cs2_state matches 3 run function cs2:round/check_live
 execute if score #state cs2_state matches 3 run function cs2:round/check_time_live
 execute if score #state cs2_state matches 4 run function cs2:round/check_planted
 
-# 炸弹掉落/拾取检测
-execute if score #state cs2_state matches 3 run function cs2:bomb/drop_check
 # 拆弹器掉落/拾取检测
 
 # HUD

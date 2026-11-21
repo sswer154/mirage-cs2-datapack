@@ -1,5 +1,4 @@
 # 阵亡：保留 cs2_team（下一回合自动回队），但本回合变成观战
-execute if score @s cs2_carrier matches 1 run function cs2:bomb/carrier_death
 scoreboard players set @s cs2_alive 0
 # 标记下一回合需要补发默认装备，避免死亡发生在 freeze/回合结束等阶段时漏发
 scoreboard players set @s cs2_needs_default 1

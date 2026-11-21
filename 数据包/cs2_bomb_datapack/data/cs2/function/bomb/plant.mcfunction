@@ -3,7 +3,6 @@ scoreboard players set #bomb cs2_bomb_state 3
 scoreboard players set @s cs2_planter 1
 scoreboard players operation #bomb_timer cs2_bomb_timer = bomb cs2_cfg
 scoreboard players operation #bomb_timer cs2_bomb_timer *= #20 cs2_const
-scoreboard players set #drop_timer cs2_counts 0
 # 记录安放时的人数劣势：安放方参赛人数比对方少 1 人及以上
 scoreboard players set #plant_disadvantage cs2_counts 0
 scoreboard players set #plant_ally cs2_counts 0

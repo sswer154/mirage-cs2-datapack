@@ -31,7 +31,6 @@ scoreboard players set #bomb_timer cs2_bomb_timer 0
 scoreboard players set #site cs2_site 0
 scoreboard players set #winner cs2_counts 0
 scoreboard players set #reason cs2_counts 0
-scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #hud_tick cs2_const 0
 scoreboard players set #blink cs2_blink 0
 scoreboard players set #blink_on cs2_blink 0

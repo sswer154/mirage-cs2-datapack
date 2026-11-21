@@ -3,15 +3,12 @@ package com.sandrone.cs2grenade;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -47,17 +44,7 @@ public final class C4Plant {
     }
 
     public static boolean isCarryingC4(Player player) {
-        ItemStack stack = player.getMainHandItem();
-        if (stack.isEmpty()) {
-            return false;
-        }
-        if (!stack.is(net.minecraft.world.item.Items.NAUTILUS_SHELL)) {
-            return false;
-        }
-        CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA) == null
-                ? null
-                : stack.get(DataComponents.CUSTOM_DATA).copyTag();
-        return tag != null && tag.getBoolean("cs2_bomb");
+        return C4Objective.isBomb(player.getMainHandItem());
     }
 
     public static boolean isChanneling(Player player) {
