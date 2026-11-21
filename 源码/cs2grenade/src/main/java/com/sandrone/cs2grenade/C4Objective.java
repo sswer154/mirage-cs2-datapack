@@ -174,36 +174,36 @@ final class C4Objective {
         }
     }
 
-    void tick(MinecraftServer server, boolean live, boolean planted) {
+    void tick(MinecraftServer server, boolean unplantedRound) {
+        if (!unplantedRound) {
+            dropped = null;
+            displays.values().forEach(ServerBossEvent::removeAllPlayers);
+            displays.clear();
+            return;
+        }
+
         Scoreboard board = server.getScoreboard();
         Entity target = null;
-        if (planted) {
-            target = C4Sfx.findBomb(server);
-        } else if (live) {
-            int bombState = score(board, BOMB, BOMB_STATE);
-            if (usableDrop(board)) {
-                if (bombState == 1 && !dropped.isRemoved()) {
-                    // A manual toss reaches the world after ItemTossEvent returns.
-                    markDropped(board);
-                    bombState = 2;
-                }
-                if (bombState == 2) {
-                    target = dropped;
-                }
-            } else {
-                dropped = null;
+        int bombState = score(board, BOMB, BOMB_STATE);
+        if (usableDrop(board)) {
+            if (bombState == 1 && !dropped.isRemoved()) {
+                // A manual toss reaches the world after ItemTossEvent returns.
+                markDropped(board);
+                bombState = 2;
             }
-            if (bombState == 1) {
-                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                    if (isActiveCarrier(player) && !carriedBomb(player).isEmpty()) {
-                        target = player;
-                        break;
-                    }
-                }
+            if (bombState == 2) {
+                target = dropped;
             }
-        }
-        if (!live || planted) {
+        } else {
             dropped = null;
+        }
+        if (bombState == 1) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (isActiveCarrier(player) && !carriedBomb(player).isEmpty()) {
+                    target = player;
+                    break;
+                }
+            }
         }
 
         Entity objective = target;
@@ -219,7 +219,7 @@ final class C4Objective {
                 if (!isT(player)) {
                     continue;
                 }
-                Component label = label(player, target, planted);
+                Component label = label(player, target);
                 ServerBossEvent display = displays.get(player);
                 if (display == null) {
                     display = new ServerBossEvent(label, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
@@ -232,11 +232,11 @@ final class C4Objective {
         }
     }
 
-    private static Component label(ServerPlayer player, Entity target, boolean planted) {
+    private static Component label(ServerPlayer player, Entity target) {
         if (player == target) {
             return Component.literal("C4 · 你持有");
         }
-        String status = planted ? "已安放" : target instanceof ItemEntity ? "已掉落" : "队友携带";
+        String status = target instanceof ItemEntity ? "已掉落" : "队友携带";
         var pos = target.blockPosition();
         String coordinates = pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
         if (player.level() != target.level()) {
