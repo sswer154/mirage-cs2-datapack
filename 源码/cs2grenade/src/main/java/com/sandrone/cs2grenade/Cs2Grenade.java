@@ -109,7 +109,10 @@ public class Cs2Grenade {
         var scoreboard = player.getScoreboard();
         var objective = scoreboard.getObjective("cs2_inmatch");
         var score = objective == null ? null : scoreboard.getPlayerScoreInfo(player, objective);
+        var queueObjective = scoreboard.getObjective("cs2_queued_team");
+        var queuedTeam = queueObjective == null ? null : scoreboard.getPlayerScoreInfo(player, queueObjective);
         return (score != null && score.value() == 1)
+                || (queuedTeam != null && queuedTeam.value() >= 1 && queuedTeam.value() <= 2)
                 || (player.getTeam() != null && "cs2_cast".equals(player.getTeam().getName()));
     }
 

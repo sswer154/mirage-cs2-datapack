@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "com.sandrone.cs2grenade.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["PreparationDropMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

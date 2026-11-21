@@ -13,6 +13,8 @@ import net.minecraft.world.scores.Scoreboard;
 
 /** 数据包用计分板 cs2_sfx / #c4_sfx 触发 C4 音效。 */
 final class C4Sfx {
+    private static final double EXPLOSION_RANGE = 80.0;
+    private static final float EXPLOSION_VOLUME = 5.0f;
     private static final String COUNTDOWN_SOUND = "c4.countdown";
     private final Set<UUID> countdownListeners = new HashSet<>();
     private Marker countdownBomb;
@@ -57,18 +59,25 @@ final class C4Sfx {
             case 3 -> { id = null; volume = 0.0f; }
             case 4 -> { id = "c4.plant_start"; volume = 1.0f; }
             case 5 -> { id = "c4.defuse_start"; volume = 1.0f; }
-            case 6 -> { id = "c4.explosion"; volume = 4.0f; }
+            case 6 -> { id = "c4.explosion"; volume = EXPLOSION_VOLUME; }
             case 7 -> { id = "c4.beep"; volume = 2.0f; }
             default -> { return; }
         }
         if (code == 2 || code == 6) {
             stopCountdown(server);
         }
+        Marker explosionBomb = code == 6 ? findBomb(server) : null;
+        if (code == 6 && explosionBomb == null) {
+            return;
+        }
         if (id != null) {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (Cs2Grenade.isMatchAudioListener(player)) {
-                    GrenadeManager.playC4Sfx(player, player.position(), id, volume);
+                if (!Cs2Grenade.isMatchAudioListener(player)
+                        || (explosionBomb != null && !canHearExplosion(player, explosionBomb))) {
+                    continue;
                 }
+                var position = explosionBomb == null ? player.position() : explosionBomb.position();
+                GrenadeManager.playC4Sfx(player, position, id, volume);
             }
         }
         if ((code == 1 || code == 3) && bombRound) {
@@ -100,6 +109,10 @@ final class C4Sfx {
         }
         countdownListeners.clear();
         countdownBomb = null;
+    }
+
+    private static boolean canHearExplosion(ServerPlayer player, Marker bomb) {
+        return player.level() == bomb.level() && player.distanceToSqr(bomb) <= EXPLOSION_RANGE * EXPLOSION_RANGE;
     }
 
     private static Marker findBomb(MinecraftServer server) {

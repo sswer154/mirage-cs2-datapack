@@ -1,0 +1,22 @@
+{
+  "condition": "minecraft:any_of",
+  "terms": [
+    {
+      "condition": "minecraft:entity_scores",
+      "entity": "this",
+      "scores": {
+        "cs2_inmatch": 1
+      }
+    },
+    {
+      "condition": "minecraft:entity_scores",
+      "entity": "this",
+      "scores": {
+        "cs2_queued_team": {
+          "min": 1,
+          "max": 2
+        }
+      }
+    }
+  ]
+}

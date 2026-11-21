@@ -11,7 +11,7 @@ scoreboard players set defuse cs2_cfg 10
 scoreboard players set kit_time cs2_cfg 5
 scoreboard players set kit cs2_cfg 1
 scoreboard players set overtime cs2_cfg 1
-scoreboard players set #music_preset cs2_cfg 1
+scoreboard players set #music_preset cs2_cfg 8
 
 scoreboard players set #cfg_ready cs2_const 1
 # 已有比赛状态时只恢复配置，保留比分及参赛流程。

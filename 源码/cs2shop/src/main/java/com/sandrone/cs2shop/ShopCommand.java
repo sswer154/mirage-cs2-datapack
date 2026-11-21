@@ -1,9 +1,13 @@
 package com.sandrone.cs2shop;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,9 +19,12 @@ public final class ShopCommand {
     private ShopCommand() {
     }
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         dispatcher.register(Commands.literal("cs2shop")
                 .requires(src -> src.hasPermission(2))
+                .then(Commands.literal("buy_gun")
+                        .then(buyGun("primary", GunPurchase.Slot.PRIMARY, buildContext))
+                        .then(buyGun("secondary", GunPurchase.Slot.SECONDARY, buildContext)))
                 .then(Commands.literal("open")
                         .then(Commands.argument("id", StringArgumentType.greedyString())
                                 .executes(ctx -> {
@@ -77,6 +84,17 @@ public final class ShopCommand {
                             ctx.getSource().getServer().getWorldData().getDataConfiguration().dataPacks().getEnabled());
                     ctx.getSource().sendSuccess(() -> Component.literal("已重载数据包"), false);
                     return 1;
+                })));
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> buyGun(
+            String name, GunPurchase.Slot slot, CommandBuildContext buildContext) {
+        return Commands.literal(name).then(Commands.argument("price", IntegerArgumentType.integer(1))
+                .then(Commands.argument("gun", ItemArgument.item(buildContext)).executes(ctx -> {
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+                    int price = IntegerArgumentType.getInteger(ctx, "price");
+                    var gun = ItemArgument.getItem(ctx, "gun").createItemStack(1, false);
+                    return GunPurchase.buy(player, slot, price, gun);
                 })));
     }
 

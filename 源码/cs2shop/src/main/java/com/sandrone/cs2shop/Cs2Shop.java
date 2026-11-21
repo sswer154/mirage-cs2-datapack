@@ -60,7 +60,7 @@ public class Cs2Shop {
     }
 
     private void onCommands(RegisterCommandsEvent event) {
-        ShopCommand.register(event.getDispatcher());
+        ShopCommand.register(event.getDispatcher(), event.getBuildContext());
     }
 
     /** 手上拿着商店道具右键，直接打开界面。 */
