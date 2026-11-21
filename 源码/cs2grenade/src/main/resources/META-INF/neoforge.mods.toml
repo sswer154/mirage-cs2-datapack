@@ -22,3 +22,6 @@ type = "required"
 versionRange = "[1.21.1,1.21.2)"
 ordering = "NONE"
 side = "SERVER"
+
+[[mixins]]
+config = "cs2grenade.mixins.json"

@@ -5,10 +5,7 @@ execute unless score #cfg_ready cs2_const matches 1 run function cs2:config/defa
 execute unless score #freeze25 cs2_const matches 1 run scoreboard players set freeze cs2_cfg 25
 execute unless score #freeze25 cs2_const matches 1 run scoreboard players set #freeze25 cs2_const 1
 
-# 旧存档迁移：补上赛后音乐盒预设编号；接入曲目后默认第 1 首（0=关闭）
-execute unless score #music_ready cs2_const matches 1 run scoreboard players set #music_preset cs2_cfg 1
-execute unless score #music_ready cs2_const matches 1 run scoreboard players set #music_ready cs2_const 1
-
-# 旧存档一次性开启：已有 #music_ready=1 但预设仍为 0 的存档，补到第 1 首
-execute unless score #music7 cs2_const matches 1 if score #music_preset cs2_cfg matches 0 run scoreboard players set #music_preset cs2_cfg 1
-execute unless score #music7 cs2_const matches 1 run scoreboard players set #music7 cs2_const 1
+# 迁移旧的第 1 首默认预设；之后可以手动设回 1。保留 0 和其他手动预设。
+execute unless score #music_preset cs2_cfg = #music_preset cs2_cfg run scoreboard players set #music_preset cs2_cfg 8
+execute unless score #music_rotate cs2_const matches 1 if score #music_preset cs2_cfg matches 1 run scoreboard players set #music_preset cs2_cfg 8
+scoreboard players set #music_rotate cs2_const 1

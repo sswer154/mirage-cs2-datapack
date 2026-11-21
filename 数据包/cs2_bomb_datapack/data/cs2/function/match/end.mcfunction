@@ -25,7 +25,7 @@ execute if score #winner cs2_counts matches 2 run title @a[scores={cs2_inmatch=1
 execute if score #winner cs2_counts matches 0 run title @a[scores={cs2_inmatch=1,cs2_hud=1}] title {"text":"平局","color":"gray","bold":true}
 title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"比赛结束","color":"gray"}
 tellraw @a[scores={cs2_inmatch=1}] [{"text":"比赛结束  最终比分  T ","color":"gold"},{"score":{"name":"#t","objective":"cs2_score_t"}},{"text":" : ","color":"white"},{"score":{"name":"#ct","objective":"cs2_score_ct"}},{"text":" CT","color":"gold"}]
-playsound minecraft:ui.toast.challenge_complete master @a[scores={cs2_inmatch=1}]
+execute as @a[predicate=cs2:match_audio] at @s run playsound minecraft:ui.toast.challenge_complete master @s
 
 # 结束前再发一次本场 K/D 与击杀王
 function cs2:stats/match_end

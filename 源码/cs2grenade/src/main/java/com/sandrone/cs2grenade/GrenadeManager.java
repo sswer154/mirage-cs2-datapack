@@ -79,6 +79,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -615,8 +616,15 @@ public final class GrenadeManager {
     static void playC4Sfx(ServerPlayer player, Vec3 pos, String id, float volume) {
         ResourceLocation loc = ResourceLocation.fromNamespaceAndPath("cs2", id);
         SoundEvent sound = SoundEvent.createVariableRangeEvent(loc);
-        GrenadeManager.sendSoundPacket(player, sound, pos, volume, 1.0f,
-                player.getServer().overworld().getRandom().nextLong());
+        long seed = player.getServer().overworld().getRandom().nextLong();
+        if ("c4.planted".equals(id) || "c4.defused".equals(id)) {
+            if (player.connection != null) {
+                player.connection.send(new ClientboundSoundEntityPacket(
+                        Holder.direct(sound), SoundSource.PLAYERS, player, volume, 1.0f, seed));
+            }
+            return;
+        }
+        GrenadeManager.sendSoundPacket(player, sound, pos, volume, 1.0f, seed);
     }
 
     /** 中断时掐掉安放开始音。 */
@@ -1432,13 +1440,6 @@ public final class GrenadeManager {
         for (ServerPlayer player : serverRef.getPlayerList().getPlayers()) {
             UUID id = player.getUUID();
             Map<SmokeZone, Long> sounds = SMOKE_HISS_LISTENERS.get(id);
-            if (!Cs2Grenade.isMatchAudioListener(player)) {
-                if (sounds != null) {
-                    stopSoundFor(player, SMOKE_HISS_SOUND);
-                    SMOKE_HISS_LISTENERS.remove(id);
-                }
-                continue;
-            }
             if (sounds != null) {
                 sounds.values().removeIf(end -> now >= end);
             }
