@@ -65,7 +65,7 @@
       },
       "name": "M1911",
       "lore": [
-        "价格 $500"
+        "价格 $400"
       ],
       "commands": [
         "function cs2:shop/items/m1911"

@@ -55,7 +55,7 @@
       },
       "name": "M1895",
       "lore": [
-        "价格 $2550"
+        "价格 $2900"
       ],
       "commands": [
         "function cs2:shop/items/m1895"

@@ -1,4 +1,4 @@
-# UMP45  $1050
+# UMP45  $1100
 scoreboard players set @s cs2_wclass 2
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

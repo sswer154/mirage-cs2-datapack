@@ -1,4 +1,4 @@
-# 满改 AKM  $2700
+# 满改 AKM  $2900
 scoreboard players set @s cs2_wclass 3
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

@@ -1,4 +1,4 @@
-# M1014  $2950
+# M1014  $2800
 scoreboard players set @s cs2_wclass 4
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

@@ -1,4 +1,4 @@
-# 刘易斯轻机枪  $4500
+# 刘易斯轻机枪  $4700
 scoreboard players set @s cs2_wclass 6
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

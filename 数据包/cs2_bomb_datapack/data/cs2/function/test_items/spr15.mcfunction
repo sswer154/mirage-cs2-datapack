@@ -1,4 +1,4 @@
-# SPR-15 HB  $4800
+# SPR-15 HB  $5000
 scoreboard players set @s cs2_wclass 5
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0
