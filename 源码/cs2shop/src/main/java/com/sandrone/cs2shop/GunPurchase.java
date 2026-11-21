@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +28,9 @@ final class GunPurchase {
                 "tacz:qbz_191", "tacz:qbz_95", "tacz:scar_l",
                 "tacz:sks_tactical", "tacz:spr15hb", "tacz:springfield1873",
                 "tacz:ump45")),
-        SECONDARY("cs2_secondary_gun", Set.of("tacz:glock_17", "tacz:m9a4"));
+        SECONDARY("cs2_secondary_gun", Set.of(
+                "tacz:glock_17", "tacz:m9a4", "tacz:cz75", "tacz:m1911", "tacz:deagle",
+                "bf1:handgun", "bf1:sw_model3", "bf1:obrez"));
 
         private final String marker;
         private final Set<String> legacyIds;
@@ -35,6 +38,14 @@ final class GunPurchase {
         Slot(String marker, Set<String> legacyIds) {
             this.marker = marker;
             this.legacyIds = legacyIds;
+        }
+
+        boolean matches(CompoundTag tag) {
+            return tag.getBoolean(marker) || legacyIds.contains(tag.getString("GunId"));
+        }
+
+        void mark(ItemStack stack) {
+            CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putBoolean(marker, true));
         }
     }
 
@@ -65,7 +76,7 @@ final class GunPurchase {
                 continue;
             }
             var tag = data.copyTag();
-            if (!tag.getBoolean(slot.marker) && !slot.legacyIds.contains(tag.getString("GunId"))) {
+            if (!slot.matches(tag)) {
                 continue;
             }
             replaced.add(index);
@@ -101,6 +112,22 @@ final class GunPurchase {
             player.sendSystemMessage(Component.literal("旧枪退款 $" + refund + "。"));
         }
         return 1;
+    }
+
+    static Slot slotOf(ItemStack stack) {
+        var data = stack.get(DataComponents.CUSTOM_DATA);
+        if (!isGun(stack) || data == null) {
+            return null;
+        }
+        var tag = data.copyTag();
+        if (Slot.PRIMARY.matches(tag)) {
+            return Slot.PRIMARY;
+        }
+        return Slot.SECONDARY.matches(tag) ? Slot.SECONDARY : null;
+    }
+
+    static void removePurchasePrice(ItemStack stack) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(PURCHASE_PRICE));
     }
 
     private static boolean isGun(ItemStack stack) {

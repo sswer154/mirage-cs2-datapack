@@ -77,6 +77,10 @@ public final class KillFeedHandler {
             // 友伤保留播报，只有击杀敌方参赛者计入击杀统计。
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_kills 1");
             command(server, "scoreboard players add " + killer.getScoreboardName() + " cs2_round_kills 1");
+            if (server.getCommands().getDispatcher().findNode(java.util.List.of("cs2shop", "drop_enemy_loot")) != null) {
+                server.getCommands().performPrefixedCommand(
+                        victim.createCommandSourceStack().withPermission(4).withSuppressedOutput(), "cs2shop drop_enemy_loot");
+            }
             // 击杀奖金/CT 团队击杀仍由数据包计算；同队击杀不会获得奖金。
             String rewardCommand;
             if (isGrenadeDamage(source)) {

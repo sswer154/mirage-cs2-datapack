@@ -1,5 +1,6 @@
 # 准备阶段开始：只清理由对局回收的物品。
 gamerule keepInventory true
+kill @e[type=item,tag=cs2_match_loot]
 function cs2:util/item_tick
 execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_primary_gun run kill @s
 execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_util run kill @s

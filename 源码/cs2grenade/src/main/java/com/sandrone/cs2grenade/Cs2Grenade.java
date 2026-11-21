@@ -1,6 +1,7 @@
 package com.sandrone.cs2grenade;
 
 import com.mojang.logging.LogUtils;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -58,7 +59,7 @@ public class Cs2Grenade {
         NeoForge.EVENT_BUS.addListener(this::onItemToss);
         NeoForge.EVENT_BUS.addListener(this::onEntityInteract);
         NeoForge.EVENT_BUS.addListener(this::onEntityInteractSpecific);
-        NeoForge.EVENT_BUS.addListener(KillFeedHandler::onLivingDeath);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, KillFeedHandler::onLivingDeath);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(this::onReload);

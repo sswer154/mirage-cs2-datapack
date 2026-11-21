@@ -25,6 +25,8 @@ public final class ShopCommand {
                 .then(Commands.literal("buy_gun")
                         .then(buyGun("primary", GunPurchase.Slot.PRIMARY, buildContext))
                         .then(buyGun("secondary", GunPurchase.Slot.SECONDARY, buildContext)))
+                .then(Commands.literal("drop_enemy_loot")
+                        .executes(ctx -> MatchLoot.dropOnEnemyKill(ctx.getSource().getPlayerOrException())))
                 .then(Commands.literal("open")
                         .then(Commands.argument("id", StringArgumentType.greedyString())
                                 .executes(ctx -> {
