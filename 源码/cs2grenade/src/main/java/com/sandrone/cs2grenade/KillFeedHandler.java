@@ -110,6 +110,11 @@ public final class KillFeedHandler {
                     killer.createCommandSourceStack().withPermission(4).withSuppressedOutput(),
                     rewardCommand
             );
+        } else if (playerKill) {
+            server.getCommands().performPrefixedCommand(
+                    killer.createCommandSourceStack().withPermission(4).withSuppressedOutput(),
+                    "function cs2:econ/kill/team_kill_penalty"
+            );
         }
     }
 
