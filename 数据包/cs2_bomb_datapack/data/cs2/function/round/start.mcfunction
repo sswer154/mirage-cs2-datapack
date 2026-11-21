@@ -5,7 +5,6 @@ function cs2:pvp/off
 scoreboard players set #bomb cs2_bomb_state 0
 scoreboard players set #bomb_timer cs2_bomb_timer 0
 scoreboard players set #site cs2_site 0
-scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #plant_disadvantage cs2_counts 0
 tag @a remove cs2_last_defuser
 scoreboard players set #blink cs2_blink 0

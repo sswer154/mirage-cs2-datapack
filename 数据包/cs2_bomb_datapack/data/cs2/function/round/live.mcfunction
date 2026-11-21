@@ -15,7 +15,6 @@ execute if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={c
 scoreboard players operation #timer cs2_timer = round cs2_cfg
 scoreboard players operation #timer cs2_timer *= #20 cs2_const
 scoreboard players set #bomb cs2_bomb_state 0
-scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #blink cs2_blink 0
 scoreboard players set #blink_on cs2_blink 0
 

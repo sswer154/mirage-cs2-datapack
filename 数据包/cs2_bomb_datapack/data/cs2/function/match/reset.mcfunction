@@ -17,7 +17,6 @@ scoreboard players set #bomb_timer cs2_bomb_timer 0
 scoreboard players set #site cs2_site 0
 scoreboard players set #winner cs2_counts 0
 scoreboard players set #reason cs2_counts 0
-scoreboard players set #drop_timer cs2_counts 0
 scoreboard players set #break_type cs2_counts 0
 scoreboard players set #solo cs2_counts 0
 scoreboard players set #train_hold cs2_counts 0
