@@ -12,8 +12,8 @@ bossbar set cs2:bomb visible false
 function cs2:econ/round_end
 function cs2:stats/round_highlights
 
-gamemode adventure @a[scores={cs2_inmatch=1,cs2_team=1}]
-gamemode adventure @a[scores={cs2_inmatch=1,cs2_team=2}]
+# 只切换存活玩家；阵亡玩家保持观战，直到下一回合初始化。
+gamemode adventure @a[scores={cs2_inmatch=1,cs2_team=1..2,cs2_alive=1}]
 effect clear @a[scores={cs2_inmatch=1,cs2_team=1}] minecraft:slowness
 effect clear @a[scores={cs2_inmatch=1,cs2_team=1}] minecraft:resistance
 effect clear @a[scores={cs2_inmatch=1,cs2_team=2}] minecraft:slowness
