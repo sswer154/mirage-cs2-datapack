@@ -54,7 +54,7 @@ public record GrenadeType(
 
     /** 找不到配置时的兜底，就是现在这套手感。 */
     public static GrenadeType fallback(ResourceLocation id) {
-        return new GrenadeType(id, "he", 10, 2.5, 15, "minecraft:campfire_signal_smoke", "FFFFFF", 255, 1, 722002, 0, 0.35, 0.8, "minecraft:block.metal.place", "minecraft:block.metal.hit", "minecraft:block.metal.place", "minecraft:block.metal.place", "minecraft:block.metal.place", 1.45, 0.045, 0.99, 0.4, 0.5, 80,
+        return new GrenadeType(id, "he", 10, 2.5, 15, "minecraft:campfire_signal_smoke", "FFFFFF", 255, 1, 722002, 0, 0.35, 0.8, "minecraft:block.metal.place", "minecraft:block.metal.hit", "minecraft:block.metal.place", "minecraft:block.metal.place", "minecraft:block.metal.place", 1.45, 0.045, 0.99, 0.34, 0.425, 80,
                 6.0, 24.0f, 0.6f, 6.0f, 1.0f, 0.9f, 0.35f, 1.35f, 1.0f, 0.12,
                 20, 4.0f, 3.0f, 4.0, 15.0, 10.0f, 3.5, 6.0);
     }
