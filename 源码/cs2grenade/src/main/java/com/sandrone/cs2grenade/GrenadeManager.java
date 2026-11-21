@@ -1370,7 +1370,7 @@ public final class GrenadeManager {
                 continue;
             }
             FireVictim rec = FIRE_VICTIMS.get(entry.getKey());
-            if (rec == null) {
+            if (rec == null || now - rec.lastSeenTick > FIRE_STAY_GRACE) {
                 rec = new FireVictim(now);
                 FIRE_VICTIMS.put(entry.getKey(), rec);
             }
@@ -1393,8 +1393,7 @@ public final class GrenadeManager {
         int previousCooldown = victim.invulnerableTime;
         float previousDamage = victim.lastHurt;
         try {
-            // 火区有自己的结算间隔，且不能改写普通攻击的受伤冷却。
-            victim.invulnerableTime = 0;
+            // cs2:fire 绕过受伤冷却。结算后恢复普通攻击原有的冷却和伤害记录。
             return victim.hurt(victim.level().damageSources().source(FIRE_DAMAGE_TYPE, thrower), amount);
         } finally {
             victim.invulnerableTime = previousCooldown;
