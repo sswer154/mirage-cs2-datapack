@@ -5,7 +5,7 @@ execute if score #state cs2_state matches 1..6 run return fail
 scoreboard players set warmup cs2_cfg 10
 scoreboard players set freeze cs2_cfg 25
 scoreboard players set round cs2_cfg 115
-scoreboard players set round_end cs2_cfg 5
+scoreboard players set round_end cs2_cfg 8
 scoreboard players set bomb cs2_cfg 40
 scoreboard players set defuse cs2_cfg 10
 scoreboard players set kit_time cs2_cfg 5

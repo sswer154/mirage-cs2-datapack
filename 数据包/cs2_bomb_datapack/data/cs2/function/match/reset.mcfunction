@@ -1,5 +1,6 @@
 # 只重置比赛状态，不动地图 marker 和配置
 scoreboard players set #state cs2_state 0
+schedule clear cs2:round/play_ct_win
 kill @e[type=item,tag=cs2_match_loot]
 scoreboard players set #timer cs2_timer 0
 scoreboard players set #round cs2_round 0

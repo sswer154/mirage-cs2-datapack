@@ -732,10 +732,29 @@ public final class GrenadeManager {
     private static final int PROJECTILE_CHUNK_WAIT_TICKS = 100;
 
     /** 弹体正下方 0.08 格内有没有碰撞面，用来判断是不是贴着地面在滑。 */
-    private static boolean hasSupportBelow(ServerLevel level, Vec3 pos) {
-        BlockHitResult hit = level.clip(new ClipContext(pos, pos.add(0.0, -0.08, 0.0),
-                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
-        return hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.UP && !hit.isInside();
+    private static BlockHitResult clipSmoke(ServerLevel level, Entity thrower, Vec3 from, Vec3 to) {
+        // 栅栏等碰撞体会伸入上一格，普通方块射线可能不会访问其所在的格子。
+        BlockHitResult nearest = null;
+        double distance = Double.POSITIVE_INFINITY;
+        for (VoxelShape shape : level.getBlockCollisions(thrower, new AABB(from, to).inflate(1.0E-6))) {
+            // getBlockCollisions 返回的形状已经位于世界坐标。
+            BlockHitResult hit = shape.clip(from, to, BlockPos.ZERO);
+            if (hit == null) continue;
+            double candidate = from.distanceToSqr(hit.getLocation());
+            if (candidate < distance) {
+                nearest = hit;
+                distance = candidate;
+            }
+        }
+        return nearest;
+    }
+
+    private static boolean hasSupportBelow(ServerLevel level, Vec3 pos, boolean smoke) {
+        Vec3 below = pos.add(0.0, -0.08, 0.0);
+        BlockHitResult hit = smoke ? clipSmoke(level, null, pos, below)
+                : level.clip(new ClipContext(pos, below,
+                        ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, CollisionContext.empty()));
+        return hit != null && hit.getType() == HitResult.Type.BLOCK && hit.getDirection() == Direction.UP && !hit.isInside();
     }
 
     private static void waitForProjectileChunk(Grenade grenade) {
@@ -762,8 +781,10 @@ public final class GrenadeManager {
         g.chunkWaitTicks = 0;
         // 燃烧弹把水也当成碰撞面：落水时在水面爆开，而不是一路沉到水底才炸
         ClipContext.Fluid fluidClip = "fire".equals(g.type.effect()) ? ClipContext.Fluid.WATER : ClipContext.Fluid.NONE;
-        BlockHitResult hit = g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, fluidClip, (Entity)g.thrower));
-        if (hit.getType() == HitResult.Type.BLOCK) {
+        boolean smoke = "smoke".equals(g.type.effect());
+        BlockHitResult hit = smoke ? clipSmoke(g.level, g.thrower, from, to)
+                : g.level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, fluidClip, g.thrower));
+        if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
             int nowTick;
             Vec3 normal = Vec3.atLowerCornerOf((Vec3i)hit.getDirection().getNormal());
             double impactSpeed = g.vel.length();
@@ -846,7 +867,10 @@ public final class GrenadeManager {
             to = after;
         }
         // 贴地滑行：竖直速度已经被压平、下面又有支撑面时，水平速度每 tick 掉一点
-        if (Math.abs(g.vel.y) < BOUNCE_MIN_VERTICAL && hasSupportBelow(g.level, to)) {
+        double verticalSpeed = Math.abs(g.vel.y);
+        boolean supported = verticalSpeed < BOUNCE_MIN_VERTICAL * (smoke ? 3.0 : 1.0)
+                && hasSupportBelow(g.level, to, smoke);
+        if (supported && verticalSpeed < BOUNCE_MIN_VERTICAL) {
             g.vel = new Vec3(g.vel.x * GROUND_ROLL_FRICTION, g.vel.y, g.vel.z * GROUND_ROLL_FRICTION);
         }
         g.lastPos = to;
@@ -856,13 +880,10 @@ public final class GrenadeManager {
         if ((g.age & 1) == 0) {
             g.level.sendParticles((ParticleOptions)ParticleTypes.SMOKE, to.x, to.y, to.z, 1, 0.0, 0.0, 0.0, 0.0);
         }
-        if ("smoke".equals(g.type.effect())) {
+        if (smoke) {
             // 烟雾弹没有引信：只有真正贴地停稳、或碰到火才起烟。
             // 下方没有支撑面的一律不算停稳：抛物线顶点、卡方块边缘、被击退的短暂零速都不起烟。
-            boolean supported = hasSupportBelow(g.level, to)
-                    && Math.abs(g.vel.y) < BOUNCE_MIN_VERTICAL * 3.0
-                    && g.vel.horizontalDistanceSqr() < 0.12 * 0.12;
-            if (supported) {
+            if (supported && g.vel.horizontalDistanceSqr() < 0.12 * 0.12) {
                 ++g.smokeRest;
             } else {
                 g.smokeRest = 0;
