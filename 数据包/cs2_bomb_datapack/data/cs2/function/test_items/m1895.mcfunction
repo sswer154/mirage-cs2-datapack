@@ -1,4 +1,4 @@
-# M1895  $2550
+# M1895  $2900
 scoreboard players set @s cs2_wclass 7
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

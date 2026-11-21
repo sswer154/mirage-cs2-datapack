@@ -16,7 +16,7 @@
       },
       "name": "DB-4",
       "lore": [
-        "价格 $1400"
+        "价格 $1200"
       ],
       "commands": [
         "function cs2:shop/items/db4"
@@ -36,7 +36,7 @@
       },
       "name": "M870",
       "lore": [
-        "价格 $1700"
+        "价格 $1500"
       ],
       "commands": [
         "function cs2:shop/items/m870"
@@ -92,7 +92,7 @@
       },
       "name": "AA12",
       "lore": [
-        "价格 $2250"
+        "价格 $2300"
       ],
       "commands": [
         "function cs2:shop/items/aa12"
@@ -139,7 +139,7 @@
       },
       "name": "满改 M1014",
       "lore": [
-        "价格 $3750"
+        "价格 $3600"
       ],
       "commands": [
         "function cs2:shop/items/xm1014_full"
@@ -159,7 +159,7 @@
       },
       "name": "M1014",
       "lore": [
-        "价格 $2950"
+        "价格 $2800"
       ],
       "commands": [
         "function cs2:shop/items/xm1014"
@@ -179,7 +179,7 @@
       },
       "name": "M2火焰喷射器",
       "lore": [
-        "价格 $4800",
+        "价格 $4500",
         "T 专属"
       ],
       "commands": [

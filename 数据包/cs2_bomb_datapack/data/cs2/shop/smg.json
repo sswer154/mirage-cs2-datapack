@@ -25,7 +25,7 @@
       },
       "name": "UMP45",
       "lore": [
-        "价格 $1050",
+        "价格 $1100",
         "T 专属"
       ],
       "commands": [
@@ -56,7 +56,7 @@
       },
       "name": "MP5A5",
       "lore": [
-        "价格 $1150",
+        "价格 $1050",
         "CT 专属"
       ],
       "commands": [
@@ -87,7 +87,7 @@
       },
       "name": "P90（空尖弹）",
       "lore": [
-        "价格 $1500"
+        "价格 $1300"
       ],
       "commands": [
         "function cs2:shop/items/p90_hp"
@@ -107,7 +107,7 @@
       },
       "name": "维拉佩罗萨",
       "lore": [
-        "价格 $3250"
+        "价格 $3100"
       ],
       "commands": [
         "function cs2:shop/items/vp1915"
@@ -127,7 +127,7 @@
       },
       "name": "P90",
       "lore": [
-        "价格 $2500"
+        "价格 $2250"
       ],
       "commands": [
         "function cs2:shop/items/p90"

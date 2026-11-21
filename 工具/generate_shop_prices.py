@@ -35,6 +35,7 @@ def rewrite_standard(text: str, price: int) -> str:
     for line in text.splitlines():
         line = re.sub(r"(matches \.\.)\d+", rf"\g<1>{price - 1}", line)
         line = re.sub(r"(remove @s cs2_money )\d+", rf"\g<1>{price}", line)
+        line = re.sub(r"(cs2shop buy_gun (?:primary|secondary) )\d+", rf"\g<1>{price}", line)
         line = DOLLAR_RE.sub(f"${price}", line)
         out.append(line)
     return "\n".join(out) + ("\n" if text.endswith("\n") else "")

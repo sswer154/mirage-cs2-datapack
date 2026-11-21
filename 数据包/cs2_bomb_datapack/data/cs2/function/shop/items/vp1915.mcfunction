@@ -1,8 +1,8 @@
-# 维拉佩罗萨  $3250
+# 维拉佩罗萨  $3100
 execute unless score #state cs2_state matches 2 run return 0
 execute unless score @s cs2_team matches 1..2 run return 0
-execute store result score #shop_purchase cs2_counts run cs2shop buy_gun primary 3250 tacz:modern_kinetic_gun[minecraft:custom_data={cs2_primary_gun:1b,GunCurrentAmmoCount:50,GunFireMode:"BURST",GunId:"bf1:vp1915",HasBulletInBarrel:1b}]
+execute store result score #shop_purchase cs2_counts run cs2shop buy_gun primary 3100 tacz:modern_kinetic_gun[minecraft:custom_data={cs2_primary_gun:1b,GunCurrentAmmoCount:50,GunFireMode:"BURST",GunId:"bf1:vp1915",HasBulletInBarrel:1b}]
 execute unless score #shop_purchase cs2_counts matches 1 run return 0
 scoreboard players set @s cs2_wclass 2
 scoreboard players set @s cs2_primary 1
-tellraw @s [{"text":"已购买 ","color":"green"},{"text":"维拉佩罗萨","color":"yellow"},{"text":"  售价 $3250  余额 $","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"gold"}]
+tellraw @s [{"text":"已购买 ","color":"green"},{"text":"维拉佩罗萨","color":"yellow"},{"text":"  售价 $3100  余额 $","color":"gray"},{"score":{"name":"@s","objective":"cs2_money"},"color":"gold"}]

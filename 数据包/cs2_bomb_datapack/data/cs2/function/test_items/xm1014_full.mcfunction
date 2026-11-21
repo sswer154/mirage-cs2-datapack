@@ -1,4 +1,4 @@
-# 满改 M1014  $3750
+# 满改 M1014  $3600
 scoreboard players set @s cs2_wclass 4
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0

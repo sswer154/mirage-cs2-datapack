@@ -1,4 +1,4 @@
-# AK-47  $2500
+# AK-47  $2700
 scoreboard players set @s cs2_wclass 3
 tag @s add cs2_shop_buying
 scoreboard players set @s cs2_primary 0
