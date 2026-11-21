@@ -22,7 +22,7 @@ final class MatchLoot {
 
     private MatchLoot() {}
 
-    static int dropOnEnemyKill(ServerPlayer victim) {
+    static int dropOnDeath(ServerPlayer victim, boolean includeGrenade) {
         int phase = score(victim, STATE, "cs2_state");
         int round = score(victim, ROUND, "cs2_health_round");
         if (phase < 3 || phase > 4 || round < 1 || !isRoundParticipant(victim)
@@ -52,6 +52,17 @@ final class MatchLoot {
             }
         }
 
+        if (includeGrenade && dropRandomGrenade(victim, carried, round)) {
+            dropped++;
+        }
+        if (dropped != 0) {
+            victim.getInventory().setChanged();
+            victim.containerMenu.broadcastChanges();
+        }
+        return dropped;
+    }
+
+    private static boolean dropRandomGrenade(ServerPlayer victim, List<ItemStack> carried, int round) {
         var grenadeTypes = new LinkedHashMap<String, ItemStack>();
         for (ItemStack stack : carried) {
             var data = stack.get(DataComponents.CUSTOM_DATA);
@@ -62,18 +73,12 @@ final class MatchLoot {
                 }
             }
         }
-        if (!grenadeTypes.isEmpty()) {
-            List<ItemStack> options = List.copyOf(grenadeTypes.values());
-            ItemStack grenade = options.get(victim.getRandom().nextInt(options.size()));
-            if (drop(victim, grenade, grenade.copyWithCount(1), round)) {
-                dropped++;
-            }
+        if (grenadeTypes.isEmpty()) {
+            return false;
         }
-        if (dropped != 0) {
-            victim.getInventory().setChanged();
-            victim.containerMenu.broadcastChanges();
-        }
-        return dropped;
+        List<ItemStack> options = List.copyOf(grenadeTypes.values());
+        ItemStack grenade = options.get(victim.getRandom().nextInt(options.size()));
+        return drop(victim, grenade, grenade.copyWithCount(1), round);
     }
 
     private static boolean drop(ServerPlayer victim, ItemStack source, ItemStack loot, int round) {
