@@ -20,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
  * 不再依赖食物组件，因此没有进食动画。
  */
 public final class C4Plant {
+    private static final double BOMB_SITE_RADIUS = 7.0;
     private static final Map<UUID, Channel> CHANNELS = new HashMap<>();
 
     private static final class Channel {
@@ -80,7 +81,7 @@ public final class C4Plant {
         if (fake("#state", "cs2_state", player) != 3) {
             return;
         }
-        if (!nearBombSite(player, 10.0)) {
+        if (!nearBombSite(player, BOMB_SITE_RADIUS)) {
             return;
         }
         int ticks = (int) Math.round(Math.max(0.6, seconds) * 20.0);
@@ -114,7 +115,7 @@ public final class C4Plant {
                 || score(player, "cs2_carrier") != 1
                 || !isCarryingC4(player)
                 || player.position().distanceToSqr(ch.start) > 0.8 * 0.8
-                || !nearBombSite(player, 10.0);
+                || !nearBombSite(player, BOMB_SITE_RADIUS);
         if (invalid) {
             cancel(player, false);
             return;
