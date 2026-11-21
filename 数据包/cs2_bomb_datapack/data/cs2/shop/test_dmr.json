@@ -15,8 +15,9 @@
               "id": "tacz:attachment",
               "count": 1,
               "components": {
+                "cmagic:item_volume": 0.2,
                 "minecraft:custom_data": {
-                  "AttachmentId": "tacz:extended_mag_2"
+                  "AttachmentId": "huanmeng:pp_762_mag"
                 }
               }
             },
@@ -24,11 +25,15 @@
               "id": "tacz:attachment",
               "count": 1,
               "components": {
+                "cmagic:item_volume": 0.2,
                 "minecraft:custom_data": {
-                  "AttachmentId": "tacz:scope_contender"
+                  "AttachmentId": "tacz:scope_elcan_4x"
                 }
               }
-            }
+            },
+            "GunCurrentAmmoCount": 20,
+            "GunFireMode": "SEMI",
+            "HasBulletInBarrel": true
           }
         }
       },
