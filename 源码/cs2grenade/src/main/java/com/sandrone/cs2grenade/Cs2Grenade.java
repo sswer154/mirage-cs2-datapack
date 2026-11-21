@@ -127,7 +127,7 @@ public class Cs2Grenade {
         var state = stateObjective == null ? null : scoreboard.getPlayerScoreInfo(
                 ScoreHolder.forNameOnly("#state"), stateObjective);
         boolean roundIsLive = state != null && (state.value() == 3 || state.value() == 4);
-        c4Objective.tick(server, roundIsLive, state != null && state.value() == 4);
+        c4Objective.tick(server, state != null && state.value() == 3);
         if (roundWasLive && !roundIsLive) {
             GrenadeManager.clearRoundGrenades(server);
         }
