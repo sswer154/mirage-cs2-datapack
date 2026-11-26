@@ -16,6 +16,7 @@ import net.minecraft.world.item.component.CustomData;
 final class GunPurchase {
     private static final ResourceLocation GUN = ResourceLocation.fromNamespaceAndPath("tacz", "modern_kinetic_gun");
     private static final String PURCHASE_PRICE = "cs2_shop_purchase_price";
+    private static final String PURCHASE_OWNER = "cs2_shop_purchase_owner";
 
     enum Slot {
         PRIMARY("cs2_primary_gun", Set.of(
@@ -81,7 +82,8 @@ final class GunPurchase {
             }
             replaced.add(index);
             // The match allows one gun per slot. Legacy duplicates may be removed, but only one is refunded.
-            if (tag.getBoolean(slot.marker) && tag.contains(PURCHASE_PRICE, Tag.TAG_INT)) {
+            if (tag.getBoolean(slot.marker) && tag.contains(PURCHASE_PRICE, Tag.TAG_INT)
+                    && tag.hasUUID(PURCHASE_OWNER) && player.getUUID().equals(tag.getUUID(PURCHASE_OWNER))) {
                 refund = Math.max(refund, tag.getInt(PURCHASE_PRICE));
             }
         }
@@ -101,7 +103,10 @@ final class GunPurchase {
             return 0;
         }
         int newBalance = Math.toIntExact(remaining);
-        CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> tag.putInt(PURCHASE_PRICE, price));
+        CustomData.update(DataComponents.CUSTOM_DATA, gun, tag -> {
+            tag.putInt(PURCHASE_PRICE, price);
+            tag.putUUID(PURCHASE_OWNER, player.getUUID());
+        });
         for (int index : replaced) {
             inventory.setItem(index, ItemStack.EMPTY);
         }
@@ -126,8 +131,11 @@ final class GunPurchase {
         return Slot.SECONDARY.matches(tag) ? Slot.SECONDARY : null;
     }
 
-    static void removePurchasePrice(ItemStack stack) {
-        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove(PURCHASE_PRICE));
+    static void clearPurchase(ItemStack stack) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
+            tag.remove(PURCHASE_PRICE);
+            tag.remove(PURCHASE_OWNER);
+        });
     }
 
     private static boolean isGun(ItemStack stack) {

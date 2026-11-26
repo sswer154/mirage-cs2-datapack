@@ -32,6 +32,7 @@ public class Cs2Grenade {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue DEBUG;
     public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
+    private final WaterFreeze waterFreeze = new WaterFreeze();
     private final C4Sfx c4Sfx = new C4Sfx();
     private final C4Objective c4Objective = new C4Objective();
     private boolean roundWasLive;
@@ -50,6 +51,7 @@ public class Cs2Grenade {
     public Cs2Grenade(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.COMMON, SPEC);
         MatchInventory.register(modBus);
+        MatchSpawns.register(modBus);
         MapChunkTickets.register(modBus);
         RoundCheckpoint.register(modBus);
         RoundRewards.register();
@@ -101,6 +103,7 @@ public class Cs2Grenade {
 
     private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            waterFreeze.remove(player);
             c4Objective.onLogout(player);
             C4Plant.cancel(player, false);
             C4Defuse.cancel(player);
@@ -124,6 +127,7 @@ public class Cs2Grenade {
     private void onServerTick(ServerTickEvent.Post event) {
         var server = event.getServer();
         var scoreboard = server.getScoreboard();
+        waterFreeze.tick(server);
         var stateObjective = scoreboard.getObjective("cs2_state");
         var state = stateObjective == null ? null : scoreboard.getPlayerScoreInfo(
                 ScoreHolder.forNameOnly("#state"), stateObjective);

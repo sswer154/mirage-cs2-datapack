@@ -27,6 +27,7 @@ execute as @a[scores={cs2_cancel_queue=1..}] run function cs2:join/cancel_queue
 execute as @a[scores={cs2_hud_toggle=1..}] run function cs2:hud/trigger_toggle
 execute as @a[scores={cs2_stats=1..}] run function cs2:stats/trigger
 execute as @a[scores={cs2_panel=1..}] run function cs2:panel/trigger
+scoreboard players enable @a[scores={cs2_inmatch=1}] cs2_panel
 execute as @a[scores={cs2_pause=1..}] run function cs2:panel/pause_request
 execute as @a[scores={cs2_vote_restart=1..}] run function cs2:panel/vote_restart
 execute as @a[scores={cs2_vote_end=1..}] run function cs2:panel/vote_end
