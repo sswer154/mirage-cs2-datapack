@@ -50,6 +50,7 @@ public class Cs2Grenade {
     public Cs2Grenade(IEventBus modBus, ModContainer container) {
         container.registerConfig(ModConfig.Type.COMMON, SPEC);
         MatchInventory.register(modBus);
+        MatchSpawns.register(modBus);
         MapChunkTickets.register(modBus);
         RoundCheckpoint.register(modBus);
         RoundRewards.register();

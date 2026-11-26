@@ -1,4 +1,6 @@
 # 重连/中途加入
+execute unless score #state cs2_state matches 1..6 run cs2spawn restore
+execute unless score @s cs2_inmatch matches 1 run cs2spawn restore
 # 等候开赛的玩家保留阵营和选边时保存的背包。
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_t] run return 0
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_ct] run return 0
