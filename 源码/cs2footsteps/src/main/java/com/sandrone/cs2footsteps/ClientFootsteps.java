@@ -71,6 +71,7 @@ public final class ClientFootsteps {
             Map.entry("metal_thin.sprint", 4),
             Map.entry("metal_thin.walk", 4),
             Map.entry("snow.jump", 2),
+            Map.entry("snow.landing", 2),
             Map.entry("snow.run", 4),
             Map.entry("snow.sprint", 4),
             Map.entry("snow.walk", 4),
