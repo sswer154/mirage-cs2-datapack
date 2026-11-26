@@ -6,7 +6,8 @@ param(
 $repo = "F:\mc\sync\mirage-cs2-datapack"
 $pairs = @(
     @{ From = "F:\mc\cs2server\world\datapacks\cs2_bomb_datapack"; To = "$repo\数据包\cs2_bomb_datapack"; Data = $true },
-    @{ From = "F:\mc\cs2server\mods"; To = "$repo\模组\mods"; Data = $false },
+    @{ From = "F:\mc\cs2server\mods"; To = "$repo\模组\mods\服务端模组"; Data = $false },
+    @{ From = "F:\mc\.minecraft\versions\1.21.1 tacz1.1.8\mods"; To = "$repo\模组\mods\客户端模组"; Data = $false },
     @{ From = "F:\mc\.minecraft\versions\1.21.1 tacz1.1.8\resourcepacks"; To = "$repo\资源包"; Data = $false }
 )
 foreach ($p in $pairs) {
