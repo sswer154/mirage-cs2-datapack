@@ -7,7 +7,7 @@
   "drag": 0.99,
   "bounce": 0.34,
   "bounce_wall": 0.425,
-  "fuse": 40,
+  "fuse": 60,
   "radius": 0,
   "damage": 0,
   "knockback": 0,
