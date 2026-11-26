@@ -34,6 +34,69 @@ public final class ClientFootsteps {
 
     private static final Map<UUID, State> STATES = new HashMap<>();
 
+    private static final Map<String, Integer> VARIANTS = Map.ofEntries(
+            Map.entry("dirt.jump", 2),
+            Map.entry("dirt.landing", 2),
+            Map.entry("dirt.run", 4),
+            Map.entry("dirt.sprint", 4),
+            Map.entry("dirt.walk", 4),
+            Map.entry("fabric.jump", 2),
+            Map.entry("fabric.landing", 2),
+            Map.entry("fabric.run", 4),
+            Map.entry("fabric.sprint", 4),
+            Map.entry("fabric.walk", 4),
+            Map.entry("glass.jump", 2),
+            Map.entry("glass.landing", 2),
+            Map.entry("glass.run", 4),
+            Map.entry("glass.sprint", 4),
+            Map.entry("glass.walk", 4),
+            Map.entry("grass.jump", 2),
+            Map.entry("grass.landing", 2),
+            Map.entry("grass.run", 4),
+            Map.entry("grass.sprint", 4),
+            Map.entry("grass.walk", 4),
+            Map.entry("gravel.jump", 2),
+            Map.entry("gravel.landing", 2),
+            Map.entry("gravel.run", 4),
+            Map.entry("gravel.sprint", 4),
+            Map.entry("gravel.walk", 4),
+            Map.entry("metal.jump", 2),
+            Map.entry("metal.landing", 2),
+            Map.entry("metal.run", 4),
+            Map.entry("metal.sprint", 3),
+            Map.entry("metal.walk", 4),
+            Map.entry("metal_thin.jump", 2),
+            Map.entry("metal_thin.landing", 2),
+            Map.entry("metal_thin.run", 4),
+            Map.entry("metal_thin.sprint", 4),
+            Map.entry("metal_thin.walk", 4),
+            Map.entry("snow.jump", 2),
+            Map.entry("snow.run", 4),
+            Map.entry("snow.sprint", 4),
+            Map.entry("snow.walk", 4),
+            Map.entry("stone.jump", 2),
+            Map.entry("stone.landing", 2),
+            Map.entry("stone.run", 4),
+            Map.entry("stone.sprint", 4),
+            Map.entry("stone.walk", 4),
+            Map.entry("water.jump", 2),
+            Map.entry("water.landing", 2),
+            Map.entry("water.run", 4),
+            Map.entry("water.sprint", 4),
+            Map.entry("water.walk", 4),
+            Map.entry("wood.jump", 2),
+            Map.entry("wood.landing", 2),
+            Map.entry("wood.run", 4),
+            Map.entry("wood.sprint", 4),
+            Map.entry("wood.walk", 4),
+            Map.entry("wood_thin.jump", 2),
+            Map.entry("wood_thin.landing", 2),
+            Map.entry("wood_thin.run", 4),
+            Map.entry("wood_thin.sprint", 4),
+            Map.entry("wood_thin.walk", 4)
+    );
+
+
     private static final double STEP_SNEAK = 1.20;
     private static final double STEP_WALK = 1.55;
     private static final double STEP_SPRINT = 1.55;
@@ -132,7 +195,7 @@ public final class ClientFootsteps {
         String material = materialOf(level, p.blockPosition().below());
         State st = STATES.computeIfAbsent(p.getUUID(), k -> new State());
         String variantKey = material + "." + state;
-        int variants = state.equals("landing") || state.equals("jump") ? VARIANTS_LANDING : VARIANTS_WALK;
+        int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
         int variant = 1 + level.getRandom().nextInt(variants);
         if (variants > 1) {
             Integer last = st.lastVariant.get(variantKey);
