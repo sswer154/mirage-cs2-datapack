@@ -2,7 +2,7 @@
   "required": true,
   "package": "com.sandrone.cs2grenade.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["PreparationDropMixin"],
+  "mixins": ["PreparationDropMixin", "PlayerStepSoundMixin", "PlayerFallSoundMixin"],
   "injectors": {
     "defaultRequire": 1
   }

@@ -665,7 +665,7 @@ public final class GrenadeManager {
         }
     }
 
-    private static void sendSoundPacket(ServerPlayer p, SoundEvent sound, Vec3 pos, float volume, float pitch, long seed) {
+    static void sendSoundPacket(ServerPlayer p, SoundEvent sound, Vec3 pos, float volume, float pitch, long seed) {
         if (p.connection == null) {
             return;
         }

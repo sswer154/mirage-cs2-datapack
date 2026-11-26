@@ -34,6 +34,7 @@ public class Cs2Grenade {
     public static final ModConfigSpec.DoubleValue PLANT_SECONDS;
     private final C4Sfx c4Sfx = new C4Sfx();
     private final C4Objective c4Objective = new C4Objective();
+    private final MatchFootsteps footsteps = new MatchFootsteps();
     private boolean roundWasLive;
 
     static {
@@ -102,6 +103,7 @@ public class Cs2Grenade {
     private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             c4Objective.onLogout(player);
+            footsteps.remove(player);
             C4Plant.cancel(player, false);
             C4Defuse.cancel(player);
             c4Sfx.playerLoggedOut(player);
@@ -135,6 +137,7 @@ public class Cs2Grenade {
         var counts = scoreboard.getObjective("cs2_counts");
         var pause = counts == null ? null : scoreboard.getPlayerScoreInfo(ScoreHolder.forNameOnly("#paused"), counts);
         boolean paused = pause != null && pause.value() == 1;
+        footsteps.tick(server, roundIsLive && !paused);
         GrenadeManager.tick(paused);
         if (event.getServer() != null) {
             c4Sfx.tick(server, state != null && state.value() == 4, paused);
