@@ -1321,5 +1321,19 @@
     "name": "cs2footsteps:step/snow_jump_2"
    }
   ]
+ },
+ "step.snow.landing.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/snow_landing_1"
+   }
+  ]
+ },
+ "step.snow.landing.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/snow_landing_2"
+   }
+  ]
  }
 }
