@@ -148,7 +148,10 @@ public final class FootstepSystem {
         double dx = pos.x - st.last.x;
         double dz = pos.z - st.last.z;
         double moved = Math.sqrt(dx * dx + dz * dz);
-        if (moved > 0.001 && moved < 1.5) {
+        if (!onGround) {
+            // 空中不累计步距，落地后重新开始
+            st.accum = 0.0;
+        } else if (moved > 0.001 && moved < 1.5) {
             if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
                 // 起步第一脚：不等走满一个步距
                 st.accum = stepLenFor(player) * 0.55;
