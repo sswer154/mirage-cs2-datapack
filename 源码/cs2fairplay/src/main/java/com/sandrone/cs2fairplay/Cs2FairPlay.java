@@ -30,6 +30,7 @@ public final class Cs2FairPlay {
         NeoForge.EVENT_BUS.register(MatchFairPlay.class);
         NeoForge.EVENT_BUS.register(MatchAudit.class);
         NeoForge.EVENT_BUS.register(InputAuditServer.class);
+        NeoForge.EVENT_BUS.register(ServerFootsteps.class);
         TaCZAuditEvents.register();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             FairPlayClient.register(modBus);
@@ -43,6 +44,11 @@ public final class Cs2FairPlay {
         var current = VersionMarker.CURRENT;
         markers.playToServer(INSTALLED.type(), StreamCodec.unit(INSTALLED), (payload, context) -> {});
         markers.playToServer(current.type(), StreamCodec.unit(current), (payload, context) -> {});
+
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || ModList.get().getModContainerById("cs2footsteps")
+                .filter(mod -> "0.1.1".equals(mod.getModInfo().getVersion().toString())).isPresent()) {
+            FootstepWire.register(markers);
+        }
 
         // With a known map mod installed the client declines the competitive channel.
         if (FMLEnvironment.dist == Dist.CLIENT && MAP_MODS.stream().anyMatch(ModList.get()::isLoaded)) {
@@ -61,6 +67,11 @@ public final class Cs2FairPlay {
 
     static boolean ready(ServerPlayer player) {
         return hasChannel(player, Policy.TYPE.id()) && versionMatches(player);
+    }
+
+    static boolean supportsFootsteps(ServerPlayer player) {
+        return hasChannel(player, FootstepWire.Request.TYPE.id()) && hasChannel(player, FootstepWire.Cue.TYPE.id())
+                && hasChannel(player, FootstepWire.Policy.TYPE.id());
     }
 
     static boolean installed(ServerPlayer player) {
