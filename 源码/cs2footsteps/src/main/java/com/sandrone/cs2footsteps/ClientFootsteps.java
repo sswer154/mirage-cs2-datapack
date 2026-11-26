@@ -2,6 +2,7 @@ package com.sandrone.cs2footsteps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -14,7 +15,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /** 纯客户端脚步声：本地计算步频、材质与播放，不经过服务端。 */
 public final class ClientFootsteps {
@@ -32,7 +32,9 @@ public final class ClientFootsteps {
         final Map<String, Integer> lastVariant = new HashMap<>();
     }
 
-    private static final Map<UUID, State> STATES = new HashMap<>();
+    private static final Map<Player, State> STATES = new HashMap<>();
+    private static ClientLevel lastLevel;
+    private static LocalPlayer lastLocalPlayer;
 
     private static final Map<String, Integer> VARIANTS = Map.ofEntries(
             Map.entry("dirt.jump", 2),
@@ -102,25 +104,28 @@ public final class ClientFootsteps {
     private static final double STEP_WALK = 1.55;
     private static final double STEP_SPRINT = 1.55;
 
-    private static final double RANGE_SNEAK = 9.0;
-    private static final double RANGE_WALK = 20.0;
-    private static final double RANGE_SPRINT = 26.0;
-    private static final double RANGE_LANDING = 22.0;
-    private static final double RANGE_JUMP = 12.0;
-
-    private static final int VARIANTS_WALK = 4;
-    private static final int VARIANTS_LANDING = 2;
+    // sounds.json defines attenuation independently of the playback gain.
+    private static final float GAIN_SNEAK = 0.5625f;
+    private static final float GAIN_JUMP = 0.75f;
 
     static void tick() {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
-        if (level == null || mc.player == null || mc.isPaused()) {
+        LocalPlayer localPlayer = mc.player;
+        if (lastLevel != level || lastLocalPlayer != localPlayer) {
+            STATES.clear();
+            lastLevel = level;
+            lastLocalPlayer = localPlayer;
+        }
+        if (level == null || localPlayer == null || mc.isPaused()) {
             return;
         }
-        int now = mc.player.tickCount;
-        for (Player p : level.players()) {
+        var players = level.players();
+        STATES.keySet().retainAll(players);
+        int now = localPlayer.tickCount;
+        for (Player p : players) {
             if (!inTeam(p) || p.isSpectator() || p.isDeadOrDying()) {
-                STATES.remove(p.getUUID());
+                STATES.remove(p);
                 continue;
             }
             step(p, level, now);
@@ -128,7 +133,7 @@ public final class ClientFootsteps {
     }
 
     private static void step(Player p, ClientLevel level, int now) {
-        State st = STATES.computeIfAbsent(p.getUUID(), k -> new State());
+        State st = STATES.computeIfAbsent(p, k -> new State());
         Vec3 pos = p.position();
         boolean onGround = p.onGround();
         Vec3 vel = p.getDeltaMovement();
@@ -142,7 +147,7 @@ public final class ClientFootsteps {
 
         if (st.wasOnGround && !onGround && vel.y > 0.15 && now - st.lastJumpTick > 8) {
             st.lastJumpTick = now;
-            play(p, level, "jump", RANGE_JUMP, 0.02);
+            play(p, level, st, "jump", GAIN_JUMP, 0.02);
         }
         if (!onGround) {
             st.airFall = Math.max(st.airFall, p.fallDistance);
@@ -150,7 +155,7 @@ public final class ClientFootsteps {
         } else if (!st.wasOnGround) {
             boolean steppedUp = !Double.isNaN(st.lastGroundY) && pos.y > st.lastGroundY + 0.4;
             if (st.airFall > 0.7 || steppedUp) {
-                play(p, level, "landing", RANGE_LANDING, 0.0);
+                play(p, level, st, "landing", 1.0f, 0.0);
             }
             st.airFall = 0.0;
         }
@@ -163,19 +168,17 @@ public final class ClientFootsteps {
         double moved = Math.sqrt(dx * dx + dz * dz);
         String state;
         double stepLen;
-        double range;
+        float gain = 1.0f;
         if (p.isShiftKeyDown()) {
             state = "walk";
             stepLen = STEP_SNEAK;
-            range = RANGE_SNEAK;
+            gain = GAIN_SNEAK;
         } else if (p.isSprinting()) {
             state = "sprint";
             stepLen = STEP_SPRINT;
-            range = RANGE_SPRINT;
         } else {
             state = "run";
             stepLen = STEP_WALK;
-            range = RANGE_WALK;
         }
         if (onGround && moved > 0.001 && moved < 1.5) {
             if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
@@ -186,15 +189,14 @@ public final class ClientFootsteps {
         if (st.accum >= stepLen && now - st.lastPlayedTick >= 2) {
             st.accum = 0.0;
             st.lastPlayedTick = now;
-            play(p, level, state, range, 0.03);
+            play(p, level, st, state, gain, 0.03);
         }
         st.last = pos;
         st.wasOnGround = onGround;
     }
 
-    private static void play(Player p, ClientLevel level, String state, double range, double pitchJitter) {
-        String material = materialOf(level, p.blockPosition().below());
-        State st = STATES.computeIfAbsent(p.getUUID(), k -> new State());
+    private static void play(Player p, ClientLevel level, State st, String state, float gain, double pitchJitter) {
+        String material = materialOf(level, p.getOnPos());
         String variantKey = material + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
         int variant = 1 + level.getRandom().nextInt(variants);
@@ -212,10 +214,8 @@ public final class ClientFootsteps {
         double x = p.getX() + vel.x * 0.18;
         double z = p.getZ() + vel.z * 0.18;
         double y = p.getY() + 0.05;
-        // 距离只影响传播；本地播放会把音量按距离裁到 1
-        float volume = (float) Math.min(1.0, range / 16.0);
         float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2);
-        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, volume, pitch, false);
+        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, gain, pitch, false);
     }
 
     private static boolean inTeam(Player p) {
