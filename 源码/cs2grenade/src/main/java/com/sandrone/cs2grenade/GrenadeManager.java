@@ -1011,6 +1011,9 @@ public final class GrenadeManager {
         placeFire(zone, 4.0);
         zone.lastPlaceTick = startTick;
         if (zone.nodes.isEmpty()) {
+            if (g.thrower instanceof ServerPlayer player) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("燃烧弹落点没有可蔓延的支撑面。"), true);
+            }
             level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.25, 0.15, 0.25, 0.03);
         } else {
             FIRE_ZONES.add(zone);
@@ -1036,6 +1039,9 @@ public final class GrenadeManager {
         FireSurface center = findFireCenter(zone.level, zone.center, origin, surfaces);
         if (center == null) {
             center = findFireCenterNearby(zone.level, zone.center, origin, surfaces);
+        }
+        if (center == null) {
+            center = findFireImpactSurface(zone.level, zone.center);
         }
         if (center == null) {
             return;
@@ -1099,6 +1105,15 @@ public final class GrenadeManager {
             }
         }
         return best;
+    }
+
+    private static FireSurface findFireImpactSurface(ServerLevel level, Vec3 impact) {
+        // 薄立板和台阶边缘可能支撑弹体，但不经过方块中心的火区采样点。
+        BlockHitResult hit = clipSmoke(level, null, impact.add(0.0, 0.1, 0.0), impact.add(0.0, -0.25, 0.0));
+        if (hit == null || hit.isInside() || hit.getDirection() != Direction.UP) return null;
+        Vec3 surface = hit.getLocation().add(0.0, FIRE_SURFACE_OFFSET, 0.0);
+        return fireRayClear(level, surface, surface.add(0.0, FIRE_HEADROOM, 0.0))
+                ? new FireSurface(BlockPos.containing(surface), surface) : null;
     }
 
     private static FireSurface findFireCenterNearby(ServerLevel level, Vec3 impact, BlockPos origin,
