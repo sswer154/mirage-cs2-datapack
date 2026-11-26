@@ -9,7 +9,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,61 +42,91 @@ public final class ClientFootsteps {
             Map.entry("dirt.jump", 2),
             Map.entry("dirt.landing", 2),
             Map.entry("dirt.run", 4),
+            Map.entry("dirt.sneak", 4),
             Map.entry("dirt.sprint", 4),
             Map.entry("dirt.walk", 4),
             Map.entry("fabric.jump", 2),
             Map.entry("fabric.landing", 2),
             Map.entry("fabric.run", 4),
+            Map.entry("fabric.sneak", 4),
             Map.entry("fabric.sprint", 4),
             Map.entry("fabric.walk", 4),
             Map.entry("glass.jump", 2),
             Map.entry("glass.landing", 2),
             Map.entry("glass.run", 4),
+            Map.entry("glass.sneak", 4),
             Map.entry("glass.sprint", 4),
             Map.entry("glass.walk", 4),
             Map.entry("grass.jump", 2),
             Map.entry("grass.landing", 2),
             Map.entry("grass.run", 4),
+            Map.entry("grass.sneak", 4),
             Map.entry("grass.sprint", 4),
             Map.entry("grass.walk", 4),
+            Map.entry("grasslow.jump", 2),
+            Map.entry("grasslow.landing", 2),
+            Map.entry("grasslow.run", 4),
+            Map.entry("grasslow.sneak", 4),
+            Map.entry("grasslow.sprint", 4),
+            Map.entry("grasslow.walk", 4),
             Map.entry("gravel.jump", 2),
             Map.entry("gravel.landing", 2),
             Map.entry("gravel.run", 4),
+            Map.entry("gravel.sneak", 4),
             Map.entry("gravel.sprint", 4),
             Map.entry("gravel.walk", 4),
             Map.entry("metal.jump", 2),
             Map.entry("metal.landing", 2),
             Map.entry("metal.run", 4),
+            Map.entry("metal.sneak", 4),
             Map.entry("metal.sprint", 3),
             Map.entry("metal.walk", 4),
+            Map.entry("metal2.jump", 1),
+            Map.entry("metal2.landing", 1),
+            Map.entry("metal2.run", 1),
+            Map.entry("metal2.sneak", 1),
+            Map.entry("metal2.sprint", 1),
+            Map.entry("metal2.walk", 1),
+            Map.entry("metal3.jump", 1),
+            Map.entry("metal3.landing", 1),
+            Map.entry("metal3.run", 1),
+            Map.entry("metal3.sneak", 1),
+            Map.entry("metal3.sprint", 1),
+            Map.entry("metal3.walk", 1),
             Map.entry("metal_thin.jump", 2),
             Map.entry("metal_thin.landing", 2),
             Map.entry("metal_thin.run", 4),
+            Map.entry("metal_thin.sneak", 4),
             Map.entry("metal_thin.sprint", 4),
             Map.entry("metal_thin.walk", 4),
             Map.entry("snow.jump", 2),
             Map.entry("snow.landing", 2),
             Map.entry("snow.run", 4),
+            Map.entry("snow.sneak", 4),
             Map.entry("snow.sprint", 4),
             Map.entry("snow.walk", 4),
             Map.entry("stone.jump", 2),
             Map.entry("stone.landing", 2),
             Map.entry("stone.run", 4),
+            Map.entry("stone.sneak", 4),
             Map.entry("stone.sprint", 4),
             Map.entry("stone.walk", 4),
             Map.entry("water.jump", 2),
             Map.entry("water.landing", 2),
             Map.entry("water.run", 4),
+            Map.entry("water.sneak", 4),
             Map.entry("water.sprint", 4),
             Map.entry("water.walk", 4),
             Map.entry("wood.jump", 2),
             Map.entry("wood.landing", 2),
             Map.entry("wood.run", 4),
+            Map.entry("wood.sneak", 4),
             Map.entry("wood.sprint", 4),
             Map.entry("wood.walk", 4),
             Map.entry("wood_thin.jump", 2),
             Map.entry("wood_thin.landing", 2),
             Map.entry("wood_thin.run", 4),
+            Map.entry("wood_thin.sneak", 4),
             Map.entry("wood_thin.sprint", 4),
             Map.entry("wood_thin.walk", 4)
     );
@@ -147,7 +179,7 @@ public final class ClientFootsteps {
 
         if (st.wasOnGround && !onGround && vel.y > 0.15 && now - st.lastJumpTick > 8) {
             st.lastJumpTick = now;
-            play(p, level, st, "jump", GAIN_JUMP, 0.02);
+            play(p, level, st, "jump", GAIN_JUMP, 0.02, false);
         }
         if (!onGround) {
             st.airFall = Math.max(st.airFall, p.fallDistance);
@@ -155,7 +187,7 @@ public final class ClientFootsteps {
         } else if (!st.wasOnGround) {
             boolean steppedUp = !Double.isNaN(st.lastGroundY) && pos.y > st.lastGroundY + 0.4;
             if (st.airFall > 0.7 || steppedUp) {
-                play(p, level, st, "landing", 1.0f, 0.0);
+                play(p, level, st, "landing", 1.0f, 0.0, false);
             }
             st.airFall = 0.0;
         }
@@ -168,11 +200,9 @@ public final class ClientFootsteps {
         double moved = Math.sqrt(dx * dx + dz * dz);
         String state;
         double stepLen;
-        float gain = 1.0f;
         if (p.isShiftKeyDown()) {
-            state = "walk";
+            state = "sneak";
             stepLen = STEP_SNEAK;
-            gain = GAIN_SNEAK;
         } else if (p.isSprinting()) {
             state = "sprint";
             stepLen = STEP_SPRINT;
@@ -180,6 +210,7 @@ public final class ClientFootsteps {
             state = "run";
             stepLen = STEP_WALK;
         }
+        boolean firstStep = now - st.lastPlayedTick > 20;
         if (onGround && moved > 0.001 && moved < 1.5) {
             if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
                 st.accum = stepLen * 0.55;
@@ -189,33 +220,43 @@ public final class ClientFootsteps {
         if (st.accum >= stepLen && now - st.lastPlayedTick >= 2) {
             st.accum = 0.0;
             st.lastPlayedTick = now;
-            play(p, level, st, state, gain, 0.03);
+            play(p, level, st, state, 1.0f, 0.03, firstStep);
         }
         st.last = pos;
         st.wasOnGround = onGround;
     }
 
-    private static void play(Player p, ClientLevel level, State st, String state, float gain, double pitchJitter) {
-        String material = materialOf(level, p.getOnPos());
-        String variantKey = material + "." + state;
+    private static void play(Player p, ClientLevel level, State st, String state,
+                             float gain, double pitchJitter, boolean firstStep) {
+        MatInfo mat = materialOf(level, p.getOnPos());
+        String variantKey = mat.id + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
         int variant = 1 + level.getRandom().nextInt(variants);
-        if (variants > 1) {
+        if (firstStep && variants > 1) {
+            variant = 1;
+        } else if (variants > 1) {
             Integer last = st.lastVariant.get(variantKey);
             if (last != null && last == variant) {
                 variant = variant % variants + 1;
             }
+        }
+        if (variants > 1) {
             st.lastVariant.put(variantKey, variant);
         }
-        String id = "step." + material + "." + state + "." + variant;
+        String id = "step." + mat.id + "." + state + "." + variant;
         SoundEvent sound = SoundEvent.createVariableRangeEvent(
                 ResourceLocation.fromNamespaceAndPath(Cs2Footsteps.MODID, id));
         Vec3 vel = p.getDeltaMovement();
         double x = p.getX() + vel.x * 0.18;
         double z = p.getZ() + vel.z * 0.18;
         double y = p.getY() + 0.05;
-        float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2);
-        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, gain, pitch, false);
+        float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2)
+                * mat.pitchMul * (firstStep ? 1.06f : 1.0f);
+        float finalGain = gain * mat.gainMul * (firstStep ? 1.08f : 1.0f);
+        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, finalGain, pitch, false);
+    }
+
+    private record MatInfo(String id, float pitchMul, float gainMul) {
     }
 
     private static boolean inTeam(Player p) {
@@ -226,37 +267,63 @@ public final class ClientFootsteps {
         return "cs2_t".equals(name) || "cs2_ct".equals(name);
     }
 
-    private static String materialOf(ClientLevel level, BlockPos pos) {
+    private static MatInfo materialOf(ClientLevel level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
         SoundType sound = state.getSoundType();
         String path = block.builtInRegistryHolder().key().location().getPath();
+        if (state.hasProperty(BlockStateProperties.WATERLOGGED)
+                && state.getValue(BlockStateProperties.WATERLOGGED)) {
+            return new MatInfo("water", 1.0f, 0.9f);
+        }
         if (sound == SoundType.METAL) {
-            return (path.contains("bars") || path.contains("chain") || path.contains("grate") || path.contains("rail"))
-                    ? "metal_thin" : "metal";
+            if (path.contains("bars") || path.contains("chain") || path.contains("grate")
+                    || path.contains("rail")) {
+                return new MatInfo("metal_thin", 1.0f, 1.0f);
+            }
+            if (path.contains("copper")) {
+                return new MatInfo("metal3", 1.0f, 1.0f);
+            }
+            if (path.contains("anvil") || path.contains("hopper") || path.contains("cauldron")
+                    || path.contains("lantern") || path.contains("bell")) {
+                return new MatInfo("metal2", 1.0f, 1.0f);
+            }
+            return new MatInfo("metal", 1.0f, 1.0f);
         }
         if (sound == SoundType.WOOD) {
             return (path.contains("trapdoor") || path.contains("ladder") || path.contains("door"))
-                    ? "wood_thin" : "wood";
-        }
-        if (sound == SoundType.GRAVEL) {
-            return "gravel";
+                    ? new MatInfo("wood_thin", 1.0f, 1.0f)
+                    : new MatInfo("wood", 1.0f, 1.0f);
         }
         if (sound == SoundType.GRASS) {
-            return "grass";
+            if (path.contains("short_grass") || path.contains("fern") || path.contains("azalea")
+                    || path.contains("bush") || path.contains("tall_grass")) {
+                return new MatInfo("grasslow", 1.0f, 1.0f);
+            }
+            return new MatInfo("grass", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.GRAVEL) {
+            return new MatInfo("gravel", 1.0f, 1.0f);
         }
         if (sound == SoundType.SAND) {
-            return "dirt";
+            return new MatInfo("dirt", 1.0f, 1.0f);
         }
         if (sound == SoundType.GLASS) {
-            return "glass";
+            return new MatInfo("glass", 1.0f, 1.0f);
         }
         if (sound == SoundType.WOOL) {
-            return "fabric";
+            return new MatInfo("fabric", 1.0f, 1.0f);
         }
         if (sound == SoundType.SNOW) {
-            return "snow";
+            if (block instanceof SnowLayerBlock) {
+                int layers = state.getValue(SnowLayerBlock.LAYERS);
+                if (layers <= 2) {
+                    return new MatInfo("snow", 1.10f, 0.8f);
+                }
+            }
+            return new MatInfo("snow", 1.0f, 1.0f);
         }
-        return "stone";
+        return new MatInfo("stone", 1.0f, 1.0f);
     }
+
 }
