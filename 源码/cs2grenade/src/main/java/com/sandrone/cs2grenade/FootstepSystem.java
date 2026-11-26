@@ -122,9 +122,6 @@ public final class FootstepSystem {
         float volume = (float) (range / 16.0);
         float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2);
         for (ServerPlayer listener : level.players()) {
-            if (listener == source) {
-                continue;
-            }
             if (!Cs2Grenade.isMatchAudioListener(listener)) {
                 continue;
             }
