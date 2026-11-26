@@ -26,14 +26,79 @@ public final class FootstepSystem {
         boolean wasOnGround = true;
         double airFall = 0.0;
         int lastPlayedTick = -100;
+        int lastJumpTick = -100;
+        final java.util.HashMap<String, Integer> lastVariant = new java.util.HashMap<>();
     }
 
     private static final Map<UUID, State> STATES = new HashMap<>();
 
+    private static final Map<String, Integer> VARIANTS = Map.ofEntries(
+        Map.entry("dirt.jump", 2),
+        Map.entry("dirt.landing", 2),
+        Map.entry("dirt.run", 4),
+        Map.entry("dirt.sprint", 4),
+        Map.entry("dirt.walk", 4),
+        Map.entry("fabric.jump", 2),
+        Map.entry("fabric.landing", 2),
+        Map.entry("fabric.run", 4),
+        Map.entry("fabric.sprint", 4),
+        Map.entry("fabric.walk", 4),
+        Map.entry("glass.jump", 2),
+        Map.entry("glass.landing", 2),
+        Map.entry("glass.run", 4),
+        Map.entry("glass.sprint", 4),
+        Map.entry("glass.walk", 4),
+        Map.entry("grass.jump", 2),
+        Map.entry("grass.landing", 2),
+        Map.entry("grass.run", 4),
+        Map.entry("grass.sprint", 4),
+        Map.entry("grass.walk", 4),
+        Map.entry("gravel.jump", 2),
+        Map.entry("gravel.landing", 2),
+        Map.entry("gravel.run", 4),
+        Map.entry("gravel.sprint", 4),
+        Map.entry("gravel.walk", 4),
+        Map.entry("metal.jump", 2),
+        Map.entry("metal.landing", 2),
+        Map.entry("metal.run", 4),
+        Map.entry("metal.sprint", 3),
+        Map.entry("metal.walk", 4),
+        Map.entry("metal_thin.jump", 2),
+        Map.entry("metal_thin.landing", 2),
+        Map.entry("metal_thin.run", 4),
+        Map.entry("metal_thin.sprint", 4),
+        Map.entry("metal_thin.walk", 4),
+        Map.entry("snow.jump", 2),
+        Map.entry("snow.run", 4),
+        Map.entry("snow.sprint", 4),
+        Map.entry("snow.walk", 4),
+        Map.entry("stone.jump", 2),
+        Map.entry("stone.landing", 2),
+        Map.entry("stone.run", 4),
+        Map.entry("stone.sprint", 4),
+        Map.entry("stone.walk", 4),
+        Map.entry("water.jump", 2),
+        Map.entry("water.landing", 2),
+        Map.entry("water.run", 4),
+        Map.entry("water.sprint", 4),
+        Map.entry("water.walk", 4),
+        Map.entry("wood.jump", 2),
+        Map.entry("wood.landing", 2),
+        Map.entry("wood.run", 4),
+        Map.entry("wood.sprint", 4),
+        Map.entry("wood.walk", 4),
+        Map.entry("wood_thin.jump", 2),
+        Map.entry("wood_thin.landing", 2),
+        Map.entry("wood_thin.run", 4),
+        Map.entry("wood_thin.sprint", 4),
+        Map.entry("wood_thin.walk", 4)
+    );
+
+
     /** 不同状态的步距（格）与传播距离（格）。 */
     private static final double STEP_SNEAK = 1.20;
     private static final double STEP_WALK = 1.90;
-    private static final double STEP_SPRINT = 1.75;
+    private static final double STEP_SPRINT = 1.55;
 
     private static final double RANGE_SNEAK = 9.0;
     private static final double RANGE_WALK = 20.0;
@@ -65,7 +130,9 @@ public final class FootstepSystem {
         }
 
         // 起跳 / 落地
-        if (st.wasOnGround && !onGround && player.getDeltaMovement().y > 0.18) {
+        if (st.wasOnGround && !onGround && player.getDeltaMovement().y > 0.15
+                && now - st.lastJumpTick > 8) {
+            st.lastJumpTick = now;
             play(player, "jump", RANGE_JUMP, 0.02);
         }
         if (!onGround) {
@@ -127,14 +194,25 @@ public final class FootstepSystem {
     private static void play(ServerPlayer source, String state, double range, double pitchJitter) {
         ServerLevel level = source.serverLevel();
         String material = materialOf(level, source.blockPosition().below());
-        String id = "step." + material + "." + state;
-        Vec3 at = new Vec3(source.getX(), source.getY() + 0.12, source.getZ());
+        State st = STATES.computeIfAbsent(source.getUUID(), k -> new State());
+        String variantKey = material + "." + state;
+        int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
+        int variant = 1 + level.getRandom().nextInt(variants);
+        if (variants > 1) {
+            Integer last = st.lastVariant.get(variantKey);
+            if (last != null && last == variant) {
+                variant = variant % variants + 1;
+            }
+            st.lastVariant.put(variantKey, variant);
+        }
+        String id = "step." + material + "." + state + "." + variant;
+        // 服务端一 tick 的滞后 + 采样前摇，往前补一点，听感更贴脚
+        Vec3 vel = source.getDeltaMovement();
+        Vec3 ahead = source.position().add(vel.x * 0.18, 0.0, vel.z * 0.18);
+        Vec3 at = new Vec3(ahead.x, source.getY() + 0.05, ahead.z);
         float volume = (float) (range / 16.0);
         float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2);
         for (ServerPlayer listener : level.players()) {
-            if (!Cs2Grenade.isMatchAudioListener(listener)) {
-                continue;
-            }
             if (listener.position().distanceToSqr(at) > (range + 2) * (range + 2)) {
                 continue;
             }
@@ -175,6 +253,14 @@ public final class FootstepSystem {
             return "snow";
         }
         return "stone";
+    }
+
+    /** 听众：T/CT 队员与解说，不依赖 cs2_inmatch。 */
+    private static boolean canHear(ServerPlayer player) {
+        var team = player.getTeam();
+        if (team == null) return false;
+        String name = team.getName();
+        return "cs2_t".equals(name) || "cs2_ct".equals(name) || "cs2_cast".equals(name);
     }
 
     private static boolean isAlive(ServerPlayer player) {
