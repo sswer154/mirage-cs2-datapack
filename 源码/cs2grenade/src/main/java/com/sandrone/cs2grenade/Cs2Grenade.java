@@ -109,7 +109,6 @@ public class Cs2Grenade {
             C4Defuse.cancel(player);
             c4Sfx.playerLoggedOut(player);
             GrenadeManager.clearSmokeListener(player);
-            FootstepSystem.onLogout(player);
         }
     }
 
