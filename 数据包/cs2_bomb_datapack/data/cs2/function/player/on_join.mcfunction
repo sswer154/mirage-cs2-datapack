@@ -1,5 +1,6 @@
 # 重连/中途加入
 scoreboard players enable @s cs2_panel
+execute if score #state cs2_state matches 1..6 if score #solo cs2_counts matches 0 if score @s cs2_inmatch matches 1 unless function cs2:fairplay/ready run return run function cs2:join/leave
 execute if entity @s[team=cs2_cast] run function cs2:util/freeze_unlock
 execute if entity @s[team=cs2_cast] run gamemode spectator @s
 execute unless score #state cs2_state matches 1..6 run cs2spawn restore

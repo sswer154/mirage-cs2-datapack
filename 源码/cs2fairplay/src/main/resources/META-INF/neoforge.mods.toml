@@ -1,0 +1,19 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All rights reserved"
+
+[[mods]]
+modId="cs2fairplay"
+version="0.1.0"
+displayName="CS2 Fair Play"
+description="Competitive match eligibility, camera and spectator rules."
+
+[[mixins]]
+config="cs2fairplay.mixins.json"
+
+[[dependencies.cs2fairplay]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.250,)"
+ordering="NONE"
+side="BOTH"

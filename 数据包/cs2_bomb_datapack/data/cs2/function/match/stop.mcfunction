@@ -1,6 +1,7 @@
 # 停止比赛：仅让参赛者回大厅，不影响无关人员
 gamerule keepInventory true
 function cs2:practice/cleanup
+cs2audit_lifecycle finish
 function cs2:match/reset
 kill @e[tag=cs2_bomb]
 kill @e[type=item_display,tag=cs2_c4_display]
