@@ -18,17 +18,21 @@ final class AuditCompare {
 
     private record Entry(int tick, int round, String kind, String value) {}
 
-    static Path file(Path directory, UUID player, String suffix) {
-        return directory.resolve(directory.getFileName() + "-" + player + suffix);
+    static String filePlayerId(String name) {
+        return name.replaceAll("[^a-zA-Z0-9_]", "_");
     }
 
-    static boolean save(Path path, UUID player, byte[] bytes) {
+    static Path file(Path directory, UUID player, String playerId, String suffix) {
+        return directory.resolve(directory.getFileName() + "-" + playerId + "-" + player + suffix);
+    }
+
+    static boolean save(Path path, UUID player, String playerId, byte[] bytes) {
         try {
             var client = read(new String(bytes, StandardCharsets.UTF_8), true);
-            var serverPath = file(path, player, ".server.tsv");
+            var serverPath = file(path, player, playerId, ".server.tsv");
             var server = Files.exists(serverPath) ? read(Files.readString(serverPath), false) : List.<Entry>of();
-            Files.write(file(path, player, ".client.tsv"), bytes);
-            Files.writeString(file(path, player, ".review.txt"), summarize(server, client));
+            Files.write(file(path, player, playerId, ".client.tsv"), bytes);
+            Files.writeString(file(path, player, playerId, ".review.txt"), summarize(server, client));
             return true;
         } catch (IOException | IllegalArgumentException e) {
             LogUtils.getLogger().warn("Could not receive CS2 match audit for {}", player, e);
