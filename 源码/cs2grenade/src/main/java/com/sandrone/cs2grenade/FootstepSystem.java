@@ -27,6 +27,7 @@ public final class FootstepSystem {
         double airFall = 0.0;
         int lastPlayedTick = -100;
         int lastJumpTick = -100;
+        double lastGroundY = Double.NaN;
         final java.util.HashMap<String, Integer> lastVariant = new java.util.HashMap<>();
     }
 
@@ -138,10 +139,15 @@ public final class FootstepSystem {
         if (!onGround) {
             st.airFall = Math.max(st.airFall, player.fallDistance);
         } else if (!st.wasOnGround) {
-            if (st.airFall > 0.7) {
+            // 正常落地，或者跳上高一格时也算一次落地
+            boolean steppedUp = !Double.isNaN(st.lastGroundY) && pos.y > st.lastGroundY + 0.4;
+            if (st.airFall > 0.7 || steppedUp) {
                 play(player, "landing", RANGE_LANDING, 0.0);
             }
             st.airFall = 0.0;
+        }
+        if (onGround) {
+            st.lastGroundY = pos.y;
         }
 
         // 地面移动距离累计
