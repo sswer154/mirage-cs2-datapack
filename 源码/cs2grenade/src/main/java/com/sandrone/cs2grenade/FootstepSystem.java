@@ -98,7 +98,7 @@ public final class FootstepSystem {
 
     /** 不同状态的步距（格）与传播距离（格）。 */
     private static final double STEP_SNEAK = 1.20;
-    private static final double STEP_WALK = 1.90;
+    private static final double STEP_WALK = 1.72;
     private static final double STEP_SPRINT = 1.55;
 
     private static final double RANGE_SNEAK = 9.0;
