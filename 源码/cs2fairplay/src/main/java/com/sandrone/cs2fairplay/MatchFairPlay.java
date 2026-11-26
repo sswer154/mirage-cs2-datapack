@@ -1,6 +1,7 @@
 package com.sandrone.cs2fairplay;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -48,10 +49,31 @@ public final class MatchFairPlay {
     }
 
     private static int checkStart(CommandSourceStack source) {
-        var players = source.getServer().getPlayerList().getPlayers();
-        if (players.stream().noneMatch(p -> "cs2_t".equals(team(p)))
-                || players.stream().noneMatch(p -> "cs2_ct".equals(team(p)))) return 1;
-        return checkPlayers(source, players.stream().filter(MatchFairPlay::onTeam).toList());
+        var blocked = source.getServer().getPlayerList().getPlayers().stream()
+                .filter(MatchFairPlay::onTeam)
+                .filter(player -> !Cs2FairPlay.ready(player))
+                .toList();
+        for (var player : blocked) {
+            String reason;
+            if (!Cs2FairPlay.installed(player)) {
+                reason = "未安装 cs2fairplay";
+            } else if (!Cs2FairPlay.versionMatches(player)) {
+                reason = "cs2fairplay 版本与服务器不一致（需要 " + Cs2FairPlay.version() + "）";
+            } else {
+                reason = "未通过 cs2fairplay 公平校验，请禁用受限地图模组";
+            }
+            var message = Component.literal(player.getGameProfile().getName() + " " + reason)
+                    .withStyle(ChatFormatting.RED);
+            if (source.getEntity() instanceof ServerPlayer starter) {
+                starter.sendSystemMessage(message);
+            } else {
+                source.getServer().sendSystemMessage(message);
+            }
+            if (player != source.getEntity()) {
+                player.displayClientMessage(Component.literal(reason), true);
+            }
+        }
+        return blocked.isEmpty() ? 1 : 0;
     }
 
     private static int checkFormal(CommandSourceStack source) {

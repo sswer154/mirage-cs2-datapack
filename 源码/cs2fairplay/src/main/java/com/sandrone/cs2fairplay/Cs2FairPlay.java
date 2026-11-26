@@ -14,11 +14,14 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.Set;
 
 @Mod(Cs2FairPlay.MOD_ID)
 public final class Cs2FairPlay {
     public static final String MOD_ID = "cs2fairplay";
+    private static final TypeMarker INSTALLED = TypeMarker.named("installed");
     private static final Set<String> MAP_MODS = Set.of(
             "xaerominimap", "xaeroworldmap", "xaeroplus", "journeymap", "voxelmap", "map_atlases", "antiqueatlas");
 
@@ -35,6 +38,11 @@ public final class Cs2FairPlay {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
+        var markers = event.registrar("1").optional();
+        var current = VersionMarker.CURRENT;
+        markers.playToServer(INSTALLED.type(), StreamCodec.unit(INSTALLED), (payload, context) -> {});
+        markers.playToServer(current.type(), StreamCodec.unit(current), (payload, context) -> {});
+
         // With a known map mod installed the client declines the competitive channel.
         if (FMLEnvironment.dist == Dist.CLIENT && MAP_MODS.stream().anyMatch(ModList.get()::isLoaded)) {
             return;
@@ -51,7 +59,38 @@ public final class Cs2FairPlay {
     }
 
     static boolean ready(ServerPlayer player) {
-        return player.connection != null && NetworkRegistry.hasChannel(player.connection, Policy.TYPE.id());
+        return hasChannel(player, Policy.TYPE.id()) && versionMatches(player);
+    }
+
+    static boolean installed(ServerPlayer player) {
+        // Clients predating the version check may only advertise the old policy channel.
+        return hasChannel(player, INSTALLED.type().id()) || hasChannel(player, Policy.TYPE.id());
+    }
+
+    static boolean versionMatches(ServerPlayer player) {
+        return hasChannel(player, VersionMarker.CURRENT.type().id());
+    }
+
+    static String version() {
+        return VersionMarker.VERSION;
+    }
+
+    private static boolean hasChannel(ServerPlayer player, ResourceLocation id) {
+        return player.connection != null && NetworkRegistry.hasChannel(player.connection, id);
+    }
+
+    // Distinct optional IDs let a different version still connect to the lobby.
+    private static final class VersionMarker {
+        private static final String VERSION = ModList.get().getModContainerById(MOD_ID)
+                .orElseThrow().getModInfo().getVersion().toString();
+        private static final TypeMarker CURRENT = TypeMarker.named("version/"
+                + HexFormat.of().formatHex(VERSION.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private record TypeMarker(Type<TypeMarker> type) implements CustomPacketPayload {
+        private static TypeMarker named(String name) {
+            return new TypeMarker(new Type<>(ResourceLocation.fromNamespaceAndPath(MOD_ID, name)));
+        }
     }
 
     public record Policy(boolean firstPerson, boolean watchingTeam) implements CustomPacketPayload {
