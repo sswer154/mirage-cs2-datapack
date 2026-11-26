@@ -314,6 +314,12 @@ public final class GrenadeManager {
         var it = RING_STATE.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();
+            var player = serverRef.getPlayerList().getPlayer(e.getKey());
+            if (player == null || player.isSpectator()) {
+                if (player != null) stopRingSounds(player);
+                it.remove();
+                continue;
+            }
             Ring r = e.getValue();
             int end = r.holdEnd() + r.fadeTicks();
             if (now >= end) {
@@ -327,11 +333,6 @@ public final class GrenadeManager {
                 continue;
             }
             if (now < r.nextTick()) {
-                continue;
-            }
-            var player = serverRef.getPlayerList().getPlayer(e.getKey());
-            if (player == null) {
-                it.remove();
                 continue;
             }
             boolean fading = now >= r.holdEnd();
@@ -394,8 +395,11 @@ public final class GrenadeManager {
         CommandSourceStack src = serverRef.createCommandSourceStack().withPermission(4).withSuppressedOutput();
         ArrayList<String> done = new ArrayList<String>();
         for (PendingMask m : List.copyOf(PENDING_MASKS.values())) {
-            if (now < m.expireTick()) continue;
-            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + m.fadeTicks() + " @s");
+            var player = serverRef.getPlayerList().getPlayerByName(m.player());
+            boolean spectating = player != null && player.isSpectator();
+            if (!spectating && now < m.expireTick()) continue;
+            int fadeTicks = spectating ? 0 : m.fadeTicks();
+            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + fadeTicks + " @s");
             done.add(m.player());
         }
         done.forEach(PENDING_MASKS::remove);
@@ -609,7 +613,7 @@ public final class GrenadeManager {
 
     /** C4 拆除开始音：给附近玩家。 */
     static void playDefuseSound(ServerLevel level, Vec3 pos) {
-        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.0f, 1.0f);
+        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.5f, 1.0f);
     }
 
     /** 数据包通过计分板信号触发的 C4 音效。 */
@@ -1554,7 +1558,7 @@ public final class GrenadeManager {
         }
         java.util.Map<java.util.UUID, Double> flashPower = new java.util.HashMap<>();
         for (ServerPlayer pp : level.players()) {
-            if (!GrenadeManager.inMatch(pp) || pp.position().distanceTo(pos) > range) {
+            if (pp.isSpectator() || !GrenadeManager.inMatch(pp) || pp.position().distanceTo(pos) > range) {
                 continue;
             }
             BlockHitResult h0 = level.clip(new ClipContext(pp.getEyePosition(), pos,
@@ -1613,7 +1617,7 @@ public final class GrenadeManager {
             double distFactor;
             double intensity;
             boolean blocked;
-            if (!GrenadeManager.inMatch(p) || p.position().distanceTo(pos) > range) continue;
+            if (p.isSpectator() || !GrenadeManager.inMatch(p) || p.position().distanceTo(pos) > range) continue;
             BlockHitResult hit = level.clip(new ClipContext(p.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)p));
             boolean bl = blocked = hit.getType() == HitResult.Type.BLOCK;
             if (blocked && hit.getLocation().distanceTo(pos) < 0.6) {

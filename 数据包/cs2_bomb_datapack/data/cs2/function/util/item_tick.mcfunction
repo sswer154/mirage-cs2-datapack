@@ -3,8 +3,5 @@
 # 场外普通的护甲/弹药盒没有标记，保留。
 execute as @e[type=item,tag=!cs2_match_loot] if data entity @s Item.components."minecraft:custom_data".cs2_drop_clean run kill @s
 
-# 兼容旧版带比赛标记的副武器。
-execute as @e[type=item,tag=!cs2_match_loot] if data entity @s Item.components."minecraft:custom_data".cs2_secondary_gun run kill @s
-
 # 商店道具（钻石/木棍/绿宝石）掉落即清
 execute as @e[type=item] if data entity @s Item.components."minecraft:custom_data".cs2_shop_item run kill @s
