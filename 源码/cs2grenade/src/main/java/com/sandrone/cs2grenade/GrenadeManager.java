@@ -935,10 +935,10 @@ public final class GrenadeManager {
         Vec3 center = pos.add(0.0, 0.6, 0.0);
         // 确保烟片生成的区块已加载；远距离投掷时落点区块可能还没到手
         level.getChunkAt(BlockPos.containing(center));
-        int[] ringCounts = new int[]{1, 10, 24, 42, 60};
+        int[] ringCounts = new int[]{1, 8, 16, 28, 40};
         double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
         float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};
-        float baseScale = 7.6f;
+        float baseScale = 8.1f;
         List<SmokeCard> cards = new ArrayList<>();
         int index = 0;
         for (int ring = 0; ring < ringCounts.length; ++ring) {
