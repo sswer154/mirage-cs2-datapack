@@ -31,9 +31,9 @@ public final class FootstepSystem {
     private static final Map<UUID, State> STATES = new HashMap<>();
 
     /** 不同状态的步距（格）与传播距离（格）。 */
-    private static final double STEP_SNEAK = 1.65;
-    private static final double STEP_WALK = 2.10;
-    private static final double STEP_SPRINT = 2.55;
+    private static final double STEP_SNEAK = 1.20;
+    private static final double STEP_WALK = 1.90;
+    private static final double STEP_SPRINT = 1.75;
 
     private static final double RANGE_SNEAK = 9.0;
     private static final double RANGE_WALK = 20.0;
@@ -50,7 +50,8 @@ public final class FootstepSystem {
     }
 
     static void tick(ServerPlayer player, int now) {
-        if (player.isSpectator() || player.isDeadOrDying() || !inTeam(player)) {
+        // 队伍 + 存活 + 非旁观；不看比赛阶段
+        if (!inTeam(player) || player.isSpectator() || player.isDeadOrDying() || !isAlive(player)) {
             STATES.remove(player.getUUID());
             return;
         }
@@ -81,6 +82,10 @@ public final class FootstepSystem {
         double dz = pos.z - st.last.z;
         double moved = Math.sqrt(dx * dx + dz * dz);
         if (moved > 0.001 && moved < 1.5) {
+            if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
+                // 起步第一脚：不等走满一个步距
+                st.accum = stepLenFor(player) * 0.55;
+            }
             st.accum += moved;
         }
 
@@ -114,11 +119,16 @@ public final class FootstepSystem {
         st.wasOnGround = onGround;
     }
 
+    private static double stepLenFor(ServerPlayer player) {
+        if (player.isShiftKeyDown()) return STEP_SNEAK;
+        return player.isSprinting() ? STEP_SPRINT : STEP_WALK;
+    }
+
     private static void play(ServerPlayer source, String state, double range, double pitchJitter) {
         ServerLevel level = source.serverLevel();
         String material = materialOf(level, source.blockPosition().below());
         String id = "step." + material + "." + state;
-        Vec3 at = source.position();
+        Vec3 at = new Vec3(source.getX(), source.getY() + 0.12, source.getZ());
         float volume = (float) (range / 16.0);
         float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2);
         for (ServerPlayer listener : level.players()) {
@@ -165,6 +175,15 @@ public final class FootstepSystem {
             return "snow";
         }
         return "stone";
+    }
+
+    private static boolean isAlive(ServerPlayer player) {
+        var sb = player.getScoreboard();
+        var obj = sb.getObjective("cs2_alive");
+        if (obj == null) return true;
+        var info = sb.getPlayerScoreInfo(
+                net.minecraft.world.scores.ScoreHolder.forNameOnly(player.getScoreboardName()), obj);
+        return info != null && info.value() == 1;
     }
 
     /** T/CT 队员都会发出脚步声；解说（cs2_cast）不发，只负责听。 */
