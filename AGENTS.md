@@ -39,6 +39,26 @@
 gh issue create --title "[bug] 烟雾弹落地后不放烟" --body-file issue.md
 ```
 
+### 1.2 GitHub Issue 状态
+
+标题前缀记录事项分类和验收结论。GitHub Issue 的 **Status** 字段记录当前进度，使用仓库原生状态。
+
+| 状态 | 何时使用 |
+| --- | --- |
+| Backlog | 刚收到、待确认优先级、待补复现信息，或明确暂缓但仍需保留。 |
+| Todo | 已决定要做，等待开工。可以先指定负责人。 |
+| In progress | 已开始排查、实现或验证。尚未满足提审条件时可提交 Draft PR。遇到阻塞时在 Issue 说明缺什么、谁能补齐，暂停排期时移回 Backlog。 |
+| In review | 普通 PR 已准备好审查，或改动已合入但仍在等最终验收和关单核对。若审查要求继续修改，转回 In progress。 |
+| Done | 完成关单核对后，以 completed 关闭。代码类 Issue 须先合入 `master` 并核对 `CHANGELOG.md`。 |
+| Not planned | 维护者明确决定不做时使用，关单前写明原因。后续重新考虑时重开并按实际进展选择开放状态。 |
+| Duplicate | 已确认有另一条 Issue 跟踪同一问题。补充本条独有的证据，再选择原 Issue 并以重复关闭。 |
+
+- GitHub 可能在分派负责人或关联 PR 时自动调整状态。每次实际开工、转审、返工或延期后核对状态。已认领但尚未开工的事项放在 Todo。
+- 需要在合并后验收或继续跟踪的 Issue，用 `Refs #编号` 在 PR 正文中引用，并在 Issue 留下 PR 链接。GitHub 的关单关键词和 Development 关联都可能在合并默认分支时自动关单。对仍需验收的 Issue，手动设置 In review。
+- Done、Not planned、Duplicate 是关闭状态，选择它们会关闭 Issue。待现场复测或修复只覆盖部分情况时，保留开放状态并写明尚未验证的场景。历史 Issue 缺少状态时，在下次实际处理时按进度补上。
+
+参见 [GitHub Issue 状态](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/about-issue-statuses) 和 [GitHub PR 关联与自动关单](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)。
+
 ## 2. 认领：明确谁做
 
 - 谁决定做，就在 Issue 里 `@` 自己并留下认领评论，然后把自己设为 assignee。
@@ -50,7 +70,7 @@ gh issue edit <编号> --add-assignee <github账号>
 ```
 
 - 一个 Issue 同时只由一个人做。需要别人接手时，在 Issue 里说明并改 assignee，不要两个人同时改同一个文件。
-- 维护者可以指定负责人；被指定的人在 Issue 里回复确认后再动手。
+- 维护者可以指定负责人；被指定的人在 Issue 里回复确认后再动手。开工后确认状态为 In progress。
 
 ## 3. 开发与本地验证
 
@@ -79,7 +99,7 @@ git rebase origin/master                  # 有就先变基
 
 - 提交标题：`[分类] <描述> (refs #<编号>)`，分类与 Issue 一致
 - 正文写清：改了哪些文件、关键数值、验证方式
-- 推送后开 PR 并关联 Issue，在对应 Issue 回一条变更说明，格式见下节。
+- 推送后开 PR，按第 1.2 节在正文引用 Issue，并在对应 Issue 回一条变更说明。Draft PR 保持 In progress，准备好审查时转为 In review。
 
 ## 6. 推送后：发布本次修改内容
 
@@ -106,7 +126,7 @@ git rebase origin/master                  # 有就先变基
 
 - 数据包参数（`data/cs2/grenade/*.json`、`shop/*.json`）与模组代码（`cs2grenade`、`cs2shop` 的 java 源码）尽量由不同人负责同一时间只改一处。
 - 同一文件中不要两人并行修改；需要并行时先拆 Issue。
-- 第三方模组 jar 不纳入仓库，只保留 `cs2grenade-*.jar` 与 `cs2shop-*.jar`。
+- 第三方模组 jar 不纳入仓库，只保留本仓库维护的 `cs2grenade`、`cs2shop`、`cs2footsteps` 与 `cs2fairplay` JAR。
 
 ## 7.1 数据包目录与 zip
 
@@ -144,6 +164,6 @@ gh issue list --state closed --limit 10        # 最近关掉的，确认自己�
 git log --oneline -20 --format='%h %s'         # 最近提交，和 CHANGELOG 对得上
 ```
 
-- 关闭 Issue 前，在关闭评论中记录关联 PR、验证结果和未覆盖场景。仍有未覆盖场景时，由维护者确认是否可以关闭。
+- 完成关单前，在关闭评论中记录关联 PR、验证结果和未覆盖场景。仍有未覆盖场景时，由维护者确认是否可以关闭。完成核对后按第 1.1 节更新标题，再以 completed 关闭为 Done。
 - 每条 Issue 的变更随 PR 合入 `master` 时，在 `CHANGELOG.md` 按合并日期登记一次，格式为 `- YYYY-MM-DD <类型> <一句话> (refs #N)`。关闭 Issue 时核对已有条目。
 - 同步时先读 `CHANGELOG.md` 最新几行，能快速知道上一轮改了什么，不依赖 issue 是否还开着

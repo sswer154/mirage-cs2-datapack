@@ -7,5 +7,5 @@ execute unless score #pause_kind cs2_counts matches 2 run tellraw @s {"text":"�
 execute unless score #pause_kind cs2_counts matches 2 run return 0
 execute unless score @s cs2_inmatch matches 1 run tellraw @s {"text":"你不是本场参赛者。","color":"red"}
 execute unless score @s cs2_inmatch matches 1 run return 0
-tellraw @a[scores={cs2_inmatch=1}] {"text":"比赛暂停已由玩家解除。","color":"green"}
+tellraw @a[scores={cs2_inmatch=1}] [{"selector":"@s","color":"green"},{"text":" 已解除比赛暂停。","color":"green"}]
 function cs2:panel/resume

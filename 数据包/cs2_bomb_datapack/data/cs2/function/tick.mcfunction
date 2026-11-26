@@ -27,6 +27,7 @@ execute as @a[scores={cs2_cancel_queue=1..}] run function cs2:join/cancel_queue
 execute as @a[scores={cs2_hud_toggle=1..}] run function cs2:hud/trigger_toggle
 execute as @a[scores={cs2_stats=1..}] run function cs2:stats/trigger
 execute as @a[scores={cs2_panel=1..}] run function cs2:panel/trigger
+scoreboard players enable @a[scores={cs2_inmatch=1}] cs2_panel
 execute as @a[scores={cs2_pause=1..}] run function cs2:panel/pause_request
 execute as @a[scores={cs2_vote_restart=1..}] run function cs2:panel/vote_restart
 execute as @a[scores={cs2_vote_end=1..}] run function cs2:panel/vote_end
@@ -51,7 +52,7 @@ execute if score #solo cs2_counts matches 0 if score #state cs2_state matches 3.
 execute if score #solo cs2_counts matches 0 if score #state cs2_state matches 2..4 if entity @a[scores={cs2_inmatch=1,cs2_voted_end=1}] run function cs2:panel/check_votes
 
 # 双方在准备阶段组齐时，用干净的正式经济与装备重新开始购买阶段。
-execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run return run function cs2:practice/to_formal
+execute if score #state cs2_state matches 2 if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] if function cs2:fairplay/check_formal run return run function cs2:practice/to_formal
 # 状态计时
 execute if score #state cs2_state matches 1 run function cs2:round/warmup_tick
 execute if score #state cs2_state matches 2 run function cs2:round/freeze_tick
