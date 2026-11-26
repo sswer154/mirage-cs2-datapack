@@ -1,4 +1,4 @@
-execute if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] run return run function cs2:practice/to_formal
+execute if score #solo cs2_counts matches 1..2 if entity @a[team=cs2_t,scores={cs2_inmatch=1}] if entity @a[team=cs2_ct,scores={cs2_inmatch=1}] if function cs2:fairplay/check_formal run return run function cs2:practice/to_formal
 scoreboard players set #state cs2_state 3
 # 倒计时结束，强制关闭还开着的商店界面
 execute as @a run cs2shop close

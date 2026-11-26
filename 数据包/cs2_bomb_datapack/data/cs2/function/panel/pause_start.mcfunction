@@ -5,7 +5,7 @@ scoreboard players operation #pause_state cs2_counts = #state cs2_state
 scoreboard players set #pause_timer cs2_counts 600
 team modify cs2_t friendlyFire false
 team modify cs2_ct friendlyFire false
-gamemode adventure @a[scores={cs2_inmatch=1}]
+gamemode adventure @a[scores={cs2_inmatch=1,cs2_alive=1}]
 effect give @a[scores={cs2_inmatch=1}] minecraft:slowness 30 255 true
 effect give @a[scores={cs2_inmatch=1}] minecraft:resistance 30 255 true
 bossbar set cs2:round visible true

@@ -126,7 +126,7 @@ git rebase origin/master                  # 有就先变基
 
 - 数据包参数（`data/cs2/grenade/*.json`、`shop/*.json`）与模组代码（`cs2grenade`、`cs2shop` 的 java 源码）尽量由不同人负责同一时间只改一处。
 - 同一文件中不要两人并行修改；需要并行时先拆 Issue。
-- 第三方模组 jar 不纳入仓库，只保留 `cs2grenade-*.jar` 与 `cs2shop-*.jar`。
+- 第三方模组 jar 不纳入仓库，只保留本仓库维护的 `cs2grenade`、`cs2shop`、`cs2footsteps` 与 `cs2fairplay` JAR。
 
 ## 7.1 数据包目录与 zip
 
