@@ -1,4 +1,5 @@
 # 重连/中途加入
+execute if score #state cs2_state matches 1..6 if score #solo cs2_counts matches 0 if score @s cs2_inmatch matches 1 unless function cs2:fairplay/ready run return run function cs2:join/leave
 # 等候开赛的玩家保留阵营和选边时保存的背包。
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_t] run return 0
 execute unless score #state cs2_state matches 1..6 if score @s cs2_ready_team matches 1 if entity @s[team=cs2_ct] run return 0

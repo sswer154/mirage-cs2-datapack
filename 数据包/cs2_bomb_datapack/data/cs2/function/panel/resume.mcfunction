@@ -9,7 +9,7 @@ team modify cs2_ct friendlyFire true
 effect clear @a[scores={cs2_inmatch=1}] minecraft:slowness
 effect clear @a[scores={cs2_inmatch=1}] minecraft:resistance
 execute as @a[scores={cs2_inmatch=1}] run function cs2:util/speed
-gamemode adventure @a[scores={cs2_inmatch=1}]
+gamemode adventure @a[scores={cs2_inmatch=1,cs2_alive=1}]
 effect give @a[scores={cs2_inmatch=1}] minecraft:slowness 30 255 true
 effect give @a[scores={cs2_inmatch=1}] minecraft:resistance 30 255 true
 bossbar set cs2:round visible true

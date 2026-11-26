@@ -10,6 +10,7 @@ execute unless score @s cs2_inmatch matches 1 run return 0
 execute unless score @s cs2_team matches 1..2 run function cs2:player/make_spec
 execute unless score @s cs2_team matches 1..2 run return 0
 execute unless score @s cs2_alive matches 1 run function cs2:player/make_spec
+execute unless score @s cs2_alive matches 1 if score #solo cs2_counts matches 0 run cs2fairplay watch
 execute unless score @s cs2_alive matches 1 run return 0
 
 function cs2:player/restore_health_if_due
