@@ -31,9 +31,9 @@ public final class FootstepSystem {
     private static final Map<UUID, State> STATES = new HashMap<>();
 
     /** 不同状态的步距（格）与传播距离（格）。 */
-    private static final double STEP_SNEAK = 1.55;
-    private static final double STEP_WALK = 1.00;
-    private static final double STEP_SPRINT = 1.30;
+    private static final double STEP_SNEAK = 1.65;
+    private static final double STEP_WALK = 2.10;
+    private static final double STEP_SPRINT = 2.55;
 
     private static final double RANGE_SNEAK = 9.0;
     private static final double RANGE_WALK = 20.0;
@@ -50,7 +50,7 @@ public final class FootstepSystem {
     }
 
     static void tick(ServerPlayer player, int now) {
-        if (player.isSpectator() || player.isDeadOrDying() || !inMatch(player)) {
+        if (player.isSpectator() || player.isDeadOrDying() || !inTeam(player)) {
             STATES.remove(player.getUUID());
             return;
         }
@@ -129,6 +129,7 @@ public final class FootstepSystem {
                 continue;
             }
             GrenadeManager.playCs2For(listener, level, at, id, volume, pitch);
+            Cs2Grenade.debug("footstep {} -> {} vol={}", id, listener.getScoreboardName(), volume);
         }
     }
 
@@ -166,14 +167,13 @@ public final class FootstepSystem {
         return "stone";
     }
 
-    private static boolean inMatch(ServerPlayer player) {
-        var sb = player.getScoreboard();
-        var obj = sb.getObjective("cs2_inmatch");
-        if (obj == null) {
+    /** T/CT 队员都会发出脚步声；解说（cs2_cast）不发，只负责听。 */
+    private static boolean inTeam(ServerPlayer player) {
+        var team = player.getTeam();
+        if (team == null) {
             return false;
         }
-        var info = sb.getPlayerScoreInfo(
-                net.minecraft.world.scores.ScoreHolder.forNameOnly(player.getScoreboardName()), obj);
-        return info != null && info.value() == 1;
+        String name = team.getName();
+        return "cs2_t".equals(name) || "cs2_ct".equals(name);
     }
 }

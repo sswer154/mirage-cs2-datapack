@@ -144,11 +144,7 @@ public class Cs2Grenade {
                 GrenadeManager.playerTick(p, now);
                 C4Plant.tick(p);
                 C4Defuse.tick(p);
-                if (!paused && roundIsLive) {
-                    FootstepSystem.tick(p, now);
-                } else {
-                    FootstepSystem.clear(p);
-                }
+                FootstepSystem.tick(p, now);
             }
         }
         if (event.getServer() != null) {
