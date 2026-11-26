@@ -104,6 +104,8 @@ require-resource-pack=false
 - 包点会额外生成一个悬浮的 `A 包点` / `B 包点` 文字。
 - 设置点时会自动 `forceload` 该区块，并把坐标写入 `cs2:map` 存储，避免远距离配置点所在区块卸载后，`match/start` 或 `map/switch` 找不到 marker。
 - 开赛时还会对五个关键点再次 `forceload`，确保比赛结束、换边时大厅/出生点 marker 仍在加载区块内；如果仍找不到大厅点，重新执行一次 `cs2:setup/lobby`。
+- 切换到命名地图后，可在出生点执行 `/cs2spawn add_t` 或 `/cs2spawn add_ct` 添加额外出生点。站在额外出生点两格内可执行 `/cs2spawn remove_t` 或 `/cs2spawn remove_ct` 移除。每回合优先随机分配未占用位置，名额不足时才复用。
+- 管理员可用 `/cs2spawn list` 查看当前地图两队的主出生点和额外出生点。加上 `t` 或 `ct` 只显示对应阵营。列表会显示各点的维度和方块坐标。
 - 如果升级前已经设置过出生点/包点，请先执行一次 `map/adopt` 把旧配置收编成命名地图（会补存坐标并 forceload）；或者站到对应位置重新执行一次设置命令。
 - 不要用 `/kill @e[type=marker]` 清实体，否则会删掉配置点。
 
