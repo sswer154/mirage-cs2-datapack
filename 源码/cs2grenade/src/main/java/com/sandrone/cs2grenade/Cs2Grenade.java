@@ -106,6 +106,7 @@ public class Cs2Grenade {
             C4Defuse.cancel(player);
             c4Sfx.playerLoggedOut(player);
             GrenadeManager.clearSmokeListener(player);
+            FootstepSystem.onLogout(player);
         }
     }
 
@@ -143,6 +144,11 @@ public class Cs2Grenade {
                 GrenadeManager.playerTick(p, now);
                 C4Plant.tick(p);
                 C4Defuse.tick(p);
+                if (!paused && roundIsLive) {
+                    FootstepSystem.tick(p, now);
+                } else {
+                    FootstepSystem.clear(p);
+                }
             }
         }
         if (event.getServer() != null) {
