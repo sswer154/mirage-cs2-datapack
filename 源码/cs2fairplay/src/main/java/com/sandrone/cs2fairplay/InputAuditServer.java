@@ -67,6 +67,12 @@ public final class InputAuditServer {
     }
 
     private static final class PlayerLog {
+        final String playerId;
+
+        PlayerLog(ServerPlayer player) {
+            playerId = AuditCompare.filePlayerId(player.getGameProfile().getName());
+        }
+
         AuditJournal journal;
         int slot = -1;
         ByteArrayOutputStream partial;
@@ -187,12 +193,12 @@ public final class InputAuditServer {
     private static void attach(MinecraftServer server, ServerPlayer player) {
         var match = active;
         var id = player.getUUID();
-        var log = match.players.computeIfAbsent(id, key -> new PlayerLog());
+        var log = match.players.computeIfAbsent(id, key -> new PlayerLog(player));
         if (log.connection != player) {
             if (log.journal != null) log.journal.close();
             log.connection = player;
             try {
-                log.journal = new AuditJournal(AuditCompare.file(match.path, id, ".server.tsv"));
+                log.journal = new AuditJournal(AuditCompare.file(match.path, id, log.playerId, ".server.tsv"));
                 log.journal.write(match.tick(server), round(server), "session", "enter");
             } catch (IOException e) {
                 log.journal = null;
@@ -262,7 +268,7 @@ public final class InputAuditServer {
             if (log.journal != null) log.journal.close();
             log.journal = null;
             log.connection = null;
-            writeStatus(match, id, match.upload ? "status=awaiting_client" : "status=upload_disabled");
+            writeStatus(match, id, log.playerId, match.upload ? "status=awaiting_client" : "status=upload_disabled");
             var player = server.getPlayerList().getPlayer(id);
             if (player != null && channel(player, AuditWire.Finish.TYPE)) {
                 PacketDistributor.sendToPlayer(player, new AuditWire.Finish(match.id, match.name, match.upload));
@@ -311,7 +317,7 @@ public final class InputAuditServer {
         log.comparing = true;
         UUID id = player.getUUID();
         MinecraftServer server = player.getServer();
-        CompletableFuture.supplyAsync(() -> AuditCompare.save(match.path, id, bytes)).thenAccept(ok -> server.execute(() -> {
+        CompletableFuture.supplyAsync(() -> AuditCompare.save(match.path, id, log.playerId, bytes)).thenAccept(ok -> server.execute(() -> {
             log.comparing = false;
             log.complete = ok;
             ServerPlayer connected = server.getPlayerList().getPlayer(id);
@@ -321,9 +327,9 @@ public final class InputAuditServer {
         }));
     }
 
-    private static void writeStatus(Match match, UUID id, String status) {
+    private static void writeStatus(Match match, UUID id, String playerId, String status) {
         try {
-            Files.writeString(AuditCompare.file(match.path, id, ".review.txt"), status + "\n");
+            Files.writeString(AuditCompare.file(match.path, id, playerId, ".review.txt"), status + "\n");
         } catch (IOException e) {
             LogUtils.getLogger().warn("Could not write CS2 audit status for {}", id, e);
         }

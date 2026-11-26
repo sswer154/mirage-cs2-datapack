@@ -32,7 +32,8 @@ public final class Cs2FairPlay {
         NeoForge.EVENT_BUS.register(InputAuditServer.class);
         TaCZAuditEvents.register();
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            FairPlayClient.register();
+            FairPlayClient.register(modBus);
+            SpectatorGunRenderer.register();
             NeoForge.EVENT_BUS.register(InputAuditClient.class);
         }
     }

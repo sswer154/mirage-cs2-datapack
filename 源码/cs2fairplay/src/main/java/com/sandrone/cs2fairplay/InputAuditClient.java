@@ -54,7 +54,10 @@ public final class InputAuditClient {
         } else if (journal == null || clock == null || !clock.match().equals(next.match())) {
             closeRecording();
             try {
-                journal = new AuditJournal(path(next.match(), next.name()));
+                Path file = path(next.match(), next.name());
+                Path legacy = auditDirectory().resolve(next.name() + "-" + next.match() + ".client.tsv");
+                if (!Files.exists(file) && Files.isRegularFile(legacy)) Files.move(legacy, file);
+                journal = new AuditJournal(file);
                 journal.write(next.tick(), next.round(), "session", "enter");
             } catch (IOException e) {
                 LogUtils.getLogger().warn("Could not open local CS2 input audit", e);
@@ -69,6 +72,9 @@ public final class InputAuditClient {
         if (!AuditWire.validName(event.name())) return;
         if (clock != null && clock.match().equals(event.match())) closeRecording();
         Path file = path(event.match(), event.name());
+        if (!Files.isRegularFile(file)) {
+            file = auditDirectory().resolve(event.name() + "-" + event.match() + ".client.tsv");
+        }
         if (event.upload() && Files.isRegularFile(file) && AUTHORIZED.putIfAbsent(event.match(), file) == null) {
             QUEUE.addLast(event.match());
         }
@@ -87,7 +93,12 @@ public final class InputAuditClient {
     }
 
     private static Path path(UUID id, String name) {
-        return FMLPaths.GAMEDIR.get().resolve("cs2fairplay-audit").resolve(name + "-" + id + ".client.tsv");
+        String playerId = AuditCompare.filePlayerId(Minecraft.getInstance().getUser().getName());
+        return auditDirectory().resolve(name + "-" + playerId + "-" + id + ".client.tsv");
+    }
+
+    private static Path auditDirectory() {
+        return FMLPaths.GAMEDIR.get().resolve("cs2fairplay-audit");
     }
 
     @SubscribeEvent
