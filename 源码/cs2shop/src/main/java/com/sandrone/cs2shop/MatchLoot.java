@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -11,10 +12,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.scores.ScoreHolder;
 import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 
 final class MatchLoot {
     private static final String LOOT_TAG = "cs2_match_loot";
+    private static final String HANDOFF_TAG = "cs2_gun_handoff";
     private static final String LOOT_ROUND = "cs2:loot_round";
     private static final String DROPPED_ROUND = "cs2:loot_dropped_round";
     private static final ScoreHolder ROUND = ScoreHolder.forNameOnly("#epoch");
@@ -84,8 +87,7 @@ final class MatchLoot {
     private static boolean drop(ServerPlayer victim, ItemStack source, ItemStack loot, int round) {
         var level = victim.serverLevel();
         var item = new ItemEntity(level, victim.getX(), victim.getY() + 0.25, victim.getZ(), loot);
-        item.addTag(LOOT_TAG);
-        item.getPersistentData().putInt(LOOT_ROUND, round);
+        markRoundLoot(item, round);
         item.setDefaultPickUpDelay();
         if (!level.addFreshEntity(item)) {
             return false;
@@ -94,16 +96,36 @@ final class MatchLoot {
         return true;
     }
 
+    static void onToss(ItemTossEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player) || !isRoundParticipant(player)
+                || !player.isAlive() || player.isSpectator() || score(player, STATE, "cs2_state") != 2
+                || GunPurchase.slotOf(event.getEntity().getItem()) == null) {
+            return;
+        }
+        int round = score(player, ROUND, "cs2_health_round");
+        if (round > 0) {
+            ItemEntity item = event.getEntity();
+            markRoundLoot(item, round);
+            item.addTag(HANDOFF_TAG);
+        }
+    }
+
+    private static void markRoundLoot(ItemEntity item, int round) {
+        item.addTag(LOOT_TAG);
+        item.getPersistentData().putInt(LOOT_ROUND, round);
+    }
+
     static void beforePickup(ItemEntityPickupEvent.Pre event) {
         if (!(event.getPlayer() instanceof ServerPlayer player)) {
             return;
         }
         ItemEntity item = event.getItemEntity();
+        boolean handoff = item.getTags().contains(HANDOFF_TAG);
         boolean activePlayer = player.isAlive() && !player.isSpectator() && isRoundParticipant(player);
         if (item.getTags().contains(LOOT_TAG)) {
             int phase = score(player, STATE, "cs2_state");
             int round = score(player, ROUND, "cs2_health_round");
-            if (phase < 3 || phase > 5 || round != item.getPersistentData().getInt(LOOT_ROUND)) {
+            if (phase < (handoff ? 2 : 3) || phase > 5 || round != item.getPersistentData().getInt(LOOT_ROUND)) {
                 event.setCanPickup(TriState.FALSE);
                 item.discard();
                 return;
@@ -118,11 +140,31 @@ final class MatchLoot {
         if (!activePlayer || slot == null) {
             return;
         }
-        if (stack.getCount() != 1 || !findGun(carriedBy(player), slot).isEmpty()) {
+        if (stack.getCount() != 1) {
             event.setCanPickup(TriState.FALSE);
             return;
         }
+        if (!findGun(carriedBy(player), slot).isEmpty()) {
+            event.setCanPickup(TriState.FALSE);
+            if (handoff) {
+                String category = slot == GunPurchase.Slot.PRIMARY ? "主武器" : "手枪";
+                showPickupHint(player, item, "已携带" + category + "，请先腾出该武器栏");
+            }
+            return;
+        }
+        if (handoff && player.getInventory().getFreeSlot() < 0) {
+            event.setCanPickup(TriState.FALSE);
+            showPickupHint(player, item, "背包已满，无法拾取枪械");
+            return;
+        }
         slot.mark(stack);
+    }
+
+    private static void showPickupHint(ServerPlayer player, ItemEntity item, String message) {
+        // Touching an ItemEntity can trigger a pickup attempt every tick.
+        if (!item.hasPickUpDelay() && player.tickCount % 20 == 0) {
+            player.displayClientMessage(Component.literal(message), true);
+        }
     }
 
     static void afterPickup(ItemEntityPickupEvent.Post event) {
