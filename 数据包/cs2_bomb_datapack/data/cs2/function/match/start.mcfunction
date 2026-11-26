@@ -1,5 +1,6 @@
 # 开始一场比赛
-gamerule keepInventory true
+execute unless function cs2:fairplay/check_start run return fail
+
 execute unless entity @e[type=marker,tag=cs2_spawn_t] run tellraw @a {"text":"无法开始：缺少 T 出生点。","color":"red"}
 execute unless entity @e[type=marker,tag=cs2_spawn_t] run return 0
 execute unless entity @e[type=marker,tag=cs2_spawn_ct] run tellraw @a {"text":"无法开始：缺少 CT 出生点。","color":"red"}
@@ -14,7 +15,7 @@ execute unless entity @e[type=marker,tag=cs2_lobby] run return 0
 execute unless entity @a[team=cs2_t] unless entity @a[team=cs2_ct] run tellraw @a {"text":"无法开始：至少需要一名玩家加入 T 或 CT。","color":"red"}
 execute unless entity @a[team=cs2_t] unless entity @a[team=cs2_ct] run return 0
 
-execute unless function cs2:fairplay/check_start run return fail
+gamerule keepInventory true
 
 # 开赛时把五个关键点所在区块全部强加载，避免比赛途中区块卸载导致
 # match/end 找不到大厅 marker、或 round/start 找不到出生点而把玩家留在原地。
