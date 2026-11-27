@@ -35,15 +35,7 @@ scoreboard players enable @s cs2_join_cast
 scoreboard players enable @s cs2_leave
 scoreboard players enable @s cs2_hud_toggle
 scoreboard players enable @s cs2_stats
-scoreboard players enable @s cs2_panel
-scoreboard players enable @s cs2_pause
-scoreboard players enable @s cs2_vote_restart
-scoreboard players enable @s cs2_vote_end
-scoreboard players enable @s cs2_practice_leave
-scoreboard players enable @s cs2_train_hold
-scoreboard players enable @s cs2_train_spawn
-scoreboard players enable @s cs2_match_pause
-scoreboard players enable @s cs2_match_resume
+function cs2:panel/enable_triggers
 function cs2:player/tag
 tellraw @s {"text":"欢迎！按加入按钮，或用 /trigger cs2_join_t / cs2_join_ct 加入比赛；解说用 /trigger cs2_join_cast。","color":"gold"}
 function cs2:player/on_join
