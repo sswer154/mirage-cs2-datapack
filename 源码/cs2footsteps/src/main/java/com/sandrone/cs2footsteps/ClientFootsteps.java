@@ -219,10 +219,10 @@ public final class ClientFootsteps {
             interval = 18;
         } else if (p.isSprinting()) {
             state = "sprint";
-            interval = 5;
+            interval = 6;
         } else {
             state = "run";
-            interval = 7;
+            interval = 8;
         }
         // 步频按 tick 计时，不受速度效果影响
         boolean moving = onGround && moved > 0.001 && moved < 1.5;
