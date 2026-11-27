@@ -125,7 +125,7 @@ public final class GrenadeManager {
     private static final List<Grenade> ACTIVE = new ArrayList<Grenade>();
     private static final String GRENADE_TAG = "cs2_grenade_visual";
     private static MinecraftServer serverRef;
-    private static final Map<String, PendingMask> PENDING_MASKS;
+    private static final Map<java.util.UUID, PendingMask> PENDING_MASKS;
     private static int sweepTimer;
     private static boolean purgedAfterStart;
     private static final Map<UUID, Integer> DRAW_READY;
@@ -387,22 +387,28 @@ public final class GrenadeManager {
                 ResourceLocation.fromNamespaceAndPath("cs2", id), SoundSource.PLAYERS));
     }
 
+    static void clearMaskOnReturn(ServerPlayer player) {
+        PENDING_MASKS.computeIfPresent(player.getUUID(), (id, mask) -> mask.clearNow());
+    }
+
     private static void processMasks() {
-        if (PENDING_MASKS.isEmpty() || serverRef == null) {
-            return;
-        }
+        if (PENDING_MASKS.isEmpty() || serverRef == null) return;
         int now = serverRef.getTickCount();
-        CommandSourceStack src = serverRef.createCommandSourceStack().withPermission(4).withSuppressedOutput();
-        ArrayList<String> done = new ArrayList<String>();
-        for (PendingMask m : List.copyOf(PENDING_MASKS.values())) {
-            var player = serverRef.getPlayerList().getPlayerByName(m.player());
-            boolean spectating = player != null && player.isSpectator();
-            if (!spectating && now < m.expireTick()) continue;
-            int fadeTicks = spectating ? 0 : m.fadeTicks();
-            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + fadeTicks + " @s");
-            done.add(m.player());
+        var pending = PENDING_MASKS.entrySet().iterator();
+        while (pending.hasNext()) {
+            var entry = pending.next();
+            var player = serverRef.getPlayerList().getPlayer(entry.getKey());
+            // An offline player cannot receive the clear command. Keep it until they return.
+            if (player == null || player.connection == null) continue;
+            var mask = entry.getValue();
+            boolean clearNow = mask.immediate() || player.isSpectator() || !player.isAlive() || !inMatch(player);
+            if (!clearNow && now < mask.expireTick()) continue;
+            var source = player.createCommandSourceStack().withPermission(4).withSuppressedOutput();
+            int fadeTicks = clearNow ? 0 : mask.fadeTicks();
+            serverRef.getCommands().performPrefixedCommand(source,
+                    "media mask " + mask.color() + " 0 " + fadeTicks + " @s");
+            pending.remove();
         }
-        done.forEach(PENDING_MASKS::remove);
     }
 
     static void tick(boolean paused) {
@@ -489,6 +495,7 @@ public final class GrenadeManager {
     }
 
     static void clearRoundGrenades(MinecraftServer server) {
+        PENDING_MASKS.replaceAll((id, mask) -> mask.clearNow());
         for (Grenade grenade : ACTIVE) {
             if (grenade.display != null) {
                 grenade.display.discard();
@@ -1655,8 +1662,8 @@ public final class GrenadeManager {
                 RING_STATE.put(p.getUUID(), new Ring(ringNow + ticks, fadeTicks, 0, ringVolume, 0));
             }
             String who = p.getGameProfile().getName();
-            PendingMask current = PENDING_MASKS.get(who);
-            if (current != null) {
+            PendingMask current = PENDING_MASKS.get(p.getUUID());
+            if (current != null && !current.immediate()) {
                 int nowTick0 = serverRef == null ? 0 : serverRef.getTickCount();
                 int remainingHold = current.expireTick() - nowTick0;
                 if (remainingHold > 0 && ticks <= remainingHold) continue;
@@ -1666,7 +1673,8 @@ public final class GrenadeManager {
             String maskCmd = "execute as " + who + " run media mask " + g.type.maskColor() + " " + alpha + " 0 @s";
             server.getCommands().performPrefixedCommand(src, maskCmd);
             if (ticks <= 0) continue;
-            PENDING_MASKS.put(who, new PendingMask(who, g.type.maskColor(), server.getTickCount() + ticks, Math.max(20, (int)Math.round(100.0 * intensity)), alpha, intensity));
+            PENDING_MASKS.put(p.getUUID(), new PendingMask(g.type.maskColor(), server.getTickCount() + ticks,
+                    Math.max(20, (int)Math.round(100.0 * intensity)), false));
         }
         level.sendParticles((ParticleOptions)ParticleTypes.END_ROD, pos.x, pos.y, pos.z, 40, 0.6, 0.6, 0.6, 0.25);
         if (g.display != null) {
@@ -1777,7 +1785,7 @@ public final class GrenadeManager {
     }
 
     static {
-        PENDING_MASKS = new HashMap<String, PendingMask>();
+        PENDING_MASKS = new HashMap<>();
         sweepTimer = 0;
         purgedAfterStart = false;
         DRAW_READY = new HashMap<UUID, Integer>();
@@ -1824,7 +1832,8 @@ public final class GrenadeManager {
         }
     }
 
-    private record PendingMask(String player, String color, int expireTick, int fadeTicks, int startAlpha, double strength) {
+    private record PendingMask(String color, int expireTick, int fadeTicks, boolean immediate) {
+        PendingMask clearNow() { return immediate ? this : new PendingMask(color, expireTick, fadeTicks, true); }
     }
 
     private record PendingThrow(int endTick, int slot, String util) {

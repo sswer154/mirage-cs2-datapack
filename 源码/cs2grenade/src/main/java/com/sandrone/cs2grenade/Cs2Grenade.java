@@ -55,6 +55,7 @@ public class Cs2Grenade {
         MapChunkTickets.register(modBus);
         RoundCheckpoint.register(modBus);
         RoundRewards.register();
+        NeoForge.EVENT_BUS.addListener(MatchStats::registerCommands);
         TaczHitAttribution.register(NeoForge.EVENT_BUS);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
         NeoForge.EVENT_BUS.addListener(this::onRightClickBlock);
@@ -109,6 +110,7 @@ public class Cs2Grenade {
             C4Defuse.cancel(player);
             c4Sfx.playerLoggedOut(player);
             GrenadeManager.clearSmokeListener(player);
+            GrenadeManager.clearMaskOnReturn(player);
         }
     }
 
