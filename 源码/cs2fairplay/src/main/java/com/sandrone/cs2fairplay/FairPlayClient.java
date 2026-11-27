@@ -14,6 +14,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -68,6 +69,16 @@ public final class FairPlayClient {
         if (locked && !mc.options.getCameraType().isFirstPerson()) {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
+    }
+
+    @SubscribeEvent
+    public static void movement(MovementInputUpdateEvent event) {
+        if (!watchingTeam || !event.getEntity().isSpectator()) return;
+        var input = event.getInput();
+        input.leftImpulse = 0;
+        input.forwardImpulse = 0;
+        input.jumping = false;
+        input.shiftKeyDown = false;
     }
 
     @SubscribeEvent

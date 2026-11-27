@@ -78,7 +78,7 @@
 | --- | --- | --- |
 | 服务端数据包目录 | [cs2_bomb_datapack.zip](数据包/cs2_bomb_datapack.zip) | 替换后执行 `/reload` |
 | 服务端模组目录 | [cs2grenade 与 cs2shop JAR](模组/mods) | 替换后重启服务端 |
-| 正式赛公平模组 | `cs2fairplay-0.1.11.jar`（同一文件安装到服务端和参赛客户端） | 双端同步替换后重启 |
+| 正式赛公平模组 | `cs2fairplay-0.1.12.jar`（同一文件安装到服务端和参赛客户端） | 双端同步替换后重启 |
 | 客户端脚步声 | `cs2footsteps-0.1.19.jar`（参赛者与解说客户端） | 替换后重启客户端 |
 | 客户端资源包目录 | [cs2_bomb_resourcepack.zip](资源包/cs2_bomb_resourcepack.zip) | 替换并启用后按 `F3+T` 重载 |
 

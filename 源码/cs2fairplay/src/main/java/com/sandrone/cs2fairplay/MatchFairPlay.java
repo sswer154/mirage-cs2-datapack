@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -162,6 +163,16 @@ public final class MatchFairPlay {
     }
 
     @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getEntity() instanceof ServerPlayer viewer && event.getTarget() instanceof ServerPlayer target
+                && viewer.isSpectator() && viewer.getCamera() == target
+                && isTeamViewer(viewer) && validTarget(viewer, target)) {
+            // Vanilla ignores an early camera packet if the target has not spawned on the client yet.
+            viewer.connection.send(new ClientboundSetCameraPacket(target));
+        }
+    }
+
+    @SubscribeEvent
     public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             WAITING.remove(player);
@@ -205,10 +216,6 @@ public final class MatchFairPlay {
 
     public static boolean blocksSpectatorTeleport(ServerPlayer viewer) {
         return viewer.isSpectator() && (isTeamViewer(viewer) || queuedViewer(viewer));
-    }
-
-    public static boolean isWaiting(ServerPlayer viewer) {
-        return WAITING.contains(viewer) && blocksSpectatorTeleport(viewer);
     }
 
     private static List<ServerPlayer> candidates(ServerPlayer viewer) {
