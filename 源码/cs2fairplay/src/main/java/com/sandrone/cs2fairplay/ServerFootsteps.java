@@ -16,9 +16,9 @@ public final class ServerFootsteps {
 
     private ServerFootsteps() {}
 
+    /** 只看是否在比赛队伍：不判断比赛阶段，也不看 cs2_alive。 */
     public static boolean customSource(ServerPlayer player) {
-        return MatchFairPlay.participant(player) && player.isAlive() && !player.isSpectator()
-                && MatchFairPlay.score(player.getServer(), player, "cs2_alive") == 1
+        return onTeam(player) && player.isAlive() && !player.isSpectator()
                 && Cs2FairPlay.supportsFootsteps(player);
     }
 
@@ -54,7 +54,13 @@ public final class ServerFootsteps {
     public static void stopped(ServerStoppedEvent event) { SENT.clear(); }
 
     private static boolean canHear(ServerPlayer player) {
-        return MatchFairPlay.participant(player)
+        return onTeam(player)
                 || (player.getTeam() != null && "cs2_cast".equals(player.getTeam().getName()));
+    }
+
+    private static boolean onTeam(ServerPlayer player) {
+        if (player.getTeam() == null) return false;
+        String name = player.getTeam().getName();
+        return "cs2_t".equals(name) || "cs2_ct".equals(name);
     }
 }
