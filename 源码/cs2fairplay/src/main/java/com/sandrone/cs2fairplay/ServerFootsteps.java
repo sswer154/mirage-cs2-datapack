@@ -64,8 +64,6 @@ public final class ServerFootsteps {
                     allowed == null ? List.of() : List.copyOf(allowed));
             if (!policy.equals(SENT.put(listener, policy))) {
                 PacketDistributor.sendToPlayer(listener, policy);
-                Cs2FairPlay.LOGGER.info("[footsteps] {} allowed={} custom={}", listener.getScoreboardName(),
-                        policy.sources().size(), customSource(listener));
             }
         }
     }
