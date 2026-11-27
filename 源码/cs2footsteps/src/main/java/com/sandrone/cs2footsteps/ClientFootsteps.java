@@ -34,6 +34,8 @@ public final class ClientFootsteps {
         int lastPlayedTick = -100;
         int lastJumpTick = -100;
         final Map<String, Integer> lastVariant = new HashMap<>();
+        int parity;
+        int jitterTicks;
         int stepTicks;
         boolean moving;
         int lastLandingTick = -100;
@@ -50,6 +52,12 @@ public final class ClientFootsteps {
             Map.entry("dirt.sneak", 4),
             Map.entry("dirt.sprint", 4),
             Map.entry("dirt.walk", 4),
+            Map.entry("dry_leaves.jump", 2),
+            Map.entry("dry_leaves.landing", 2),
+            Map.entry("dry_leaves.run", 4),
+            Map.entry("dry_leaves.sneak", 4),
+            Map.entry("dry_leaves.sprint", 4),
+            Map.entry("dry_leaves.walk", 4),
             Map.entry("fabric.jump", 2),
             Map.entry("fabric.landing", 2),
             Map.entry("fabric.run", 4),
@@ -104,6 +112,12 @@ public final class ClientFootsteps {
             Map.entry("metal_thin.sneak", 4),
             Map.entry("metal_thin.sprint", 4),
             Map.entry("metal_thin.walk", 4),
+            Map.entry("mud.jump", 2),
+            Map.entry("mud.landing", 2),
+            Map.entry("mud.run", 4),
+            Map.entry("mud.sneak", 4),
+            Map.entry("mud.sprint", 4),
+            Map.entry("mud.walk", 4),
             Map.entry("sand.jump", 2),
             Map.entry("sand.landing", 2),
             Map.entry("sand.run", 4),
@@ -128,6 +142,12 @@ public final class ClientFootsteps {
             Map.entry("water.sneak", 4),
             Map.entry("water.sprint", 4),
             Map.entry("water.walk", 4),
+            Map.entry("whole_glass.jump", 2),
+            Map.entry("whole_glass.landing", 2),
+            Map.entry("whole_glass.run", 4),
+            Map.entry("whole_glass.sneak", 4),
+            Map.entry("whole_glass.sprint", 4),
+            Map.entry("whole_glass.walk", 4),
             Map.entry("wood.jump", 2),
             Map.entry("wood.landing", 2),
             Map.entry("wood.run", 4),
@@ -224,8 +244,9 @@ public final class ClientFootsteps {
             state = "run";
             interval = 8;
         }
-        // 步频按 tick 计时，不受速度效果影响
-        boolean moving = onGround && moved > 0.001 && moved < 1.5;
+        // 步频按 tick 计时，不受速度效果影响；水中放慢
+        if (isWaterAt(level, p)) interval = Math.round(interval * 1.6f);
+        boolean moving = onGround && moved > 0.03 && moved < 1.5;
         if (!moving) {
             st.stepTicks = 0;
             st.moving = false;
@@ -240,9 +261,10 @@ public final class ClientFootsteps {
                 st.stepTicks = 0;
             }
             st.stepTicks++;
-            if (st.stepTicks >= interval && now - st.lastPlayedTick >= 1) {
+            if (st.stepTicks >= interval + st.jitterTicks && now - st.lastPlayedTick >= 1) {
                 st.stepTicks = 0;
                 st.lastPlayedTick = now;
+                st.jitterTicks = level.getRandom().nextInt(4) == 0 ? 1 : 0;
                 play(p, level, st, state, 1.0f, 0.03, false);
             }
         }
@@ -255,16 +277,24 @@ public final class ClientFootsteps {
         MatInfo mat = materialOf(level, p.getOnPos());
         String variantKey = mat.id + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
-        int variant = 1 + level.getRandom().nextInt(variants);
-        if (firstStep && variants > 1) {
-            variant = 1;
-        } else if (variants > 1) {
-            Integer last = st.lastVariant.get(variantKey);
-            if (last != null && last == variant) {
-                variant = variant % variants + 1;
+        boolean stepState = "run".equals(state) || "sprint".equals(state) || "sneak".equals(state);
+        int variant;
+        if (stepState && variants >= 4) {
+            // 左右脚交替，各用一半变体，节奏和音色更规律
+            int half = variants / 2;
+            int side = st.parity++ & 1;
+            variant = 1 + side * half + level.getRandom().nextInt(half);
+        } else {
+            variant = 1 + level.getRandom().nextInt(variants);
+            if (firstStep && variants > 1) {
+                variant = 1;
             }
         }
         if (variants > 1) {
+            Integer last = st.lastVariant.get(variantKey);
+            if (last != null && last == variant && variants > 1) {
+                variant = variant % variants + 1;
+            }
             st.lastVariant.put(variantKey, variant);
         }
         String id = "step." + mat.id + "." + state + "." + variant;
@@ -274,13 +304,20 @@ public final class ClientFootsteps {
         double x = p.getX() + vel.x * 0.18;
         double z = p.getZ() + vel.z * 0.18;
         double y = p.getY() + 0.05;
-        float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2)
-                * mat.pitchMul * (firstStep ? 1.06f : 1.0f);
-        float finalGain = gain * mat.gainMul * (firstStep ? 1.08f : 1.0f);
+        float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * 0.012)
+                * mat.pitchMul * (firstStep ? 1.03f : 1.0f);
+        float finalGain = gain * mat.gainMul * (firstStep ? 1.05f : 1.0f)
+                * (float) (0.985 + level.getRandom().nextDouble() * 0.03);
         level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, finalGain, pitch, false);
     }
 
     private record MatInfo(String id, float pitchMul, float gainMul) {
+    }
+
+    private static boolean isWaterAt(ClientLevel level, Player p) {
+        BlockPos feet = p.blockPosition();
+        return !level.getBlockState(feet).getFluidState().isEmpty()
+                || !level.getBlockState(feet.above()).getFluidState().isEmpty();
     }
 
     private static MatInfo materialOf(ClientLevel level, BlockPos pos) {
@@ -291,6 +328,10 @@ public final class ClientFootsteps {
         if (state.hasProperty(BlockStateProperties.WATERLOGGED)
                 && state.getValue(BlockStateProperties.WATERLOGGED)) {
             return new MatInfo("water", 1.0f, 0.9f);
+        }
+        if (!state.getFluidState().isEmpty()
+                || !level.getBlockState(pos.above()).getFluidState().isEmpty()) {
+            return new MatInfo("water", 0.96f, 1.0f);
         }
         if (sound == SoundType.METAL) {
             if (path.contains("bars") || path.contains("chain") || path.contains("grate")
@@ -306,28 +347,76 @@ public final class ClientFootsteps {
             }
             return new MatInfo("metal", 1.0f, 1.0f);
         }
-        if (sound == SoundType.WOOD) {
+        if (sound == SoundType.LADDER || sound == SoundType.SCAFFOLDING) {
+            return new MatInfo("wood_thin", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.ANVIL || sound == SoundType.NETHERITE_BLOCK
+                || sound == SoundType.HEAVY_CORE || sound == SoundType.VAULT
+                || sound == SoundType.TRIAL_SPAWNER) {
+            return new MatInfo("metal2", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.CHAIN || sound == SoundType.COPPER_GRATE) {
+            return new MatInfo("metal_thin", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.COPPER || sound == SoundType.COPPER_BULB) {
+            return new MatInfo("metal3", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.WOOD || sound == SoundType.BAMBOO || sound == SoundType.BAMBOO_WOOD
+                || sound == SoundType.CHERRY_WOOD || sound == SoundType.NETHER_WOOD) {
             return (path.contains("trapdoor") || path.contains("ladder") || path.contains("door"))
                     ? new MatInfo("wood_thin", 1.0f, 1.0f)
                     : new MatInfo("wood", 1.0f, 1.0f);
         }
-        if (sound == SoundType.GRASS) {
+        if (sound == SoundType.GRASS || sound == SoundType.WET_GRASS) {
+            if (path.contains("leaves")) {
+                return new MatInfo("dry_leaves", 1.0f, 1.0f);
+            }
             if (path.contains("short_grass") || path.contains("fern") || path.contains("azalea")
                     || path.contains("bush") || path.contains("tall_grass")) {
                 return new MatInfo("grasslow", 1.0f, 1.0f);
             }
             return new MatInfo("grass", 1.0f, 1.0f);
         }
+        if (sound == SoundType.AZALEA || sound == SoundType.FLOWERING_AZALEA
+                || sound == SoundType.MOSS || sound == SoundType.MOSS_CARPET
+                || sound == SoundType.PINK_PETALS || sound == SoundType.BIG_DRIPLEAF
+                || sound == SoundType.SMALL_DRIPLEAF || sound == SoundType.ROOTS
+                || sound == SoundType.HANGING_ROOTS || sound == SoundType.VINE
+                || sound == SoundType.CAVE_VINES || sound == SoundType.CROP
+                || sound == SoundType.HARD_CROP || sound == SoundType.NETHER_WART
+                || sound == SoundType.SWEET_BERRY_BUSH || sound == SoundType.BAMBOO_SAPLING) {
+            return new MatInfo("grasslow", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.AZALEA_LEAVES || sound == SoundType.CHERRY_LEAVES) {
+            return new MatInfo("grass", 1.0f, 1.0f);
+        }
         if (sound == SoundType.GRAVEL) {
+            if (path.contains("mud")) {
+                return new MatInfo("mud", 1.0f, 1.0f);
+            }
+            if (path.contains("dirt") || path.contains("farmland") || path.contains("podzol")
+                    || path.contains("mycelium") || path.contains("clay") || path.contains("rooted")) {
+                return new MatInfo("dirt", 1.0f, 1.0f);
+            }
             return new MatInfo("gravel", 1.0f, 1.0f);
         }
-        if (sound == SoundType.SAND || sound == SoundType.SOUL_SAND) {
+        if (sound == SoundType.SAND || sound == SoundType.SOUL_SAND
+                || sound == SoundType.SUSPICIOUS_SAND) {
             return new MatInfo("sand", 1.04f, 0.9f);
         }
-        if (sound == SoundType.GLASS) {
-            return new MatInfo("glass", 1.0f, 1.0f);
+        if (sound == SoundType.SUSPICIOUS_GRAVEL) {
+            return new MatInfo("gravel", 1.0f, 1.0f);
         }
-        if (sound == SoundType.WOOL) {
+        if (sound == SoundType.GLASS || sound == SoundType.AMETHYST
+                || sound == SoundType.AMETHYST_CLUSTER || sound == SoundType.SMALL_AMETHYST_BUD
+                || sound == SoundType.MEDIUM_AMETHYST_BUD || sound == SoundType.LARGE_AMETHYST_BUD) {
+            return new MatInfo("whole_glass", 1.0f, 1.0f);
+        }
+        if (sound == SoundType.WOOL || sound == SoundType.SLIME_BLOCK
+                || sound == SoundType.HONEY_BLOCK || sound == SoundType.SPONGE
+                || sound == SoundType.WET_SPONGE || sound == SoundType.COBWEB
+                || sound == SoundType.CANDLE || sound == SoundType.SHROOMLIGHT
+                || sound == SoundType.FROGLIGHT) {
             return new MatInfo("fabric", 1.0f, 1.0f);
         }
         if (sound == SoundType.SNOW) {
@@ -339,7 +428,29 @@ public final class ClientFootsteps {
             }
             return new MatInfo("snow", 1.0f, 1.0f);
         }
+        if (sound == SoundType.POWDER_SNOW) {
+            return new MatInfo("snow", 1.15f, 0.7f);
+        }
+        if (sound == SoundType.LILY_PAD) {
+            return new MatInfo("water", 0.96f, 1.0f);
+        }
+        if (sound == SoundType.MUD || sound == SoundType.PACKED_MUD
+                || sound == SoundType.MUD_BRICKS || sound == SoundType.MUDDY_MANGROVE_ROOTS
+                || sound == SoundType.ROOTED_DIRT || sound == SoundType.SOUL_SOIL) {
+            return new MatInfo("dirt", 1.0f, 1.0f);
+        }
+        // 模组自定义 SoundType：按其 step 音效 id 兜底
+        String step = sound.getStepSound().getLocation().getPath();
+        if (step.contains("wood") || step.contains("bamboo") || step.contains("cherry")) {
+            return new MatInfo("wood", 1.0f, 1.0f);
+        }
+        if (step.contains("gravel")) return new MatInfo("gravel", 1.0f, 1.0f);
+        if (step.contains("sand")) return new MatInfo("sand", 1.04f, 0.9f);
+        if (step.contains("grass")) return new MatInfo("grass", 1.0f, 1.0f);
+        if (step.contains("glass")) return new MatInfo("whole_glass", 1.0f, 1.0f);
+        if (step.contains("wool") || step.contains("cloth")) return new MatInfo("fabric", 1.0f, 1.0f);
+        if (step.contains("snow")) return new MatInfo("snow", 1.0f, 1.0f);
+        if (step.contains("metal") || step == "block.chain.step") return new MatInfo("metal", 1.0f, 1.0f);
         return new MatInfo("stone", 1.0f, 1.0f);
     }
-
 }

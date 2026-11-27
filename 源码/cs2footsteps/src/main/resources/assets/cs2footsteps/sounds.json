@@ -1863,6 +1863,390 @@
    }
   ]
  },
+ "step.whole_glass.walk.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.walk.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.walk.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.walk.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.run.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_run_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.run.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_run_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.run.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_run_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.run.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_run_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.whole_glass.sprint.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_sprint_1",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.whole_glass.sprint.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_sprint_2",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.whole_glass.sprint.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_sprint_3",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.whole_glass.sprint.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_sprint_4",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.whole_glass.landing.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_landing_1",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.whole_glass.landing.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_landing_2",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.whole_glass.jump.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_jump_1",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.whole_glass.jump.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_jump_2",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.dry_leaves.walk.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.walk.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.walk.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.walk.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.run.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_run_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.run.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_run_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.run.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_run_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.run.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_run_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.dry_leaves.sprint.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_sprint_1",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.dry_leaves.sprint.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_sprint_2",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.dry_leaves.sprint.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_sprint_3",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.dry_leaves.sprint.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_sprint_4",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.dry_leaves.landing.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_landing_1",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.dry_leaves.landing.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_landing_2",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.dry_leaves.jump.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_jump_1",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.dry_leaves.jump.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_jump_2",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.mud.walk.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.walk.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.walk.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.walk.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.run.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_run_1",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.run.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_run_2",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.run.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_run_3",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.run.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_run_4",
+    "attenuation_distance": 20
+   }
+  ]
+ },
+ "step.mud.sprint.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_sprint_1",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.mud.sprint.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_sprint_2",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.mud.sprint.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_sprint_3",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.mud.sprint.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_sprint_4",
+    "attenuation_distance": 26
+   }
+  ]
+ },
+ "step.mud.landing.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_landing_1",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.mud.landing.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_landing_2",
+    "attenuation_distance": 22
+   }
+  ]
+ },
+ "step.mud.jump.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_jump_1",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.mud.jump.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_jump_2",
+    "attenuation_distance": 12
+   }
+  ]
+ },
  "step.glass.sneak.1": {
   "sounds": [
    {
@@ -2323,6 +2707,102 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/sand_walk_4",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.whole_glass.sneak.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_1",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.whole_glass.sneak.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_2",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.whole_glass.sneak.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_3",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.whole_glass.sneak.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/whole_glass_walk_4",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.dry_leaves.sneak.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_1",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.dry_leaves.sneak.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_2",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.dry_leaves.sneak.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_3",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.dry_leaves.sneak.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/dry_leaves_walk_4",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.mud.sneak.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_1",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.mud.sneak.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_2",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.mud.sneak.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_3",
+    "attenuation_distance": 9
+   }
+  ]
+ },
+ "step.mud.sneak.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/mud_walk_4",
     "attenuation_distance": 9
    }
   ]

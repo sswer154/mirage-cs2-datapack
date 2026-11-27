@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.1.39'
 }
 
-version = '0.1.4'
+version = '0.1.19'
 group = 'com.sandrone.cs2footsteps'
 
 base {
