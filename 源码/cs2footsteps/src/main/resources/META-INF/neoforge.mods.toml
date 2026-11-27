@@ -4,7 +4,7 @@ license="All rights reserved"
 
 [[mods]]
 modId="cs2footsteps"
-version="0.1.1"
+version="0.1.2"
 displayName="CS2 Footsteps"
 description="CS2 服务器专用的客户端脚步声，音效内置在模组中。"
 
@@ -18,6 +18,6 @@ side="BOTH"
 [[dependencies.cs2footsteps]]
 modId="cs2fairplay"
 type="required"
-versionRange="[0.1.3,)"
+versionRange="[0.1.4,)"
 ordering="AFTER"
 side="CLIENT"

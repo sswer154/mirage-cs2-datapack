@@ -9,8 +9,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.SoundType;
@@ -21,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Computes local step cadence and resolves authorized cues to client sound assets. */
+/** Detects and plays footsteps using the movement already visible to this client. */
 public final class ClientFootsteps {
     private ClientFootsteps() {
     }
@@ -32,18 +30,13 @@ public final class ClientFootsteps {
         boolean wasOnGround = true;
         double airFall = 0.0;
         double lastGroundY = Double.NaN;
+        double peakY;
         int lastPlayedTick = -100;
         int lastJumpTick = -100;
-    }
-
-    private static final class Playback {
-        long lastStep = -100;
-        long lastSound;
         final Map<String, Integer> lastVariant = new HashMap<>();
     }
 
-    private static final Map<Integer, Playback> PLAYBACK = new HashMap<>();
-    private static State movement = new State();
+    private static final Map<Player, State> STATES = new HashMap<>();
     private static ClientLevel lastLevel;
     private static LocalPlayer lastLocalPlayer;
 
@@ -143,6 +136,7 @@ public final class ClientFootsteps {
 
     private static final double STEP_SNEAK = 1.20;
     private static final double STEP_WALK = 1.55;
+    private static final double STEP_SPRINT = 1.55;
 
     // sounds.json defines attenuation independently of the playback gain.
     private static final float GAIN_JUMP = 0.75f;
@@ -152,32 +146,29 @@ public final class ClientFootsteps {
         ClientLevel level = mc.level;
         LocalPlayer localPlayer = mc.player;
         if (lastLevel != level || lastLocalPlayer != localPlayer) {
-            PLAYBACK.clear();
-            movement = new State();
+            STATES.clear();
             lastLevel = level;
             lastLocalPlayer = localPlayer;
         }
-        if (level == null || localPlayer == null || mc.getConnection() == null
-                || !NetworkRegistry.hasChannel(mc.getConnection(), FootstepWire.Request.TYPE.id())) {
-            FootstepWire.resetLocal();
+        if (level == null || localPlayer == null || mc.isPaused()) {
             return;
         }
-        if (localPlayer.tickCount % 40 == 0) {
-            long now = level.getGameTime();
-            PLAYBACK.values().removeIf(state -> now - state.lastSound > 200);
+        var players = level.players();
+        STATES.keySet().retainAll(players);
+        int now = localPlayer.tickCount;
+        for (Player p : players) {
+            if (!FootstepWire.permits(level.dimension().location(), p.getId()) || p.isSpectator() || p.isDeadOrDying()) {
+                STATES.remove(p);
+                continue;
+            }
+            step(p, level, now);
         }
-        if (!FootstepWire.localCustom() || localPlayer.isSpectator() || !localPlayer.isAlive()) {
-            if (movement.last != null) movement = new State();
-            return;
-        }
-        if (!mc.isPaused()) step(localPlayer, localPlayer.tickCount);
     }
 
-    private static void step(Player p, int now) {
-        State st = movement;
+    private static void step(Player p, ClientLevel level, int now) {
+        State st = STATES.computeIfAbsent(p, k -> new State());
         Vec3 pos = p.position();
         boolean onGround = p.onGround();
-        Vec3 vel = p.getDeltaMovement();
 
         if (st.last == null || st.last.distanceToSqr(pos) >= 2.25) {
             st.last = pos;
@@ -185,20 +176,22 @@ public final class ClientFootsteps {
             st.airFall = 0;
             st.wasOnGround = onGround;
             st.lastGroundY = pos.y;
+            st.peakY = pos.y;
             return;
         }
 
-        if (st.wasOnGround && !onGround && vel.y > 0.15 && now - st.lastJumpTick > 8) {
+        if (st.wasOnGround && !onGround && pos.y - st.last.y > 0.15 && now - st.lastJumpTick > 8) {
             st.lastJumpTick = now;
-            PacketDistributor.sendToServer(new FootstepWire.Request(FootstepWire.JUMP));
+            play(p, level, st, "jump", GAIN_JUMP, 0.02, false);
         }
         if (!onGround) {
+            st.peakY = st.wasOnGround ? Math.max(st.lastGroundY, pos.y) : Math.max(st.peakY, pos.y);
             st.airFall = Math.max(st.airFall, p.fallDistance);
             st.accum = 0.0;
         } else if (!st.wasOnGround) {
             boolean steppedUp = !Double.isNaN(st.lastGroundY) && pos.y > st.lastGroundY + 0.4;
-            if (st.airFall > 0.7 || steppedUp) {
-                PacketDistributor.sendToServer(new FootstepWire.Request(FootstepWire.LANDING));
+            if (Math.max(st.airFall, st.peakY - pos.y) > 0.7 || steppedUp) {
+                play(p, level, st, "landing", 1.0f, 0.0, false);
             }
             st.airFall = 0.0;
         }
@@ -209,7 +202,19 @@ public final class ClientFootsteps {
         double dx = pos.x - st.last.x;
         double dz = pos.z - st.last.z;
         double moved = Math.sqrt(dx * dx + dz * dz);
-        double stepLen = p.isShiftKeyDown() ? STEP_SNEAK : STEP_WALK;
+        String state;
+        double stepLen;
+        if (p.isShiftKeyDown()) {
+            state = "sneak";
+            stepLen = STEP_SNEAK;
+        } else if (p.isSprinting()) {
+            state = "sprint";
+            stepLen = STEP_SPRINT;
+        } else {
+            state = "run";
+            stepLen = STEP_WALK;
+        }
+        boolean firstStep = now - st.lastPlayedTick > 20;
         if (onGround && moved > 0.001 && moved < 1.5) {
             if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
                 st.accum = stepLen * 0.55;
@@ -219,31 +224,15 @@ public final class ClientFootsteps {
         if (st.accum >= stepLen && now - st.lastPlayedTick >= 2) {
             st.accum = 0.0;
             st.lastPlayedTick = now;
-            PacketDistributor.sendToServer(new FootstepWire.Request(FootstepWire.STEP));
+            play(p, level, st, state, 1.0f, 0.03, firstStep);
         }
         st.last = pos;
         st.wasOnGround = onGround;
     }
 
-    static void play(FootstepWire.Cue cue) {
-        ClientLevel level = Minecraft.getInstance().level;
-        if (level == null) return;
-        String state = switch (cue.motion()) {
-            case FootstepWire.JUMP -> "jump";
-            case FootstepWire.LANDING -> "landing";
-            case FootstepWire.SNEAK -> "sneak";
-            case FootstepWire.SPRINT -> "sprint";
-            default -> "run";
-        };
-        long now = level.getGameTime();
-        var st = PLAYBACK.computeIfAbsent(cue.source(), unused -> new Playback());
-        st.lastSound = now;
-        boolean walking = cue.motion() != FootstepWire.JUMP && cue.motion() != FootstepWire.LANDING;
-        boolean firstStep = walking && now - st.lastStep > 20;
-        if (walking) st.lastStep = now;
-        float gain = cue.motion() == FootstepWire.JUMP ? GAIN_JUMP : 1.0f;
-        double pitchJitter = walking ? 0.03 : cue.motion() == FootstepWire.JUMP ? 0.02 : 0.0;
-        MatInfo mat = materialOf(level, cue.support());
+    private static void play(Player p, ClientLevel level, State st, String state,
+                             float gain, double pitchJitter, boolean firstStep) {
+        MatInfo mat = materialOf(level, p.getOnPos());
         String variantKey = mat.id + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
         int variant = 1 + level.getRandom().nextInt(variants);
@@ -261,10 +250,14 @@ public final class ClientFootsteps {
         String id = "step." + mat.id + "." + state + "." + variant;
         SoundEvent sound = SoundEvent.createVariableRangeEvent(
                 ResourceLocation.fromNamespaceAndPath(Cs2Footsteps.MODID, id));
+        Vec3 vel = p.position().subtract(st.last);
+        double x = p.getX() + vel.x * 0.18;
+        double z = p.getZ() + vel.z * 0.18;
+        double y = p.getY() + 0.05;
         float pitch = (float) (1.0 + (level.getRandom().nextDouble() - 0.5) * pitchJitter * 2)
                 * mat.pitchMul * (firstStep ? 1.06f : 1.0f);
         float finalGain = gain * mat.gainMul * (firstStep ? 1.08f : 1.0f);
-        level.playLocalSound(cue.x(), cue.y(), cue.z(), sound, SoundSource.PLAYERS, finalGain, pitch, false);
+        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, finalGain, pitch, false);
     }
 
     private record MatInfo(String id, float pitchMul, float gainMul) {
