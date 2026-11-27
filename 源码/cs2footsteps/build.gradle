@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly files("../../模组/mods/客户端模组/cs2fairplay-0.1.8.jar")
+    compileOnly files("../../模组/mods/客户端模组/cs2fairplay-0.1.9.jar")
     implementation "net.neoforged:neoforge:21.1.250"
 }
 

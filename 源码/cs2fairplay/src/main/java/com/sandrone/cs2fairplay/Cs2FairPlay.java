@@ -27,7 +27,7 @@ public final class Cs2FairPlay {
     public static final String MOD_ID = "cs2fairplay";
     private static final TypeMarker INSTALLED = TypeMarker.named("installed");
     private static final Set<String> MAP_MODS = Set.of(
-            "xaerominimap", "xaeroworldmap", "xaeroplus", "journeymap", "voxelmap", "map_atlases", "antiqueatlas");
+            "xaerominimap", "xaeroplus", "journeymap", "voxelmap", "map_atlases", "antiqueatlas");
 
     public Cs2FairPlay(IEventBus modBus) {
         modBus.addListener(this::registerPayloads);
