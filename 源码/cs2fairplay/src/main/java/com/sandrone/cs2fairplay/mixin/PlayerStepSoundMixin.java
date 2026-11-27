@@ -18,7 +18,8 @@ abstract class PlayerStepSoundMixin {
     private void cs2fairplay$useMatchStepSound(BlockPos pos, BlockState state, CallbackInfo callback) {
         if ((Object) this instanceof ServerPlayer player && ServerFootsteps.customSource(player)) {
             callback.cancel();
-        } else if ((Object) this instanceof Player player && player.isLocalPlayer() && FootstepWire.localCustom()) {
+        } else if ((Object) this instanceof Player player && player.level().isClientSide()
+                && FootstepWire.permits(player.level().dimension().location(), player.getId())) {
             callback.cancel();
         }
     }

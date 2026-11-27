@@ -128,5 +128,6 @@ public final class FairPlayClient {
     @SubscribeEvent
     public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
         applyPolicy(false, false);
+        FootstepWire.resetLocal();
     }
 }

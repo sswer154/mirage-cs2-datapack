@@ -46,7 +46,7 @@ public final class Cs2FairPlay {
         markers.playToServer(current.type(), StreamCodec.unit(current), (payload, context) -> {});
 
         if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || ModList.get().getModContainerById("cs2footsteps")
-                .filter(mod -> "0.1.1".equals(mod.getModInfo().getVersion().toString())).isPresent()) {
+                .filter(mod -> "0.1.2".equals(mod.getModInfo().getVersion().toString())).isPresent()) {
             FootstepWire.register(markers);
         }
 
@@ -70,8 +70,7 @@ public final class Cs2FairPlay {
     }
 
     static boolean supportsFootsteps(ServerPlayer player) {
-        return hasChannel(player, FootstepWire.Request.TYPE.id()) && hasChannel(player, FootstepWire.Cue.TYPE.id())
-                && hasChannel(player, FootstepWire.Policy.TYPE.id());
+        return hasChannel(player, FootstepWire.Policy.TYPE.id());
     }
 
     static boolean installed(ServerPlayer player) {

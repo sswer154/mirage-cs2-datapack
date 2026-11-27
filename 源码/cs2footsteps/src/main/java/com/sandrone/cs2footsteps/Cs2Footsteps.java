@@ -1,6 +1,5 @@
 package com.sandrone.cs2footsteps;
 
-import com.sandrone.cs2fairplay.FootstepWire;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -12,7 +11,6 @@ public final class Cs2Footsteps {
 
     public Cs2Footsteps() {
         if (FMLEnvironment.dist.isClient()) {
-            FootstepWire.setPlayback(ClientFootsteps::play);
             NeoForge.EVENT_BUS.addListener(Cs2Footsteps::tick);
         }
     }
