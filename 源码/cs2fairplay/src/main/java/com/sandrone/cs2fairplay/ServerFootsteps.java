@@ -2,6 +2,7 @@ package com.sandrone.cs2fairplay;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -31,10 +32,25 @@ public final class ServerFootsteps {
         return ALLOWED.contains(player.getUUID());
     }
 
-    /** 队伍成员，或被单独开启的玩家；仍要求存活且非旁观。 */
+    /** 参赛者，或被单独开启的玩家；仍要求存活且非旁观。 */
     public static boolean customSource(ServerPlayer player) {
-        return (onTeam(player) || allowed(player)) && player.isAlive() && !player.isSpectator()
+        return (MatchFairPlay.participant(player) || allowed(player)) && player.isAlive() && !player.isSpectator()
                 && Cs2FairPlay.supportsFootsteps(player);
+    }
+
+    @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (!(event.getEntity() instanceof ServerPlayer listener) || !(event.getTarget() instanceof ServerPlayer source)
+                || listener.serverLevel() != source.serverLevel() || !canHear(listener)
+                || !Cs2FairPlay.supportsFootsteps(listener) || !customSource(source)) return;
+        var dimension = listener.level().dimension().location();
+        var previous = SENT.get(listener);
+        var sources = new ArrayList<Integer>();
+        if (previous != null && previous.dimension().equals(dimension)) sources.addAll(previous.sources());
+        if (!sources.contains(source.getId())) sources.add(source.getId());
+        if (customSource(listener) && !sources.contains(listener.getId())) sources.add(listener.getId());
+        sources.sort(null);
+        sendPolicy(listener, new FootstepWire.Policy(dimension, List.copyOf(sources)));
     }
 
     @SubscribeEvent
@@ -62,10 +78,12 @@ public final class ServerFootsteps {
             if (allowed != null) allowed.sort(null);
             var policy = new FootstepWire.Policy(listener.level().dimension().location(),
                     allowed == null ? List.of() : List.copyOf(allowed));
-            if (!policy.equals(SENT.put(listener, policy))) {
-                PacketDistributor.sendToPlayer(listener, policy);
-            }
+            sendPolicy(listener, policy);
         }
+    }
+
+    private static void sendPolicy(ServerPlayer listener, FootstepWire.Policy policy) {
+        if (!policy.equals(SENT.put(listener, policy))) PacketDistributor.sendToPlayer(listener, policy);
     }
 
     @SubscribeEvent

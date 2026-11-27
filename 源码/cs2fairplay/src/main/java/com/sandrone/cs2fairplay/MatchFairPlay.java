@@ -158,6 +158,12 @@ public final class MatchFairPlay {
                 if (!policy.equals(SENT.put(player, policy))) {
                     PacketDistributor.sendToPlayer(player, policy);
                 }
+                if (policy.watchingTeam() && player.getCamera() instanceof ServerPlayer target
+                        && validTarget(player, target)) {
+                    SpectatorFov.update(player, target);
+                } else if (!restricted || policy.watchingTeam()) {
+                    SpectatorFov.forget(player);
+                }
             }
         }
     }
@@ -177,6 +183,7 @@ public final class MatchFairPlay {
         if (event.getEntity() instanceof ServerPlayer player) {
             WAITING.remove(player);
             SENT.remove(player);
+            SpectatorFov.forget(player);
         }
     }
 
@@ -184,6 +191,7 @@ public final class MatchFairPlay {
     public static void stopped(ServerStoppedEvent event) {
         WAITING.clear();
         SENT.clear();
+        SpectatorFov.stop();
     }
 
     static boolean watch(ServerPlayer viewer, int direction) {

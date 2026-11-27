@@ -9,7 +9,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.PlayerModelPart;
@@ -23,12 +25,24 @@ public final class SpectatorHands {
     private SpectatorHands() {}
 
     public static AbstractClientPlayer target(Minecraft game) {
+        var target = viewTarget(game);
+        return target != null && !game.options.hideGui && !target.isSleeping() ? target : null;
+    }
+
+    private static AbstractClientPlayer viewTarget(Minecraft game) {
         if (!FairPlayClient.watchingTeam() || game.player == null || !game.player.isSpectator()
-                || !game.options.getCameraType().isFirstPerson() || game.options.hideGui) return null;
+                || !game.options.getCameraType().isFirstPerson()) return null;
         return game.getCameraEntity() instanceof AbstractClientPlayer target && target != game.player
                 && target.isAlliedTo(game.player) && target.isAlive() && !target.isSpectator()
-                && !target.isSleeping() ? target : null;
+                ? target : null;
     }
+
+    public static ObservedShot shotSound(Entity shooter, ResourceLocation playedSound) {
+        return viewTarget(Minecraft.getInstance()) == shooter && shooter instanceof AbstractClientPlayer target
+                ? SpectatorGunRenderer.shotSound(target.getMainHandItem(), playedSound) : null;
+    }
+
+    public record ObservedShot(ResourceLocation sound, float volume) {}
 
     public static void render(Minecraft game, AbstractClientPlayer target, PoseStack pose,
                               MultiBufferSource.BufferSource buffers, float partialTick) {
@@ -42,7 +56,19 @@ public final class SpectatorHands {
             var hands = (SpectatorItemHandMixin) game.gameRenderer.itemInHandRenderer;
             ItemStack main = target.getMainHandItem();
             if (!SpectatorGunRenderer.render(target, main, pose, light, partialTick)) {
-                drawItem(hands, target, InteractionHand.MAIN_HAND, main, partialTick, pose, buffers, light);
+                if (main.isEmpty()) {
+                    if (!target.isInvisible()) {
+                        float swing = target.swingingArm == InteractionHand.MAIN_HAND ? target.getAttackAnim(partialTick) : 0;
+                        pose.pushPose();
+                        try {
+                            hands.cs2fairplay$renderPlayerArm(pose, buffers, light, 0, swing, target.getMainArm());
+                        } finally {
+                            pose.popPose();
+                        }
+                    }
+                } else {
+                    drawItem(hands, target, InteractionHand.MAIN_HAND, main, partialTick, pose, buffers, light);
+                }
                 ItemStack off = target.getOffhandItem();
                 if (!off.isEmpty()) {
                     drawItem(hands, target, InteractionHand.OFF_HAND, off, partialTick, pose, buffers, light);
