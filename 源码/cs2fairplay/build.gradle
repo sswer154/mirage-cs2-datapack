@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.1.39'
 }
 
-version = '0.1.6'
+version = '0.1.7'
 group = 'com.sandrone.cs2fairplay'
 
 base {

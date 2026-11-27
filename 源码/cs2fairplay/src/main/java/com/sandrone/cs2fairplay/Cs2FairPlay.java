@@ -1,5 +1,8 @@
 package com.sandrone.cs2fairplay;
 
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
+
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -20,6 +23,7 @@ import java.util.Set;
 
 @Mod(Cs2FairPlay.MOD_ID)
 public final class Cs2FairPlay {
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static final String MOD_ID = "cs2fairplay";
     private static final TypeMarker INSTALLED = TypeMarker.named("installed");
     private static final Set<String> MAP_MODS = Set.of(
@@ -46,7 +50,7 @@ public final class Cs2FairPlay {
         markers.playToServer(current.type(), StreamCodec.unit(current), (payload, context) -> {});
 
         if (FMLEnvironment.dist == Dist.DEDICATED_SERVER || ModList.get().getModContainerById("cs2footsteps")
-                .filter(mod -> "0.1.2".equals(mod.getModInfo().getVersion().toString())).isPresent()) {
+                .filter(mod -> footstepsCompatible(mod.getModInfo().getVersion().toString())).isPresent()) {
             FootstepWire.register(markers);
         }
 
@@ -67,6 +71,18 @@ public final class Cs2FairPlay {
 
     static boolean ready(ServerPlayer player) {
         return hasChannel(player, Policy.TYPE.id()) && versionMatches(player);
+    }
+
+    /** 兼容 0.1.2 及以上的 cs2footsteps。 */
+    private static boolean footstepsCompatible(String version) {
+        try {
+            String[] parts = version.split("\\.");
+            int minor = Integer.parseInt(parts[1]);
+            int patch = Integer.parseInt(parts[2]);
+            return minor > 1 || (minor == 1 && patch >= 2);
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     static boolean supportsFootsteps(ServerPlayer player) {
