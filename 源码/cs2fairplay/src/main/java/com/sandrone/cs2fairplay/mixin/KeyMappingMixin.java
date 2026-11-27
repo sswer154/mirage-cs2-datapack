@@ -19,7 +19,7 @@ abstract class KeyMappingMixin {
 
     @Unique private boolean cs2fairplay$allowed;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"))
     private void cs2fairplay$identifyOwner(CallbackInfo callback) {
         String keyName = getName();
         cs2fairplay$allowed = StackWalker.getInstance().walk(frames -> frames
