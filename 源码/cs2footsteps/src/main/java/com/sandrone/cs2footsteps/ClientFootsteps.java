@@ -34,6 +34,9 @@ public final class ClientFootsteps {
         int lastPlayedTick = -100;
         int lastJumpTick = -100;
         final Map<String, Integer> lastVariant = new HashMap<>();
+        int stepTicks;
+        boolean moving;
+        int lastLandingTick = -100;
     }
 
     private static final Map<Player, State> STATES = new HashMap<>();
@@ -101,6 +104,12 @@ public final class ClientFootsteps {
             Map.entry("metal_thin.sneak", 4),
             Map.entry("metal_thin.sprint", 4),
             Map.entry("metal_thin.walk", 4),
+            Map.entry("sand.jump", 2),
+            Map.entry("sand.landing", 2),
+            Map.entry("sand.run", 4),
+            Map.entry("sand.sneak", 4),
+            Map.entry("sand.sprint", 4),
+            Map.entry("sand.walk", 4),
             Map.entry("snow.jump", 2),
             Map.entry("snow.landing", 2),
             Map.entry("snow.run", 4),
@@ -191,6 +200,7 @@ public final class ClientFootsteps {
         } else if (!st.wasOnGround) {
             boolean steppedUp = !Double.isNaN(st.lastGroundY) && pos.y > st.lastGroundY + 0.4;
             if (Math.max(st.airFall, st.peakY - pos.y) > 0.7 || steppedUp) {
+                st.lastLandingTick = now;
                 play(p, level, st, "landing", 1.0f, 0.0, false);
             }
             st.airFall = 0.0;
@@ -203,28 +213,38 @@ public final class ClientFootsteps {
         double dz = pos.z - st.last.z;
         double moved = Math.sqrt(dx * dx + dz * dz);
         String state;
-        double stepLen;
+        int interval;
         if (p.isShiftKeyDown()) {
             state = "sneak";
-            stepLen = STEP_SNEAK;
+            interval = 18;
         } else if (p.isSprinting()) {
             state = "sprint";
-            stepLen = STEP_SPRINT;
+            interval = 5;
         } else {
             state = "run";
-            stepLen = STEP_WALK;
+            interval = 7;
         }
-        boolean firstStep = now - st.lastPlayedTick > 20;
-        if (onGround && moved > 0.001 && moved < 1.5) {
-            if (st.accum == 0.0 && moved > 0.02 && now - st.lastPlayedTick > 6) {
-                st.accum = stepLen * 0.55;
+        // 步频按 tick 计时，不受速度效果影响
+        boolean moving = onGround && moved > 0.001 && moved < 1.5;
+        if (!moving) {
+            st.stepTicks = 0;
+            st.moving = false;
+        } else {
+            if (!st.moving && now - st.lastLandingTick > 2) {
+                st.moving = true;
+                st.stepTicks = 0;
+                st.lastPlayedTick = now;
+                play(p, level, st, state, 1.0f, 0.03, true);
+            } else if (!st.moving) {
+                st.moving = true;
+                st.stepTicks = 0;
             }
-            st.accum += moved;
-        }
-        if (st.accum >= stepLen && now - st.lastPlayedTick >= 2) {
-            st.accum = 0.0;
-            st.lastPlayedTick = now;
-            play(p, level, st, state, 1.0f, 0.03, firstStep);
+            st.stepTicks++;
+            if (st.stepTicks >= interval && now - st.lastPlayedTick >= 1) {
+                st.stepTicks = 0;
+                st.lastPlayedTick = now;
+                play(p, level, st, state, 1.0f, 0.03, false);
+            }
         }
         st.last = pos;
         st.wasOnGround = onGround;
@@ -301,8 +321,8 @@ public final class ClientFootsteps {
         if (sound == SoundType.GRAVEL) {
             return new MatInfo("gravel", 1.0f, 1.0f);
         }
-        if (sound == SoundType.SAND) {
-            return new MatInfo("dirt", 1.0f, 1.0f);
+        if (sound == SoundType.SAND || sound == SoundType.SOUL_SAND) {
+            return new MatInfo("sand", 1.04f, 0.9f);
         }
         if (sound == SoundType.GLASS) {
             return new MatInfo("glass", 1.0f, 1.0f);
