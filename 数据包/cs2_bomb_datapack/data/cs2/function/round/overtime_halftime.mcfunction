@@ -12,4 +12,4 @@ execute if entity @e[type=marker,tag=cs2_lobby] run tp @a[scores={cs2_team=1..2}
 title @a[scores={cs2_team=1..2}] times 10 60 10
 title @a[scores={cs2_team=1..2,cs2_hud=1}] title {"text":"加时换边","color":"aqua","bold":true}
 title @a[scores={cs2_team=1..2,cs2_hud=1}] subtitle {"text":"还剩 3 回合","color":"gray"}
-tellraw @a[scores={cs2_team=1..2}] {"text":"加时赛换边，先到 16 分获胜。","color":"aqua"}
+tellraw @a[scores={cs2_team=1..2}] [{"text":"加时赛换边，先到 ","color":"aqua"},{"score":{"name":"#target","objective":"cs2_score_t"}},{"text":" 分获胜。"}]

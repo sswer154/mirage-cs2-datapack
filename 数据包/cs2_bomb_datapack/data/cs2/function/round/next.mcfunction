@@ -16,10 +16,10 @@ execute if score #state cs2_state matches 7 run return 0
 execute if score #round cs2_round matches 24 if score #t cs2_score_t = #ct cs2_score_ct if score overtime cs2_cfg matches 1 run function cs2:round/overtime_start
 execute if score #state cs2_state matches 6 run return 0
 
-# 加时第 3 回合结束换边
-execute if score #ot cs2_bomb_state matches 1 if score #round cs2_round matches 27 if score #ot_half cs2_bomb_state matches 0 run function cs2:round/overtime_halftime
+# 每组加时进行 3 回合后换边；打成 3:3 时开始下一组。
+execute if score #ot cs2_bomb_state matches 1 run function cs2:round/overtime_next
 execute if score #state cs2_state matches 6 run return 0
 
-# 下一回合（15-15 时第 31 回合为突然死亡）
+# 下一回合
 scoreboard players add #round cs2_round 1
 function cs2:round/start
