@@ -1,6 +1,7 @@
 package com.sandrone.cs2fairplay.mixin;
 
 import com.sandrone.cs2fairplay.FairPlayClient;
+import com.sandrone.cs2fairplay.TaCZKeyBindings;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +19,7 @@ abstract class KeyMappingMixin {
 
     @Unique private boolean cs2fairplay$allowed;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"))
     private void cs2fairplay$identifyOwner(CallbackInfo callback) {
         String keyName = getName();
         cs2fairplay$allowed = StackWalker.getInstance().walk(frames -> frames
@@ -43,12 +44,13 @@ abstract class KeyMappingMixin {
             return false;
         }
         // Preserve the actual game bindings even when their constructor was called through another mod.
-        var options = Minecraft.getInstance().options;
-        if (options == null) {
-            return true;
-        }
         var binding = (KeyMapping) (Object) this;
-        return binding != options.keyAttack && binding != options.keyUse && binding != options.keyInventory;
+        if (TaCZKeyBindings.isAimOrFire(binding)) {
+            return false;
+        }
+        var options = Minecraft.getInstance().options;
+        return options == null
+                || (binding != options.keyAttack && binding != options.keyUse && binding != options.keyInventory);
     }
 
     @Inject(method = "isDown", at = @At("HEAD"), cancellable = true)

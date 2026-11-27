@@ -5,7 +5,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -31,8 +30,6 @@ public final class InputAuditClient {
     private static int syncTick;
     private static int selected = -1;
     private static Upload sending;
-    private static final KeyMapping RELOAD = taczKey("ReloadKey", "RELOAD_KEY");
-    private static final KeyMapping FIRE = taczKey("ShootKey", "SHOOT_KEY");
 
     private static final class Upload {
         final UUID match;
@@ -152,8 +149,8 @@ public final class InputAuditClient {
             }
         }
         String edge = event.getAction() == GLFW.GLFW_PRESS ? ":down" : ":up";
-        if (RELOAD != null && RELOAD.matches(event.getKey(), event.getScanCode())) record("input", "tacz_reload" + edge);
-        if (FIRE != null && FIRE.matches(event.getKey(), event.getScanCode())) record("input", "tacz_fire" + edge);
+        if (TaCZKeyBindings.RELOAD != null && TaCZKeyBindings.RELOAD.matches(event.getKey(), event.getScanCode())) record("input", "tacz_reload" + edge);
+        if (TaCZKeyBindings.FIRE != null && TaCZKeyBindings.FIRE.matches(event.getKey(), event.getScanCode())) record("input", "tacz_fire" + edge);
     }
 
     @SubscribeEvent
@@ -163,18 +160,8 @@ public final class InputAuditClient {
         String edge = event.getAction() == GLFW.GLFW_PRESS ? ":down" : ":up";
         if (mc.options.keyAttack.matchesMouse(event.getButton())) record("input", "attack" + edge);
         if (mc.options.keyUse.matchesMouse(event.getButton())) record("input", "use" + edge);
-        if (RELOAD != null && RELOAD.matchesMouse(event.getButton())) record("input", "tacz_reload" + edge);
-        if (FIRE != null && FIRE.matchesMouse(event.getButton())) record("input", "tacz_fire" + edge);
-    }
-
-    private static KeyMapping taczKey(String type, String field) {
-        if (!ModList.get().isLoaded("tacz")) return null;
-        try {
-            return (KeyMapping) Class.forName("com.tacz.guns.client.input." + type).getField(field).get(null);
-        } catch (ReflectiveOperationException | LinkageError e) {
-            LogUtils.getLogger().warn("Could not resolve TaCZ audit binding {}", field, e);
-            return null;
-        }
+        if (TaCZKeyBindings.RELOAD != null && TaCZKeyBindings.RELOAD.matchesMouse(event.getButton())) record("input", "tacz_reload" + edge);
+        if (TaCZKeyBindings.FIRE != null && TaCZKeyBindings.FIRE.matchesMouse(event.getButton())) record("input", "tacz_fire" + edge);
     }
 
     private static boolean inGame(Minecraft mc) {
