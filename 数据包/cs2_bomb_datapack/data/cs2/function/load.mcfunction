@@ -36,7 +36,6 @@ execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives a
 execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_armor dummy
 execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_planter dummy
 execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_wclass dummy
-execute unless score #shop_ready cs2_const matches 1 run scoreboard objectives add cs2_shop trigger
 execute unless score #shop_ready cs2_const matches 1 run scoreboard players set #shop_ready cs2_const 1
 scoreboard players set #5 cs2_const 5
 scoreboard players set #20 cs2_const 20
@@ -95,23 +94,7 @@ execute unless score #testshop_ready cs2_const matches 1 run scoreboard objectiv
 execute unless score #testshop_ready cs2_const matches 1 run scoreboard players set #testshop cs2_testshop 0
 execute unless score #testshop_ready cs2_const matches 1 run scoreboard players set #testshop_ready cs2_const 1
 
-# 战术菜单/投票/练习退出：旧存档首次 reload 补建触发器
-execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_panel trigger
-execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_pause trigger
-execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_vote_restart trigger
-execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_vote_end trigger
-execute unless score #panel_ready cs2_const matches 1 run scoreboard objectives add cs2_practice_leave trigger
-execute unless score #panel_ready cs2_const matches 1 run scoreboard players set #panel_ready cs2_const 1
-
-# 训练模式：暂停倒计时 / 召唤训练敌人（旧存档首次 reload 补建）
-execute unless score #train_ready cs2_const matches 1 run scoreboard objectives add cs2_train_hold trigger
-execute unless score #train_ready cs2_const matches 1 run scoreboard objectives add cs2_train_spawn trigger
-execute unless score #train_ready cs2_const matches 1 run scoreboard players set #train_ready cs2_const 1
-
-# 比赛暂停：投票发起 + 随时解除（旧存档补建）
-execute unless score #mpause_ready cs2_const matches 1 run scoreboard objectives add cs2_match_pause trigger
-execute unless score #mpause_ready cs2_const matches 1 run scoreboard objectives add cs2_match_resume trigger
-execute unless score #mpause_ready cs2_const matches 1 run scoreboard players set #mpause_ready cs2_const 1
+function cs2:panel/setup_triggers
 
 # 拆弹检测：用原版统计 sneak_time 的每 tick 增量判断是否潜行，避免依赖玩家 NBT 的 Sneaking 字段
 execute unless score #sneak_ready cs2_const matches 1 run scoreboard objectives add cs2_sneak minecraft.custom:minecraft.sneak_time
@@ -151,15 +134,8 @@ execute if entity @a run scoreboard players enable @a cs2_join_cast
 execute if entity @a run scoreboard players enable @a cs2_leave
 execute if entity @a run scoreboard players enable @a cs2_hud_toggle
 execute if entity @a run scoreboard players enable @a cs2_stats
-execute if entity @a run scoreboard players enable @a cs2_panel
-execute if entity @a run scoreboard players enable @a cs2_pause
-execute if entity @a run scoreboard players enable @a cs2_vote_restart
-execute if entity @a run scoreboard players enable @a cs2_vote_end
-execute if entity @a run scoreboard players enable @a cs2_practice_leave
-execute if entity @a run scoreboard players enable @a cs2_train_hold
-execute if entity @a run scoreboard players enable @a cs2_train_spawn
-execute if entity @a run scoreboard players enable @a cs2_match_pause
-execute if entity @a run scoreboard players enable @a cs2_match_resume
+execute as @a run function cs2:panel/enable_triggers
+function cs2:practice/disable_dummy_drops
 # 升级清理：旧版商店木棍不再使用，移除在线玩家背包里的旧道具
 clear @a[scores={cs2_inmatch=1}] minecraft:stick[minecraft:custom_data~{cs2_shop_item:1b}]
 # 多地图系统：记录当前地图名；老存档首次 reload 时初始化为未选择

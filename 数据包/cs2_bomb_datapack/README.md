@@ -416,7 +416,7 @@ execute as @p run function cs2:join/leave
 - **投票结束战局**：`/trigger cs2_vote_end`。准备阶段和 live 阶段都可以发起；需要**所有 `cs2_inmatch=1` 的参赛者**同意；练习模式或暂停中不可用。
 - **练习模式退出**：准备阶段和 live 阶段的战术菜单里，`#solo=1/2` 时会显示 `[退出训练]`，等价于 `/trigger cs2_practice_leave`；只影响当前练习战局。
 - **训练模式 · 取消回合倒计时**：`#solo=1/2` 的准备阶段，战术菜单显示 `[取消回合倒计时]`，对应 `/trigger cs2_train_hold`；停住准备计时并隐藏 BossBar，方便自由练习。
-- **训练模式 · 召唤训练敌人**：`#solo=1/2` 的准备/live/炸弹阶段，战术菜单显示 `[召唤训练敌人]`，对应 `/trigger cs2_train_spawn`；在面前 3 格召唤无 AI、全套无附魔下界合金甲僵尸，带 `cs2_training_dummy` 标签。退出训练、结束比赛或停止比赛时统一清除。
+- **训练模式 · 召唤训练敌人**：`#solo=1/2` 的准备/live/炸弹阶段，战术菜单显示 `[召唤训练敌人]`，对应 `/trigger cs2_train_spawn`；在面前 3 格召唤无 AI、全套无附魔下界合金甲僵尸，死亡时不掉落物品，带 `cs2_training_dummy` 标签。退出训练、结束比赛或停止比赛时统一清除。
 
 ### HUD 显示开关
 
@@ -594,7 +594,7 @@ scoreboard players set #music_preset cs2_cfg 3
 - 其他武器全部在 `shop/items/*.mcfunction` 中，购买时扣款并给对应 TACZ 枪。
 - 护甲：`shop/items/armor_half.mcfunction`（半甲）、`armor_full.mcfunction`（全甲）。
 - 拆弹器：`shop/items/kit.mcfunction`（$400，CT 专属）。
-- 商店钻石与商店模组 JSON：`util/give_shop_item.mcfunction`、`data/cs2/shop/*.json`；旧 `shop/menu`、`shop/category/*`、`shop/trigger` 文件仅作历史保留，不再自动调用。
+- 商店钻石与商店模组 JSON：`util/give_shop_item.mcfunction`、`data/cs2/shop/*.json`；准备阶段也可从战术菜单打开商店。旧聊天商店按钮会打开现行界面，购买在界面中完成。
 - 默认装备：`shop/default_t.mcfunction`、`shop/default_ct.mcfunction`。
 - 经济结算：`econ/**.mcfunction`（初始 800、连败奖励、回合/击杀奖金）。
 
@@ -735,7 +735,7 @@ cs2_bomb_datapack/
 - `cs2:match/start`：开始比赛
 - `cs2:setup/*`：地图配置
 - 商店钻石：准备阶段自动发放，手持右键打开商店模组界面
-- `cs2:shop/trigger`：商店触发器分派
+- `cs2:shop/trigger`：在准备阶段打开当前商店界面
 - `cs2:econ/start`：初始化经济
 
 ---

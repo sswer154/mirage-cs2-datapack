@@ -1,0 +1,10 @@
+scoreboard players enable @s cs2_panel
+scoreboard players enable @s cs2_pause
+scoreboard players enable @s cs2_vote_restart
+scoreboard players enable @s cs2_vote_end
+scoreboard players enable @s cs2_practice_leave
+scoreboard players enable @s cs2_train_hold
+scoreboard players enable @s cs2_train_spawn
+scoreboard players enable @s cs2_match_pause
+scoreboard players enable @s cs2_match_resume
+scoreboard players enable @s cs2_shop

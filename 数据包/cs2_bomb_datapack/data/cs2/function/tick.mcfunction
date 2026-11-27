@@ -36,6 +36,7 @@ execute as @a[scores={cs2_train_hold=1..}] run function cs2:practice/hold_timer
 execute as @a[scores={cs2_train_spawn=1..}] run function cs2:practice/spawn_enemy
 execute as @a[scores={cs2_match_pause=1..}] run function cs2:panel/match_pause
 execute as @a[scores={cs2_match_resume=1..}] run function cs2:panel/match_resume
+execute as @a[scores={cs2_shop=1..}] run function cs2:shop/trigger
 
 # 兜底：比赛进行中但场上一个参赛者都没有，持续 10 秒就自动结束
 execute if score #state cs2_state matches 1..6 unless entity @a[scores={cs2_inmatch=1}] run scoreboard players add #empty cs2_empty 1

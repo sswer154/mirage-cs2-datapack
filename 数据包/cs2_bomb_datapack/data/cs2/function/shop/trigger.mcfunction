@@ -1,58 +1,7 @@
-# 商店触发器：1=主菜单，2..9=分类，100+=条目，99=关闭
-execute if score @s cs2_shop matches 2 run function cs2:shop/category/pistols
-execute if score @s cs2_shop matches 3 run function cs2:shop/category/smg
-execute if score @s cs2_shop matches 4 run function cs2:shop/category/rifles
-execute if score @s cs2_shop matches 5 run function cs2:shop/category/shotguns
-execute if score @s cs2_shop matches 6 run function cs2:shop/category/dmr
-execute if score @s cs2_shop matches 7 run function cs2:shop/category/mg
-execute if score @s cs2_shop matches 8 run function cs2:shop/category/sniper
-execute if score @s cs2_shop matches 9 run function cs2:shop/category/armor
-execute if score @s cs2_shop matches 10 run function cs2:shop/category/utility
-execute if score @s cs2_shop matches 1 run function cs2:shop/menu
-execute if score @s cs2_shop matches 100 run function cs2:shop/items/deagle
-execute if score @s cs2_shop matches 101 run function cs2:shop/items/cz75
-execute if score @s cs2_shop matches 102 run function cs2:shop/items/m1911
-execute if score @s cs2_shop matches 103 run function cs2:shop/items/handgun
-execute if score @s cs2_shop matches 104 run function cs2:shop/items/sw_model3
-execute if score @s cs2_shop matches 105 run function cs2:shop/items/mp5
-execute if score @s cs2_shop matches 106 run function cs2:shop/items/ump45
-execute if score @s cs2_shop matches 107 run function cs2:shop/items/vp1915
-execute if score @s cs2_shop matches 108 run function cs2:shop/items/p90
-execute if score @s cs2_shop matches 109 run function cs2:shop/items/ak_full
-execute if score @s cs2_shop matches 110 run function cs2:shop/items/ak
-execute if score @s cs2_shop matches 111 run function cs2:shop/items/scar_full
-execute if score @s cs2_shop matches 112 run function cs2:shop/items/scar
-execute if score @s cs2_shop matches 113 run function cs2:shop/items/m16_full
-execute if score @s cs2_shop matches 114 run function cs2:shop/items/m16
-execute if score @s cs2_shop matches 115 run function cs2:shop/items/m4a1_full
-execute if score @s cs2_shop matches 116 run function cs2:shop/items/m4a1
-execute if score @s cs2_shop matches 117 run function cs2:shop/items/qbz191
-execute if score @s cs2_shop matches 118 run function cs2:shop/items/aug
-execute if score @s cs2_shop matches 119 run function cs2:shop/items/g36k
-execute if score @s cs2_shop matches 120 run function cs2:shop/items/fnfal
-execute if score @s cs2_shop matches 121 run function cs2:shop/items/m870
-execute if score @s cs2_shop matches 122 run function cs2:shop/items/aa12
-execute if score @s cs2_shop matches 123 run function cs2:shop/items/db4
-execute if score @s cs2_shop matches 124 run function cs2:shop/items/xm1014
-execute if score @s cs2_shop matches 125 run function cs2:shop/items/xm1014_full
-execute if score @s cs2_shop matches 126 run function cs2:shop/items/ef46
-execute if score @s cs2_shop matches 127 run function cs2:shop/items/sks
-execute if score @s cs2_shop matches 128 run function cs2:shop/items/spr15
-execute if score @s cs2_shop matches 129 run function cs2:shop/items/m249
-execute if score @s cs2_shop matches 130 run function cs2:shop/items/lewis
-execute if score @s cs2_shop matches 131 run function cs2:shop/items/m1895
-execute if score @s cs2_shop matches 132 run function cs2:shop/items/springfield
-execute if score @s cs2_shop matches 133 run function cs2:shop/items/awm
-execute if score @s cs2_shop matches 137 run function cs2:shop/items/p90_hp
-execute if score @s cs2_shop matches 138 run function cs2:shop/items/qbz95
-execute if score @s cs2_shop matches 199 run function cs2:shop/items/obrez
-execute if score @s cs2_shop matches 134 run function cs2:shop/items/armor_half
-execute if score @s cs2_shop matches 135 run function cs2:shop/items/armor_full
-execute if score @s cs2_shop matches 136 run function cs2:shop/items/kit
-execute if score @s cs2_shop matches 201 run function cs2:shop/items/util_smoke
-execute if score @s cs2_shop matches 202 run function cs2:shop/items/util_he
-execute if score @s cs2_shop matches 203 run function cs2:shop/items/util_flash
-execute if score @s cs2_shop matches 204 run function cs2:shop/items/util_fire
-execute if score @s cs2_shop matches 99 run tellraw @s "商店已关闭。"
+# 现行战术菜单和历史聊天按钮共用入口，购买操作由商店 GUI 处理。
+execute if score @s cs2_shop matches 99 run return run function cs2:shop/close_trigger
 scoreboard players reset @s cs2_shop
 scoreboard players enable @s cs2_shop
+execute unless score #state cs2_state matches 2 run return run tellraw @s {"text":"商店仅在准备阶段开放。","color":"red"}
+execute unless entity @s[gamemode=!spectator,scores={cs2_inmatch=1,cs2_alive=1,cs2_team=1..2}] run return run tellraw @s {"text":"只有存活的参赛者可以打开商店。","color":"red"}
+cs2shop open cs2:main

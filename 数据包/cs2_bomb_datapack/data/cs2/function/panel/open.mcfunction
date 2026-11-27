@@ -1,4 +1,6 @@
+function cs2:panel/enable_triggers
 tellraw @s [{"text":"═══ 战术菜单 ═══","color":"aqua","bold":true}]
+execute if score #state cs2_state matches 2 if entity @s[gamemode=!spectator,scores={cs2_inmatch=1,cs2_alive=1,cs2_team=1..2}] run tellraw @s [{"text":"[打开商店]","color":"yellow","clickEvent":{"action":"run_command","value":"/trigger cs2_shop set 1"}}]
 
 function cs2:panel/recount_votes
 
