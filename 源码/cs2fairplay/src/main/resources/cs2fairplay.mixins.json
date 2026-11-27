@@ -4,6 +4,6 @@
   "package": "com.sandrone.cs2fairplay.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": ["ServerCameraMixin", "SpectatorTeleportMixin", "TaCZRequestMixin", "PlayerStepSoundMixin"],
-  "client": ["ClientCameraMixin", "KeyMappingMixin", "SpectatorItemHandMixin", "SpectatorArmPlayerMixin", "SpectatorViewMixin", "SpectatorTaCZArmMixin"],
+  "client": ["ClientCameraMixin", "KeyMappingMixin", "SpectatorItemHandMixin", "SpectatorArmPlayerMixin", "SpectatorViewMixin", "SpectatorTaCZArmMixin", "SpectatorTaCZSoundMixin", "SpectatorOutlineMixin"],
   "injectors": {"defaultRequire": 1}
 }

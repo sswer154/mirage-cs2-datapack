@@ -4,7 +4,7 @@ license="All rights reserved"
 
 [[mods]]
 modId="cs2fairplay"
-version="0.1.11"
+version="0.1.13"
 displayName="CS2 Fair Play"
 description="Competitive match eligibility, camera and spectator rules."
 

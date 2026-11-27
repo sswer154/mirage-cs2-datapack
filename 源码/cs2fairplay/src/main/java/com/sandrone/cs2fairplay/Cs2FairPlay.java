@@ -59,6 +59,7 @@ public final class Cs2FairPlay {
             return;
         }
         var protocol = event.registrar("3").optional();
+        SpectatorFov.register(protocol);
         AuditWire.register(event.registrar("1").optional());
         protocol.playToClient(Policy.TYPE, Policy.CODEC, (payload, context) ->
                 FairPlayClient.applyPolicy(payload.firstPerson(), payload.watchingTeam()));

@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -157,7 +158,23 @@ public final class MatchFairPlay {
                 if (!policy.equals(SENT.put(player, policy))) {
                     PacketDistributor.sendToPlayer(player, policy);
                 }
+                if (policy.watchingTeam() && player.getCamera() instanceof ServerPlayer target
+                        && validTarget(player, target)) {
+                    SpectatorFov.update(player, target);
+                } else if (!restricted || policy.watchingTeam()) {
+                    SpectatorFov.forget(player);
+                }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void startTracking(PlayerEvent.StartTracking event) {
+        if (event.getEntity() instanceof ServerPlayer viewer && event.getTarget() instanceof ServerPlayer target
+                && viewer.isSpectator() && viewer.getCamera() == target
+                && isTeamViewer(viewer) && validTarget(viewer, target)) {
+            // Vanilla ignores an early camera packet if the target has not spawned on the client yet.
+            viewer.connection.send(new ClientboundSetCameraPacket(target));
         }
     }
 
@@ -166,6 +183,7 @@ public final class MatchFairPlay {
         if (event.getEntity() instanceof ServerPlayer player) {
             WAITING.remove(player);
             SENT.remove(player);
+            SpectatorFov.forget(player);
         }
     }
 
@@ -173,6 +191,7 @@ public final class MatchFairPlay {
     public static void stopped(ServerStoppedEvent event) {
         WAITING.clear();
         SENT.clear();
+        SpectatorFov.stop();
     }
 
     static boolean watch(ServerPlayer viewer, int direction) {
@@ -205,10 +224,6 @@ public final class MatchFairPlay {
 
     public static boolean blocksSpectatorTeleport(ServerPlayer viewer) {
         return viewer.isSpectator() && (isTeamViewer(viewer) || queuedViewer(viewer));
-    }
-
-    public static boolean isWaiting(ServerPlayer viewer) {
-        return WAITING.contains(viewer) && blocksSpectatorTeleport(viewer);
     }
 
     private static List<ServerPlayer> candidates(ServerPlayer viewer) {

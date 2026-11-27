@@ -10,10 +10,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
@@ -25,6 +28,10 @@ public final class FairPlayClient {
     private static boolean locked;
     private static boolean watchingTeam;
     private static CameraType previous;
+    private static float worldFov;
+    private static float handsFov;
+    private static SpectatorFov.Sample sentFov;
+    private static SpectatorFov.Observed observedFov;
 
     private FairPlayClient() {}
 
@@ -41,9 +48,14 @@ public final class FairPlayClient {
     static void applyPolicy(boolean lock, boolean watchTeam) {
         var options = Minecraft.getInstance().options;
         watchingTeam = watchTeam;
-        if (!watchTeam) SpectatorHands.reset();
+        if (!watchTeam) {
+            SpectatorHands.reset();
+            observedFov = null;
+        }
         if (lock == locked) return;
         locked = lock;
+        sentFov = null;
+        worldFov = handsFov = 0;
         KeyMapping.releaseAll();
         if (lock) {
             previous = options.getCameraType();
@@ -54,7 +66,7 @@ public final class FairPlayClient {
         }
     }
 
-    static boolean watchingTeam() {
+    public static boolean watchingTeam() {
         return watchingTeam;
     }
 
@@ -68,6 +80,50 @@ public final class FairPlayClient {
         if (locked && !mc.options.getCameraType().isFirstPerson()) {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
+        if (locked && mc.player != null && !mc.player.isSpectator() && mc.getConnection() != null) {
+            var sample = new SpectatorFov.Sample(worldFov, handsFov, aspect(mc));
+            if (sample.valid() && !sample.equals(sentFov)) {
+                PacketDistributor.sendToServer(sample);
+                sentFov = sample;
+            }
+        } else {
+            sentFov = null;
+        }
+    }
+
+    static void acceptFov(SpectatorFov.Observed sample) { observedFov = sample; }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void fov(ViewportEvent.ComputeFov event) {
+        var mc = Minecraft.getInstance();
+        if (locked && mc.player != null && !mc.player.isSpectator() && event.getCamera().getEntity() == mc.player) {
+            float value = Math.round((float) event.getFOV() * 20) / 20f;
+            if (event.usedConfiguredFov()) worldFov = value;
+            else handsFov = value;
+            return;
+        }
+        var target = watchedPlayer(mc);
+        if (!watchingTeam || target == null || event.getCamera().getEntity() != target) return;
+        if (observedFov != null && observedFov.target() == target.getId()) {
+            var view = observedFov.fov();
+            event.setFOV(event.usedConfiguredFov() ? view.worldForAspect(aspect(mc)) : view.hands());
+        } else if (event.usedConfiguredFov()) {
+            event.setFOV(Math.min(event.getFOV(), 20));
+        }
+    }
+
+    private static float aspect(Minecraft mc) {
+        return (float) mc.getWindow().getWidth() / Math.max(1, mc.getWindow().getHeight());
+    }
+
+    @SubscribeEvent
+    public static void movement(MovementInputUpdateEvent event) {
+        if (!watchingTeam || !event.getEntity().isSpectator()) return;
+        var input = event.getInput();
+        input.leftImpulse = 0;
+        input.forwardImpulse = 0;
+        input.jumping = false;
+        input.shiftKeyDown = false;
     }
 
     @SubscribeEvent
