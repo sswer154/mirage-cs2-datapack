@@ -48,7 +48,7 @@ abstract class KeyMappingMixin {
             return true;
         }
         var binding = (KeyMapping) (Object) this;
-        return binding != options.keyAttack && binding != options.keyUse;
+        return binding != options.keyAttack && binding != options.keyUse && binding != options.keyInventory;
     }
 
     @Inject(method = "isDown", at = @At("HEAD"), cancellable = true)
