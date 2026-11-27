@@ -39,6 +39,17 @@ public final class MatchFairPlay {
         var root = Commands.literal("cs2fairplay").requires(source -> source.hasPermission(2))
                 .then(Commands.literal("ready").executes(context -> require(context.getSource().getPlayerOrException())))
                 .then(Commands.literal("check_start").executes(context -> checkStart(context.getSource())))
+        .then(Commands.literal("footsteps_all")
+                .then(Commands.literal("on").executes(context -> {
+                    ServerFootsteps.setAllSources(true);
+                    context.getSource().sendSuccess(() -> Component.literal("非队伍玩家也将使用塔科夫脚步"), true);
+                    return 1;
+                }))
+                .then(Commands.literal("off").executes(context -> {
+                    ServerFootsteps.setAllSources(false);
+                    context.getSource().sendSuccess(() -> Component.literal("恢复为仅比赛队伍使用塔科夫脚步"), true);
+                    return 1;
+                })))
                 .then(Commands.literal("check_formal").executes(context -> checkFormal(context.getSource())))
                 .then(Commands.literal("join_t").executes(context -> checkJoin(context.getSource(), "cs2_t")))
                 .then(Commands.literal("join_ct").executes(context -> checkJoin(context.getSource(), "cs2_ct")))

@@ -13,12 +13,24 @@ import java.util.Map;
 
 public final class ServerFootsteps {
     private static final Map<ServerPlayer, FootstepWire.Policy> SENT = new IdentityHashMap<>();
+    private static boolean allSources = false;
+
+    /** 是否让非比赛队伍玩家也使用塔科夫脚步。默认关闭，重启回落。 */
+    public static int setAllSources(boolean on) {
+        allSources = on;
+        SENT.clear();
+        return on ? 1 : 0;
+    }
+
+    public static boolean allSources() {
+        return allSources;
+    }
 
     private ServerFootsteps() {}
 
     /** 只看是否在比赛队伍：不判断比赛阶段，也不看 cs2_alive。 */
     public static boolean customSource(ServerPlayer player) {
-        return onTeam(player) && player.isAlive() && !player.isSpectator()
+        return (allSources || onTeam(player)) && player.isAlive() && !player.isSpectator()
                 && Cs2FairPlay.supportsFootsteps(player);
     }
 
@@ -54,6 +66,7 @@ public final class ServerFootsteps {
     public static void stopped(ServerStoppedEvent event) { SENT.clear(); }
 
     private static boolean canHear(ServerPlayer player) {
+        if (allSources) return true;
         return onTeam(player)
                 || (player.getTeam() != null && "cs2_cast".equals(player.getTeam().getName()));
     }
