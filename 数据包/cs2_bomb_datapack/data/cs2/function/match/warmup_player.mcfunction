@@ -1,3 +1,4 @@
+function cs2:player/sync_scale
 gamemode adventure @s
 clear @s
 effect clear @s

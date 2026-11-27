@@ -2,6 +2,7 @@
 # 说明：cs2_const 在每次 reload 时会报一次“already exists”，这是正常的；
 # 它只是为了在首次安装时创建一次基础内容。
 scoreboard objectives add cs2_const dummy
+scoreboard objectives add cs2_match_scaled dummy
 scoreboard objectives add cs2_health_round dummy
 scoreboard objectives add cs2_side_epoch dummy
 scoreboard objectives add cs2_formal_epoch dummy
