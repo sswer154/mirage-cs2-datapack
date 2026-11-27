@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev' version '7.1.39'
+}
+
+version = '0.1.8'
+group = 'com.sandrone.cs2fairplay'
+
+base {
+    archivesName = 'cs2fairplay'
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+repositories {
+    maven {
+        name = 'CleanroomMC'
+        url = 'https://maven.cleanroommc.com'
+    }
+    mavenCentral()
+    maven {
+        name = 'Aliyun'
+        url = 'https://maven.aliyun.com/repository/public'
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:21.1.250"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

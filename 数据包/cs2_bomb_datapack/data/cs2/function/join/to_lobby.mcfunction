@@ -8,6 +8,7 @@ scoreboard players set @s cs2_alive 0
 scoreboard players set @s cs2_carrier 0
 scoreboard players set @s cs2_kit 0
 scoreboard players set @s cs2_inmatch 0
+function cs2:player/sync_scale
 scoreboard players reset @s cs2_voted_restart
 scoreboard players reset @s cs2_voted_end
 scoreboard players reset @s cs2_ready_team
@@ -27,4 +28,5 @@ effect clear @s minecraft:slowness
 effect clear @s minecraft:resistance
 function cs2:util/jump_unlock
 gamemode adventure @s
+cs2spawn restore
 cs2inventory restore

@@ -314,6 +314,12 @@ public final class GrenadeManager {
         var it = RING_STATE.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();
+            var player = serverRef.getPlayerList().getPlayer(e.getKey());
+            if (player == null || player.isSpectator()) {
+                if (player != null) stopRingSounds(player);
+                it.remove();
+                continue;
+            }
             Ring r = e.getValue();
             int end = r.holdEnd() + r.fadeTicks();
             if (now >= end) {
@@ -327,11 +333,6 @@ public final class GrenadeManager {
                 continue;
             }
             if (now < r.nextTick()) {
-                continue;
-            }
-            var player = serverRef.getPlayerList().getPlayer(e.getKey());
-            if (player == null) {
-                it.remove();
                 continue;
             }
             boolean fading = now >= r.holdEnd();
@@ -394,8 +395,11 @@ public final class GrenadeManager {
         CommandSourceStack src = serverRef.createCommandSourceStack().withPermission(4).withSuppressedOutput();
         ArrayList<String> done = new ArrayList<String>();
         for (PendingMask m : List.copyOf(PENDING_MASKS.values())) {
-            if (now < m.expireTick()) continue;
-            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + m.fadeTicks() + " @s");
+            var player = serverRef.getPlayerList().getPlayerByName(m.player());
+            boolean spectating = player != null && player.isSpectator();
+            if (!spectating && now < m.expireTick()) continue;
+            int fadeTicks = spectating ? 0 : m.fadeTicks();
+            serverRef.getCommands().performPrefixedCommand(src, "execute as " + m.player() + " run media mask " + m.color() + " 0 " + fadeTicks + " @s");
             done.add(m.player());
         }
         done.forEach(PENDING_MASKS::remove);
@@ -609,7 +613,7 @@ public final class GrenadeManager {
 
     /** C4 拆除开始音：给附近玩家。 */
     static void playDefuseSound(ServerLevel level, Vec3 pos) {
-        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 1.0f, 1.0f);
+        GrenadeManager.playCs2(level, pos, "c4.defuse_start", 2.0f, 1.0f);
     }
 
     /** 数据包通过计分板信号触发的 C4 音效。 */
@@ -935,10 +939,10 @@ public final class GrenadeManager {
         Vec3 center = pos.add(0.0, 0.6, 0.0);
         // 确保烟片生成的区块已加载；远距离投掷时落点区块可能还没到手
         level.getChunkAt(BlockPos.containing(center));
-        int[] ringCounts = new int[]{1, 10, 24, 42, 60};
+        int[] ringCounts = new int[]{1, 8, 16, 28, 40};
         double[] ringRadii = new double[]{0.0, 0.25, 0.5, 0.75, 1.0};
         float[] ringScaleBoost = new float[]{1.0f, 1.04f, 1.03f, 1.02f, 1.0f};
-        float baseScale = 7.6f;
+        float baseScale = 8.1f;
         List<SmokeCard> cards = new ArrayList<>();
         int index = 0;
         for (int ring = 0; ring < ringCounts.length; ++ring) {
@@ -1011,6 +1015,9 @@ public final class GrenadeManager {
         placeFire(zone, 4.0);
         zone.lastPlaceTick = startTick;
         if (zone.nodes.isEmpty()) {
+            if (g.thrower instanceof ServerPlayer player) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("燃烧弹落点没有可蔓延的支撑面。"), true);
+            }
             level.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 8, 0.25, 0.15, 0.25, 0.03);
         } else {
             FIRE_ZONES.add(zone);
@@ -1036,6 +1043,9 @@ public final class GrenadeManager {
         FireSurface center = findFireCenter(zone.level, zone.center, origin, surfaces);
         if (center == null) {
             center = findFireCenterNearby(zone.level, zone.center, origin, surfaces);
+        }
+        if (center == null) {
+            center = findFireImpactSurface(zone.level, zone.center);
         }
         if (center == null) {
             return;
@@ -1099,6 +1109,15 @@ public final class GrenadeManager {
             }
         }
         return best;
+    }
+
+    private static FireSurface findFireImpactSurface(ServerLevel level, Vec3 impact) {
+        // 薄立板和台阶边缘可能支撑弹体，但不经过方块中心的火区采样点。
+        BlockHitResult hit = clipSmoke(level, null, impact.add(0.0, 0.1, 0.0), impact.add(0.0, -0.25, 0.0));
+        if (hit == null || hit.isInside() || hit.getDirection() != Direction.UP) return null;
+        Vec3 surface = hit.getLocation().add(0.0, FIRE_SURFACE_OFFSET, 0.0);
+        return fireRayClear(level, surface, surface.add(0.0, FIRE_HEADROOM, 0.0))
+                ? new FireSurface(BlockPos.containing(surface), surface) : null;
     }
 
     private static FireSurface findFireCenterNearby(ServerLevel level, Vec3 impact, BlockPos origin,
@@ -1554,7 +1573,7 @@ public final class GrenadeManager {
         }
         java.util.Map<java.util.UUID, Double> flashPower = new java.util.HashMap<>();
         for (ServerPlayer pp : level.players()) {
-            if (!GrenadeManager.inMatch(pp) || pp.position().distanceTo(pos) > range) {
+            if (pp.isSpectator() || !GrenadeManager.inMatch(pp) || pp.position().distanceTo(pos) > range) {
                 continue;
             }
             BlockHitResult h0 = level.clip(new ClipContext(pp.getEyePosition(), pos,
@@ -1613,7 +1632,7 @@ public final class GrenadeManager {
             double distFactor;
             double intensity;
             boolean blocked;
-            if (!GrenadeManager.inMatch(p) || p.position().distanceTo(pos) > range) continue;
+            if (p.isSpectator() || !GrenadeManager.inMatch(p) || p.position().distanceTo(pos) > range) continue;
             BlockHitResult hit = level.clip(new ClipContext(p.getEyePosition(), pos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, (Entity)p));
             boolean bl = blocked = hit.getType() == HitResult.Type.BLOCK;
             if (blocked && hit.getLocation().distanceTo(pos) < 0.6) {

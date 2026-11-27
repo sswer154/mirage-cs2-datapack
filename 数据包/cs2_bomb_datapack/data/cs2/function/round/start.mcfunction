@@ -2,6 +2,10 @@
 scoreboard players set #state cs2_state 2
 execute as @a[predicate=cs2:match_audio] run function cs2:music/stop
 function cs2:pvp/off
+# 投票重开可以跳过回合结算，先清掉上一轮已安放的 C4。
+kill @e[tag=cs2_bomb]
+kill @e[type=item_display,tag=cs2_c4_display]
+kill @e[type=armor_stand,tag=cs2_c4_hit]
 scoreboard players set #bomb cs2_bomb_state 0
 scoreboard players set #bomb_timer cs2_bomb_timer 0
 scoreboard players set #site cs2_site 0

@@ -8,7 +8,7 @@ scoreboard players set #mpause_t cs2_counts 0
 scoreboard players set #mpause_c cs2_counts 0
 team modify cs2_t friendlyFire false
 team modify cs2_ct friendlyFire false
-gamemode adventure @a[scores={cs2_inmatch=1}]
+gamemode adventure @a[scores={cs2_inmatch=1,cs2_alive=1}]
 effect give @a[scores={cs2_inmatch=1}] minecraft:slowness infinite 255 true
 effect give @a[scores={cs2_inmatch=1}] minecraft:resistance infinite 255 true
 bossbar set cs2:round visible false
@@ -17,6 +17,6 @@ title @a[scores={cs2_inmatch=1,cs2_hud=1}] title {"text":"比赛暂停","color":
 execute if entity @s[team=cs2_cast] run title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"解说发起 · 无时间限制 · 任意参赛者可解除","color":"gray"}
 execute unless entity @s[team=cs2_cast] run title @a[scores={cs2_inmatch=1,cs2_hud=1}] subtitle {"text":"双方同意 · 无时间限制 · 任意参赛者可解除","color":"gray"}
 playsound minecraft:block.note_block.pling master @a[scores={cs2_inmatch=1}]
-execute if entity @s[team=cs2_cast] run tellraw @a[scores={cs2_inmatch=1}] [{"text":"解说已开启比赛暂停。","color":"aqua","bold":true},{"text":" 任意参赛者可用战术菜单解除。","color":"gray"}]
+execute if entity @s[team=cs2_cast] run tellraw @a[scores={cs2_inmatch=1}] [{"selector":"@s","color":"aqua","bold":true},{"text":" 已开启比赛暂停。","color":"aqua","bold":true},{"text":" 任意参赛者可用战术菜单解除。","color":"gray"}]
 execute if entity @s[team=cs2_cast] run tellraw @s {"text":"已开启无时限比赛暂停。","color":"aqua"}
 execute unless entity @s[team=cs2_cast] run tellraw @a[scores={cs2_inmatch=1}] [{"text":"比赛暂停已生效。","color":"aqua","bold":true},{"text":" 打开战术菜单可随时解除。","color":"gray"}]

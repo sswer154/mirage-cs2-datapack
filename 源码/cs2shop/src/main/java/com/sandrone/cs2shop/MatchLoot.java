@@ -48,7 +48,7 @@ final class MatchLoot {
             ItemStack loot = gun.copyWithCount(1);
             slot.mark(loot);
             // Only guns bought by the current holder can be refunded by the shop.
-            GunPurchase.removePurchasePrice(loot);
+            GunPurchase.clearPurchase(loot);
             if (drop(victim, gun, loot, round)) {
                 setGunScore(victim, slot, !findGun(carried, slot).isEmpty());
                 dropped++;

@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="All rights reserved"
+
+[[mods]]
+modId="cs2footsteps"
+version="0.1.19"
+displayName="CS2 Footsteps"
+description="CS2 服务器专用的客户端脚步声，音效内置在模组中。"
+
+[[dependencies.cs2footsteps]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.250,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.cs2footsteps]]
+modId="cs2fairplay"
+type="required"
+versionRange="[0.1.4,)"
+ordering="AFTER"
+side="CLIENT"

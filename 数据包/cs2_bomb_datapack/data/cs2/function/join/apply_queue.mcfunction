@@ -1,3 +1,4 @@
+execute if score #solo cs2_counts matches 0 unless function cs2:fairplay/ready run return run function cs2:join/cancel_queue
 # 重连的老队员可能错过了中场换边。先对齐，再判断是否还需要换队。
 execute if score @s cs2_inmatch matches 1 run function cs2:join/sync_side
 execute if score @s cs2_inmatch matches 1 if score @s cs2_team = @s cs2_queued_team run return run function cs2:join/clear_queue
