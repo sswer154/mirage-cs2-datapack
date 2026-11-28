@@ -37,6 +37,7 @@ public final class ClientFootsteps {
         final Map<String, Integer> lastVariant = new HashMap<>();
         int parity;
         int jitterTicks;
+        boolean wasProne;
         int stepTicks;
         boolean moving;
         int lastLandingTick = -100;
@@ -47,6 +48,8 @@ public final class ClientFootsteps {
     private static LocalPlayer lastLocalPlayer;
 
     private static final Map<String, Integer> VARIANTS = Map.ofEntries(
+            Map.entry("body.prone_down", 4),
+            Map.entry("body.prone_up", 4),
             Map.entry("dirt.jump", 2),
             Map.entry("dirt.landing", 2),
             Map.entry("dirt.prone", 4),
@@ -259,8 +262,12 @@ public final class ClientFootsteps {
         double moved = Math.sqrt(dx * dx + dz * dz);
         String state;
         int interval;
-        if (p.getPose() == Pose.SWIMMING && !p.isInWater()) {
-            // TaCZ 趴下用 forced SWIMMING pose
+        boolean prone = p.getPose() == Pose.SWIMMING && !p.isInWater();
+        if (prone != st.wasProne) {
+            st.wasProne = prone;
+            playBody(p, level, st, prone ? "prone_down" : "prone_up");
+        }
+        if (prone) {
             state = "prone";
             interval = 30;
         } else if (p.isShiftKeyDown()) {
@@ -308,7 +315,7 @@ public final class ClientFootsteps {
             state = "walk";
             gain *= 0.45f;
         } else if ("prone".equals(state)) {
-            gain *= 0.55f;
+            gain *= 0.9f;
         }
         String variantKey = mat.id + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
@@ -353,6 +360,19 @@ public final class ClientFootsteps {
         BlockPos feet = p.blockPosition();
         return !level.getBlockState(feet).getFluidState().isEmpty()
                 || !level.getBlockState(feet.above()).getFluidState().isEmpty();
+    }
+
+    private static void playBody(Player p, ClientLevel level, State st, String kind) {
+        String variantKey = "body." + kind;
+        int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
+        int variant = 1 + level.getRandom().nextInt(variants);
+        String id = "step.body." + kind + "." + variant;
+        SoundEvent sound = SoundEvent.createVariableRangeEvent(
+                ResourceLocation.fromNamespaceAndPath(Cs2Footsteps.MODID, id));
+        Vec3 vel = p.getDeltaMovement();
+        double x = p.getX() + vel.x * 0.1;
+        double z = p.getZ() + vel.z * 0.1;
+        level.playLocalSound(x, p.getY() + 0.1, z, sound, SoundSource.PLAYERS, 0.9f, 1.0f, false);
     }
 
     private static MatInfo materialOf(ClientLevel level, BlockPos pos) {
