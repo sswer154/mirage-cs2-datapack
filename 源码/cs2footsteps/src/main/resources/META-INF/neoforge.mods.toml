@@ -4,9 +4,12 @@ license="All rights reserved"
 
 [[mods]]
 modId="cs2footsteps"
-version="0.1.19"
+version="0.1.20"
 displayName="CS2 Footsteps"
 description="CS2 服务器专用的客户端脚步声，音效内置在模组中。"
+
+[[mixins]]
+config="cs2footsteps.mixins.json"
 
 [[dependencies.cs2footsteps]]
 modId="neoforge"

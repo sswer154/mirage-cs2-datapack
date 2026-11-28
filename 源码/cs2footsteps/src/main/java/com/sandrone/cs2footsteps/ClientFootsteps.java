@@ -170,6 +170,11 @@ public final class ClientFootsteps {
     // sounds.json defines attenuation independently of the playback gain.
     private static final float GAIN_JUMP = 0.75f;
 
+    public static boolean replacesFootsteps(Player player) {
+        return player.level().isClientSide() && !player.isSpectator() && !player.isDeadOrDying()
+                && FootstepWire.permits(player.level().dimension().location(), player.getId());
+    }
+
     static void tick() {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
@@ -186,7 +191,7 @@ public final class ClientFootsteps {
         STATES.keySet().retainAll(players);
         int now = localPlayer.tickCount;
         for (Player p : players) {
-            if (!FootstepWire.permits(level.dimension().location(), p.getId()) || p.isSpectator() || p.isDeadOrDying()) {
+            if (!replacesFootsteps(p)) {
                 STATES.remove(p);
                 continue;
             }
