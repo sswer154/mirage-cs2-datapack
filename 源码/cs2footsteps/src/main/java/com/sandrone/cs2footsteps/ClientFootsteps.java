@@ -2,6 +2,7 @@ package com.sandrone.cs2footsteps;
 
 import com.sandrone.cs2fairplay.FootstepWire;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -350,7 +351,9 @@ public final class ClientFootsteps {
                 * mat.pitchMul * (firstStep ? 1.03f : 1.0f);
         float finalGain = gain * mat.gainMul * (firstStep ? 1.05f : 1.0f)
                 * (float) (0.985 + level.getRandom().nextDouble() * 0.03);
-        level.playLocalSound(x, y, z, sound, SoundSource.PLAYERS, finalGain, pitch, false);
+        Minecraft.getInstance().getSoundManager().play(
+                new EntityBoundSoundInstance(sound, SoundSource.PLAYERS, finalGain, pitch, p,
+                        level.getRandom().nextLong()));
     }
 
     private record MatInfo(String id, float pitchMul, float gainMul) {
@@ -372,7 +375,9 @@ public final class ClientFootsteps {
         Vec3 vel = p.getDeltaMovement();
         double x = p.getX() + vel.x * 0.1;
         double z = p.getZ() + vel.z * 0.1;
-        level.playLocalSound(x, p.getY() + 0.1, z, sound, SoundSource.PLAYERS, 0.9f, 1.0f, false);
+        Minecraft.getInstance().getSoundManager().play(
+                new EntityBoundSoundInstance(sound, SoundSource.PLAYERS, 0.9f, 1.0f, p,
+                        level.getRandom().nextLong()));
     }
 
     private static MatInfo materialOf(ClientLevel level, BlockPos pos) {
