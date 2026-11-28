@@ -4,7 +4,7 @@ license = "ARR"
 
 [[mods]]
 modId = "cs2grenade"
-version = "0.1.0"
+version = "0.1.1"
 displayName = "CS2 Grenade"
 description = '''服务端专用投掷物：物理在服务端计算，客户端只需资源包。'''
 displayTest = "IGNORE_SERVER_VERSION"
@@ -25,3 +25,10 @@ side = "SERVER"
 
 [[mixins]]
 config = "cs2grenade.mixins.json"
+
+[[dependencies.cs2grenade]]
+modId="cs2fairplay"
+type="optional"
+versionRange="[0.1.15,)"
+ordering="NONE"
+side="SERVER"

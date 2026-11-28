@@ -1,17 +1,21 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.sandrone.cs2grenade.GrenadeExplosionDamageSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +25,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
 /**
@@ -31,6 +36,8 @@ public final class KillFeedHandler {
     private static final ResourceLocation TACZ_BULLET = ResourceLocation.fromNamespaceAndPath("tacz", "bullet");
     private static final ResourceLocation TACZ_GUN = ResourceLocation.fromNamespaceAndPath("tacz", "modern_kinetic_gun");
     private static final ResourceLocation KILL_REWARD = ResourceLocation.fromNamespaceAndPath("cs2", "kill_reward");
+    private static final ResourceKey<DamageType> FIRE_DAMAGE = ResourceKey.create(
+            Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath("cs2", "fire"));
 
     private KillFeedHandler() {
     }
@@ -121,7 +128,7 @@ public final class KillFeedHandler {
     private static Component buildMessage(DamageSource source, ServerPlayer victim, int victimTeam,
                                           ServerPlayer killer, int killerTeam, boolean selfKill, Component weapon) {
         if (selfKill) {
-            String deathVerb = source.is(GrenadeManager.FIRE_DAMAGE_TYPE) ? "烧死了" : "炸死了";
+            String deathVerb = source.is(FIRE_DAMAGE) ? "烧死了" : "炸死了";
             MutableComponent result = Component.empty();
             result.append(victim.getDisplayName())
                     .append(Component.literal(" 被自己的").withStyle(ChatFormatting.GRAY))
@@ -196,14 +203,24 @@ public final class KillFeedHandler {
     }
 
     private static boolean isGrenadeDamage(DamageSource source) {
-        return source instanceof GrenadeExplosionDamageSource || source.is(GrenadeManager.FIRE_DAMAGE_TYPE);
+        return isHighExplosive(source) || source.is(FIRE_DAMAGE);
+    }
+
+    private static boolean isHighExplosive(DamageSource source) {
+        return ModList.get().isLoaded("cs2grenade") && GrenadeIntegration.isHighExplosive(source);
+    }
+
+    private static final class GrenadeIntegration {
+        static boolean isHighExplosive(DamageSource source) {
+            return source instanceof GrenadeExplosionDamageSource;
+        }
     }
 
     private static Component weaponLabel(DamageSource source, ItemStack weapon, ResourceLocation gunId) {
-        if (source instanceof GrenadeExplosionDamageSource) {
+        if (isHighExplosive(source)) {
             return Component.literal("高爆手雷").withStyle(ChatFormatting.GOLD);
         }
-        if (source.is(GrenadeManager.FIRE_DAMAGE_TYPE)) {
+        if (source.is(FIRE_DAMAGE)) {
             return Component.literal("燃烧弹").withStyle(ChatFormatting.GOLD);
         }
         if (gunId != null) {

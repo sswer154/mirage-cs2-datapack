@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import java.util.List;
 import net.minecraft.commands.Commands;
@@ -20,7 +20,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 /** Captures the loadout and economy before players can buy for the round. */
 final class RoundCheckpoint {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
-            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, Cs2Grenade.MODID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, MatchState.SAVED_NAMESPACE);
     private static final DeferredHolder<AttachmentType<?>, AttachmentType<CompoundTag>> CHECKPOINT =
             ATTACHMENTS.register("round_checkpoint", () -> AttachmentType.builder(() -> new CompoundTag())
                     .serialize(CompoundTag.CODEC).copyOnDeath().build());

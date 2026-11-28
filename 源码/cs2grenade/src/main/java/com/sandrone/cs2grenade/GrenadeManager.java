@@ -461,7 +461,7 @@ public final class GrenadeManager {
         }
         if (!isGrenade || player.getInventory().selected != pt.slot() || !pt.util().equals(held)) {
             PENDING_THROW.remove(player.getUUID());
-            MatchInventory.syncContents(player);
+            resyncThrowInventory(player);
             return;
         }
         if (now < pt.endTick()) {
@@ -472,7 +472,14 @@ public final class GrenadeManager {
             int pick = 1 + ThreadLocalRandom.current().nextInt(3);
             GrenadeManager.playCs2((ServerLevel)player.level(), player.position(), "grenade.fuze_" + pick, 0.55f, 1.0f);
         } else {
-            MatchInventory.syncContents(player);
+            resyncThrowInventory(player);
+        }
+    }
+
+    private static void resyncThrowInventory(ServerPlayer player) {
+        player.inventoryMenu.broadcastFullState();
+        if (player.containerMenu != player.inventoryMenu) {
+            player.containerMenu.broadcastFullState();
         }
     }
 

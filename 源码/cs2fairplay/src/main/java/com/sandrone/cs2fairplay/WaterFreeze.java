@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import java.util.HashMap;
 import java.util.Map;

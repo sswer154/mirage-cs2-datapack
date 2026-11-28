@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.gradle.userdev' version '7.1.39'
 }
 
-version = '0.1.14'
+version = '0.1.15'
 group = 'com.sandrone.cs2fairplay'
 
 base {
@@ -27,6 +27,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly files("../../模组/mods/服务端模组/cs2grenade-0.1.1.jar")
     implementation "net.neoforged:neoforge:21.1.250"
 }
 

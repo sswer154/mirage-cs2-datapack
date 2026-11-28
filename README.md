@@ -65,7 +65,7 @@
 - 自动比赛状态与比分播报面向参赛者和解说，解说可在准备阶段直接开启无时限暂停。
 - M1895 和 AWM 使用 `tacz:scope_standard_8x`，春田 1873 使用 `tacz:scope_1873_6x`。解说身份获得永久夜视与隐身，离开时清除。
 - 训练模式战术菜单增加取消回合倒计时与召唤训练敌人，退出训练时清理训练靶。
-- 击杀播报通过 `LivingDeathEvent` 读 `DamageSource` 归属，高爆/燃烧显示对应武器名，只发给参赛者与解说。
+- 击杀播报由服务端公平模组处理，通过 `LivingDeathEvent` 读 `DamageSource` 归属，高爆/燃烧显示对应武器名，只发给参赛者与解说。
 
 ## 八、调试日志
 
@@ -77,8 +77,8 @@
 | 安装位置 | 文件 | 生效方式 |
 | --- | --- | --- |
 | 服务端数据包目录 | [cs2_bomb_datapack.zip](数据包/cs2_bomb_datapack.zip) | 替换后执行 `/reload` |
-| 服务端模组目录 | [cs2grenade 与 cs2shop JAR](模组/mods) | 替换后重启服务端 |
-| 正式赛公平模组 | `cs2fairplay-0.1.14.jar`（同一文件安装到服务端和参赛客户端） | 双端同步替换后重启 |
+| 服务端模组目录 | [cs2grenade-0.1.1.jar 与 cs2shop JAR](模组/mods/服务端模组) | 替换后重启服务端 |
+| 正式赛公平模组 | `cs2fairplay-0.1.15.jar`（同一文件安装到服务端和参赛客户端） | 双端同步替换后重启 |
 | 客户端脚步声 | `cs2footsteps-0.1.20.jar`（参赛者与解说客户端） | 替换后重启客户端 |
 | 客户端资源包目录 | [cs2_bomb_resourcepack.zip](资源包/cs2_bomb_resourcepack.zip) | 替换并启用后按 `F3+T` 重载 |
 

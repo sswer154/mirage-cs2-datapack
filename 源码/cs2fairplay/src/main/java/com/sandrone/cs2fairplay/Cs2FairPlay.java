@@ -31,6 +31,7 @@ public final class Cs2FairPlay {
 
     public Cs2FairPlay(IEventBus modBus) {
         modBus.addListener(this::registerPayloads);
+        MatchState.register(modBus);
         NeoForge.EVENT_BUS.register(MatchFairPlay.class);
         NeoForge.EVENT_BUS.register(MatchAudit.class);
         NeoForge.EVENT_BUS.register(InputAuditServer.class);
