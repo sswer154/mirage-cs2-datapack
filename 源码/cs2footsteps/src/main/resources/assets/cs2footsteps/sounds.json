@@ -2247,6 +2247,614 @@
    }
   ]
  },
+ "step.stone.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_stone_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.stone.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_stone_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.stone.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_stone_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.stone.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_stone_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood_thin.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_thin_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood_thin.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_thin_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood_thin.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_thin_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.wood_thin.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_wood_thin_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal2.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal2_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal2.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal2_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal2.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal2_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal2.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal2_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal3.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal3_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal3.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal3_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal3.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal3_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal3.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal3_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal_thin.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_thin_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal_thin.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_thin_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal_thin.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_thin_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.metal_thin.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_metal_thin_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grass.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grass_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grass.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grass_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grass.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grass_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grass.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grass_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grasslow.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grasslow_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grasslow.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grasslow_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grasslow.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grasslow_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.grasslow.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_grasslow_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dry_leaves.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dry_leaves_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dry_leaves.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dry_leaves_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dry_leaves.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dry_leaves_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dry_leaves.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dry_leaves_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dirt.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dirt_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dirt.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dirt_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dirt.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dirt_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.dirt.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_dirt_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.mud.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_mud_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.mud.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_mud_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.mud.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_mud_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.mud.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_mud_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.sand.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_sand_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.sand.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_sand_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.sand.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_sand_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.sand.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_sand_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.gravel.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_gravel_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.gravel.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_gravel_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.gravel.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_gravel_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.gravel.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_gravel_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.glass.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_glass_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.glass.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_glass_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.glass.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_glass_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.glass.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_glass_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.whole_glass.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_whole_glass_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.whole_glass.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_whole_glass_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.whole_glass.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_whole_glass_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.whole_glass.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_whole_glass_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.snow.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_snow_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.snow.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_snow_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.snow.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_snow_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.snow.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_snow_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.water.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_water_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.water.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_water_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.water.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_water_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.water.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_water_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.fabric.prone.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_fabric_1",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.fabric.prone.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_fabric_2",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.fabric.prone.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_fabric_3",
+    "attenuation_distance": 7
+   }
+  ]
+ },
+ "step.fabric.prone.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/prone_fabric_4",
+    "attenuation_distance": 7
+   }
+  ]
+ },
  "step.glass.sneak.1": {
   "sounds": [
    {
