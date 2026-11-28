@@ -269,7 +269,7 @@ public final class ClientFootsteps {
         }
         if (prone) {
             state = "prone";
-            interval = 30;
+            interval = 18;
         } else if (p.isShiftKeyDown()) {
             state = "sneak";
             interval = 18;
