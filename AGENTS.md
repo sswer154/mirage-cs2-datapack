@@ -36,7 +36,7 @@
 - 建好后用 `gh issue list` 确认编号，后续所有提交都要引用它。
 
 ```bash
-gh issue create --title "[bug] 烟雾弹落地后不放烟" --body-file issue.md
+gh issue create --title "[bug] 烟雾弹落地后不放烟" --body-file issue.md --label bug
 ```
 
 ### 1.2 GitHub Issue 状态
@@ -58,6 +58,26 @@ gh issue create --title "[bug] 烟雾弹落地后不放烟" --body-file issue.md
 - Done、Not planned、Duplicate 是关闭状态，选择它们会关闭 Issue。待现场复测或修复只覆盖部分情况时，保留开放状态并写明尚未验证的场景。历史 Issue 缺少状态时，在下次实际处理时按进度补上。
 
 参见 [GitHub Issue 状态](https://docs.github.com/en/issues/tracking-your-work-with-issues/learning-about-issues/about-issue-statuses) 和 [GitHub PR 关联与自动关单](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)。
+
+### 1.3 GitHub Issue 标签
+
+创建 Issue 时从仓库已有的 Labels 里选符合内容的标签。标签用于筛选，标题前缀和 Status 仍按第 1.1、1.2 节填写。
+
+| 标签 | 何时使用 |
+| --- | --- |
+| `bug` | 已观察到异常行为，仍可继续补充复现信息。 |
+| `enhancement` | 新功能、游戏规则调整或对已有功能的改进。 |
+| `documentation` | 修改 README、工作守则或其他文档。 |
+| `question` | 主要目的是询问用法或确认规则。 |
+| `accessibility` | 涉及无障碍使用，例如阅读、听觉或操作障碍。 |
+| `good first issue` | 范围明确、适合新协作者上手。 |
+| `help wanted` | 需要协作者提供额外帮助。 |
+| `invalid` | 经核实，报告的前提有误或事项不适用。 |
+| `duplicate` | 已确认与另一条 Issue 重复。 |
+| `wontfix` | 维护者明确决定不修复或不采纳。 |
+
+- 按内容选择主标签，确有需要时可以加其他适用标签。确认重复时关联原 Issue。决定不再计划处理时写明原因。两种情况均按第 1.2 节设置关闭状态。
+- 网页建单时检查模板预填的 Labels。命令行建单时用 `--label <标签>`，补标签用 `gh issue edit <编号> --add-label <标签>`。建单后用 `gh issue list --json number,title,labels` 核对编号和标签。
 
 ## 2. 认领：明确谁做
 
