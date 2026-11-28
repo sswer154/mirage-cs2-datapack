@@ -2418,7 +2418,7 @@
  "step.grass.prone.1": {
   "sounds": [
    {
-    "name": "cs2footsteps:step/prone_grass_1",
+    "name": "cs2footsteps:step/grass_prone_1",
     "attenuation_distance": 12
    }
   ]
@@ -2426,7 +2426,7 @@
  "step.grass.prone.2": {
   "sounds": [
    {
-    "name": "cs2footsteps:step/prone_grass_2",
+    "name": "cs2footsteps:step/grass_prone_2",
     "attenuation_distance": 12
    }
   ]
@@ -2434,7 +2434,7 @@
  "step.grass.prone.3": {
   "sounds": [
    {
-    "name": "cs2footsteps:step/prone_grass_3",
+    "name": "cs2footsteps:step/grass_prone_3",
     "attenuation_distance": 12
    }
   ]
@@ -2442,7 +2442,7 @@
  "step.grass.prone.4": {
   "sounds": [
    {
-    "name": "cs2footsteps:step/prone_grass_4",
+    "name": "cs2footsteps:step/grass_prone_4",
     "attenuation_distance": 12
    }
   ]
