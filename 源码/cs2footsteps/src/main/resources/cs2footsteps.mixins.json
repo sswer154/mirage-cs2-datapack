@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.sandrone.cs2footsteps.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["PresenceFootstepsMixin"]
+}
