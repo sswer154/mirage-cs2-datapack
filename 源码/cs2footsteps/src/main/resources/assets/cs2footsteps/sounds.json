@@ -2251,7 +2251,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_stone_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2259,7 +2259,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_stone_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2267,7 +2267,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_stone_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2275,7 +2275,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_stone_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2283,7 +2283,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2291,7 +2291,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2299,7 +2299,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2307,7 +2307,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2315,7 +2315,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_thin_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2323,7 +2323,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_thin_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2331,7 +2331,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_thin_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2339,7 +2339,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_wood_thin_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2347,7 +2347,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2355,7 +2355,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2363,7 +2363,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2371,7 +2371,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2379,7 +2379,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal2_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2387,7 +2387,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal2_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2395,7 +2395,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal2_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2403,7 +2403,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal2_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2411,7 +2411,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal3_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2419,7 +2419,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal3_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2427,7 +2427,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal3_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2435,7 +2435,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal3_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2443,7 +2443,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_thin_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2451,7 +2451,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_thin_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2459,7 +2459,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_thin_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2467,7 +2467,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_metal_thin_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2475,7 +2475,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grass_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2483,7 +2483,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grass_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2491,7 +2491,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grass_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2499,7 +2499,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grass_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2507,7 +2507,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grasslow_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2515,7 +2515,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grasslow_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2523,7 +2523,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grasslow_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2531,7 +2531,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_grasslow_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2539,7 +2539,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dry_leaves_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2547,7 +2547,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dry_leaves_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2555,7 +2555,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dry_leaves_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2563,7 +2563,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dry_leaves_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2571,7 +2571,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dirt_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2579,7 +2579,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dirt_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2587,7 +2587,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dirt_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2595,7 +2595,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_dirt_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2603,7 +2603,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_mud_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2611,7 +2611,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_mud_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2619,7 +2619,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_mud_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2627,7 +2627,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_mud_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2635,7 +2635,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_sand_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2643,7 +2643,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_sand_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2651,7 +2651,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_sand_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2659,7 +2659,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_sand_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2667,7 +2667,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_gravel_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2675,7 +2675,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_gravel_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2683,7 +2683,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_gravel_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2691,7 +2691,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_gravel_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2699,7 +2699,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_glass_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2707,7 +2707,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_glass_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2715,7 +2715,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_glass_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2723,7 +2723,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_glass_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2731,7 +2731,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_whole_glass_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2739,7 +2739,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_whole_glass_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2747,7 +2747,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_whole_glass_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2755,7 +2755,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_whole_glass_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2763,7 +2763,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_snow_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2771,7 +2771,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_snow_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2779,7 +2779,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_snow_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2787,7 +2787,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_snow_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2795,7 +2795,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_water_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2803,7 +2803,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_water_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2811,7 +2811,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_water_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2819,7 +2819,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_water_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2827,7 +2827,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_fabric_1",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2835,7 +2835,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_fabric_2",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2843,7 +2843,7 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_fabric_3",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
    }
   ]
  },
@@ -2851,7 +2851,71 @@
   "sounds": [
    {
     "name": "cs2footsteps:step/prone_fabric_4",
-    "attenuation_distance": 7
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_down.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_down_1",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_down.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_down_2",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_down.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_down_3",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_down.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_down_4",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_up.1": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_up_1",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_up.2": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_up_2",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_up.3": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_up_3",
+    "attenuation_distance": 12
+   }
+  ]
+ },
+ "step.body.prone_up.4": {
+  "sounds": [
+   {
+    "name": "cs2footsteps:step/body_prone_up_4",
+    "attenuation_distance": 12
    }
   ]
  },
