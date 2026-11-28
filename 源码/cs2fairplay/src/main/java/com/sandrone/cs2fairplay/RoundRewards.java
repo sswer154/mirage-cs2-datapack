@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;

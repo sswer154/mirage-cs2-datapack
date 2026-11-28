@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
@@ -51,7 +51,7 @@ final class TaczHitAttribution {
             bus.addListener(post, reader::onPost);
             bus.addListener(TaczHitAttribution::onServerTick);
         } catch (ReflectiveOperationException | LinkageError | ClassCastException e) {
-            Cs2Grenade.LOGGER.warn("[cs2] 无法读取 TaCZ 命中事件，保留伤害源枪械识别", e);
+            Cs2FairPlay.LOGGER.warn("[cs2] 无法读取 TaCZ 命中事件，保留伤害源枪械识别", e);
         }
     }
 
@@ -110,7 +110,7 @@ final class TaczHitAttribution {
                     PENDING.put(victim, new Hit(projectile, shooter, id, normal, armorPiercing));
                 }
             } catch (ReflectiveOperationException | ClassCastException e) {
-                Cs2Grenade.debug("TaCZ 命中事件读取失败: {}", e.toString());
+                Cs2FairPlay.LOGGER.debug("TaCZ 命中事件读取失败", e);
             }
         }
 
@@ -123,7 +123,7 @@ final class TaczHitAttribution {
                     }
                 }
             } catch (ReflectiveOperationException e) {
-                Cs2Grenade.debug("TaCZ 命中结束事件读取失败: {}", e.toString());
+                Cs2FairPlay.LOGGER.debug("TaCZ 命中结束事件读取失败", e);
             }
         }
     }

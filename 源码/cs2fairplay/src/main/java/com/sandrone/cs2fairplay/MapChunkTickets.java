@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import java.util.HashSet;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 /** Owns map tickets separately from vanilla /forceload and other mods. */
 final class MapChunkTickets extends SavedData {
     private static final TicketController CONTROLLER = new TicketController(
-            ResourceLocation.fromNamespaceAndPath(Cs2Grenade.MODID, "map_chunks"));
+            ResourceLocation.fromNamespaceAndPath(MatchState.SAVED_NAMESPACE, "map_chunks"));
     private static final String DATA_NAME = "cs2_map_chunks";
     private static final ResourceLocation MAP_STORAGE = ResourceLocation.fromNamespaceAndPath("cs2", "map");
     private static final Factory<MapChunkTickets> FACTORY = new Factory<>(

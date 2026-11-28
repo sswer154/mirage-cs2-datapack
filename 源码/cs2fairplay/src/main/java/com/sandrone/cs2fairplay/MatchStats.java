@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;

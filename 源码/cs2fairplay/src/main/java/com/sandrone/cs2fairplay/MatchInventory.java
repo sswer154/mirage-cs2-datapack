@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +18,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 /** Stores the original inventory in the same player data as the current inventory. */
 final class MatchInventory {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
-            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, Cs2Grenade.MODID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, MatchState.SAVED_NAMESPACE);
     private static final DeferredHolder<AttachmentType<?>, AttachmentType<CompoundTag>> SAVED =
             ATTACHMENTS.register("match_inventory", () -> AttachmentType.builder(() -> new CompoundTag())
                     .serialize(CompoundTag.CODEC).copyOnDeath().build());
@@ -93,20 +93,16 @@ final class MatchInventory {
     }
 
     private static int sync(ServerPlayer player) {
-        syncContents(player);
-        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
-        return 1;
-    }
-
-    static void syncContents(ServerPlayer player) {
         player.inventoryMenu.broadcastFullState();
         if (player.containerMenu != player.inventoryMenu) {
             player.containerMenu.broadcastFullState();
         }
+        player.connection.send(new ClientboundSetCarriedItemPacket(player.getInventory().selected));
+        return 1;
     }
 
     private static int invalidSnapshot(ServerPlayer player) {
-        Cs2Grenade.LOGGER.error("Cannot restore the saved CS2 inventory for {}", player.getUUID());
+        Cs2FairPlay.LOGGER.error("Cannot restore the saved CS2 inventory for {}", player.getUUID());
         player.sendSystemMessage(Component.literal("暂时无法返还背包，保存记录仍在。请联系管理员。"));
         return 0;
     }

@@ -1,4 +1,4 @@
-package com.sandrone.cs2grenade;
+package com.sandrone.cs2fairplay;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 final class MatchSpawns {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
-            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, Cs2Grenade.MODID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, MatchState.SAVED_NAMESPACE);
     private static final DeferredHolder<AttachmentType<?>, AttachmentType<CompoundTag>> SAVED =
             ATTACHMENTS.register("match_spawn", () -> AttachmentType.builder(() -> new CompoundTag())
                     .serialize(CompoundTag.CODEC).copyOnDeath().build());
