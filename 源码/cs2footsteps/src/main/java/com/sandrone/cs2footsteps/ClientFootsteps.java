@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SnowLayerBlock;
@@ -48,114 +49,133 @@ public final class ClientFootsteps {
     private static final Map<String, Integer> VARIANTS = Map.ofEntries(
             Map.entry("dirt.jump", 2),
             Map.entry("dirt.landing", 2),
+            Map.entry("dirt.prone", 4),
             Map.entry("dirt.run", 4),
             Map.entry("dirt.sneak", 4),
             Map.entry("dirt.sprint", 4),
             Map.entry("dirt.walk", 4),
             Map.entry("dry_leaves.jump", 2),
             Map.entry("dry_leaves.landing", 2),
+            Map.entry("dry_leaves.prone", 4),
             Map.entry("dry_leaves.run", 4),
             Map.entry("dry_leaves.sneak", 4),
             Map.entry("dry_leaves.sprint", 4),
             Map.entry("dry_leaves.walk", 4),
             Map.entry("fabric.jump", 2),
             Map.entry("fabric.landing", 2),
+            Map.entry("fabric.prone", 4),
             Map.entry("fabric.run", 4),
             Map.entry("fabric.sneak", 4),
             Map.entry("fabric.sprint", 4),
             Map.entry("fabric.walk", 4),
             Map.entry("glass.jump", 2),
             Map.entry("glass.landing", 2),
+            Map.entry("glass.prone", 4),
             Map.entry("glass.run", 4),
             Map.entry("glass.sneak", 4),
             Map.entry("glass.sprint", 4),
             Map.entry("glass.walk", 4),
             Map.entry("grass.jump", 2),
             Map.entry("grass.landing", 2),
+            Map.entry("grass.prone", 4),
             Map.entry("grass.run", 4),
             Map.entry("grass.sneak", 4),
             Map.entry("grass.sprint", 4),
             Map.entry("grass.walk", 4),
             Map.entry("grasslow.jump", 2),
             Map.entry("grasslow.landing", 2),
+            Map.entry("grasslow.prone", 4),
             Map.entry("grasslow.run", 4),
             Map.entry("grasslow.sneak", 4),
             Map.entry("grasslow.sprint", 4),
             Map.entry("grasslow.walk", 4),
             Map.entry("gravel.jump", 2),
             Map.entry("gravel.landing", 2),
+            Map.entry("gravel.prone", 4),
             Map.entry("gravel.run", 4),
             Map.entry("gravel.sneak", 4),
             Map.entry("gravel.sprint", 4),
             Map.entry("gravel.walk", 4),
             Map.entry("metal.jump", 2),
             Map.entry("metal.landing", 2),
+            Map.entry("metal.prone", 4),
             Map.entry("metal.run", 4),
             Map.entry("metal.sneak", 4),
             Map.entry("metal.sprint", 3),
             Map.entry("metal.walk", 4),
             Map.entry("metal2.jump", 1),
             Map.entry("metal2.landing", 1),
+            Map.entry("metal2.prone", 4),
             Map.entry("metal2.run", 1),
             Map.entry("metal2.sneak", 1),
             Map.entry("metal2.sprint", 1),
             Map.entry("metal2.walk", 1),
             Map.entry("metal3.jump", 1),
             Map.entry("metal3.landing", 1),
+            Map.entry("metal3.prone", 4),
             Map.entry("metal3.run", 1),
             Map.entry("metal3.sneak", 1),
             Map.entry("metal3.sprint", 1),
             Map.entry("metal3.walk", 1),
             Map.entry("metal_thin.jump", 2),
             Map.entry("metal_thin.landing", 2),
+            Map.entry("metal_thin.prone", 4),
             Map.entry("metal_thin.run", 4),
             Map.entry("metal_thin.sneak", 4),
             Map.entry("metal_thin.sprint", 4),
             Map.entry("metal_thin.walk", 4),
             Map.entry("mud.jump", 2),
             Map.entry("mud.landing", 2),
+            Map.entry("mud.prone", 4),
             Map.entry("mud.run", 4),
             Map.entry("mud.sneak", 4),
             Map.entry("mud.sprint", 4),
             Map.entry("mud.walk", 4),
             Map.entry("sand.jump", 2),
             Map.entry("sand.landing", 2),
+            Map.entry("sand.prone", 4),
             Map.entry("sand.run", 4),
             Map.entry("sand.sneak", 4),
             Map.entry("sand.sprint", 4),
             Map.entry("sand.walk", 4),
             Map.entry("snow.jump", 2),
             Map.entry("snow.landing", 2),
+            Map.entry("snow.prone", 4),
             Map.entry("snow.run", 4),
             Map.entry("snow.sneak", 4),
             Map.entry("snow.sprint", 4),
             Map.entry("snow.walk", 4),
             Map.entry("stone.jump", 2),
             Map.entry("stone.landing", 2),
+            Map.entry("stone.prone", 4),
             Map.entry("stone.run", 4),
             Map.entry("stone.sneak", 4),
             Map.entry("stone.sprint", 4),
             Map.entry("stone.walk", 4),
             Map.entry("water.jump", 2),
             Map.entry("water.landing", 2),
+            Map.entry("water.prone", 4),
             Map.entry("water.run", 4),
             Map.entry("water.sneak", 4),
             Map.entry("water.sprint", 4),
             Map.entry("water.walk", 4),
             Map.entry("whole_glass.jump", 2),
             Map.entry("whole_glass.landing", 2),
+            Map.entry("whole_glass.prone", 4),
             Map.entry("whole_glass.run", 4),
             Map.entry("whole_glass.sneak", 4),
             Map.entry("whole_glass.sprint", 4),
             Map.entry("whole_glass.walk", 4),
             Map.entry("wood.jump", 2),
             Map.entry("wood.landing", 2),
+            Map.entry("wood.prone", 4),
             Map.entry("wood.run", 4),
             Map.entry("wood.sneak", 4),
             Map.entry("wood.sprint", 4),
             Map.entry("wood.walk", 4),
             Map.entry("wood_thin.jump", 2),
             Map.entry("wood_thin.landing", 2),
+            Map.entry("wood_thin.prone", 4),
             Map.entry("wood_thin.run", 4),
             Map.entry("wood_thin.sneak", 4),
             Map.entry("wood_thin.sprint", 4),
@@ -239,7 +259,11 @@ public final class ClientFootsteps {
         double moved = Math.sqrt(dx * dx + dz * dz);
         String state;
         int interval;
-        if (p.isShiftKeyDown()) {
+        if (p.getPose() == Pose.SWIMMING && !p.isInWater()) {
+            // TaCZ 趴下用 forced SWIMMING pose
+            state = "prone";
+            interval = 30;
+        } else if (p.isShiftKeyDown()) {
             state = "sneak";
             interval = 18;
         } else if (p.isSprinting()) {
@@ -280,6 +304,12 @@ public final class ClientFootsteps {
     private static void play(Player p, ClientLevel level, State st, String state,
                              float gain, double pitchJitter, boolean firstStep) {
         MatInfo mat = materialOf(level, p.getOnPos());
+        if ("prone".equals(state) && !VARIANTS.containsKey(mat.id + ".prone")) {
+            state = "walk";
+            gain *= 0.45f;
+        } else if ("prone".equals(state)) {
+            gain *= 0.55f;
+        }
         String variantKey = mat.id + "." + state;
         int variants = Math.max(1, VARIANTS.getOrDefault(variantKey, 4));
         boolean stepState = "run".equals(state) || "sprint".equals(state) || "sneak".equals(state);
