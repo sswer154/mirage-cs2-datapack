@@ -4,7 +4,7 @@ license="All rights reserved"
 
 [[mods]]
 modId="cs2footsteps"
-version="0.1.27"
+version="0.1.28"
 displayName="CS2 Footsteps"
 description="CS2 服务器专用的客户端脚步声，音效内置在模组中。"
 
