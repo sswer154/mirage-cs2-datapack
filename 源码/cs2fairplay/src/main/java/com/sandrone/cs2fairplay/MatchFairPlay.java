@@ -16,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.scores.ScoreHolder;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingSwapItemsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -146,7 +147,7 @@ public final class MatchFairPlay {
         WAITING.removeIf(player -> playerList.getPlayer(player.getUUID()) != player);
         SENT.keySet().removeIf(player -> playerList.getPlayer(player.getUUID()) != player);
         for (var player : playerList.getPlayers()) {
-            boolean restricted = formal(event.getServer()) && participant(player);
+            boolean restricted = restrictsPlayerInput(player);
             boolean watching = isTeamViewer(player);
             if (watching || queuedViewer(player)) {
                 watch(player, 0);
@@ -165,6 +166,17 @@ public final class MatchFairPlay {
                     SpectatorFov.forget(player);
                 }
             }
+        }
+    }
+
+    public static boolean restrictsPlayerInput(ServerPlayer player) {
+        return formal(player.getServer()) && participant(player);
+    }
+
+    @SubscribeEvent
+    public static void swapHands(LivingSwapItemsEvent.Hands event) {
+        if (event.getEntity() instanceof ServerPlayer player && restrictsPlayerInput(player)) {
+            event.setCanceled(true);
         }
     }
 

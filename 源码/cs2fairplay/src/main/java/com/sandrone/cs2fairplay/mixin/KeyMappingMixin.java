@@ -40,15 +40,13 @@ abstract class KeyMappingMixin {
 
     @Unique
     private boolean cs2fairplay$shouldBlock() {
-        if (!FairPlayClient.locked() || cs2fairplay$allowed) {
-            return false;
-        }
-        // Preserve the actual game bindings even when their constructor was called through another mod.
+        if (!FairPlayClient.locked()) return false;
         var binding = (KeyMapping) (Object) this;
-        if (TaCZKeyBindings.isAimOrFire(binding)) {
-            return false;
-        }
         var options = Minecraft.getInstance().options;
+        if (options != null && binding == options.keySwapOffhand) return true;
+
+        // Preserve the actual game bindings even when their constructor was called through another mod.
+        if (cs2fairplay$allowed || TaCZKeyBindings.isAimOrFire(binding)) return false;
         return options == null
                 || (binding != options.keyAttack && binding != options.keyUse && binding != options.keyInventory);
     }
